@@ -43,9 +43,9 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/admission" className="btn-secondary text-lg px-8 py-4">
-                Admission Open 2024-25
+                Admission Open 2026-27
               </Link>
-              <a href="tel:+919414123456" className="bg-white text-primary-500 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all text-lg">
+              <a href="tel:+918766003200" className="bg-white text-primary-500 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all text-lg">
                 Call Now
               </a>
             </div>
