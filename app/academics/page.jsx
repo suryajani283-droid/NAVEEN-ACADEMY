@@ -143,7 +143,7 @@ export default function AcademicsPage() {
             </div>
             <div className="bg-white/10 rounded-xl p-6">
               <h3 className="text-xl font-semibold mb-4">Winter (Oct-Mar)</h3>
-              <p className="text-2xl font-bold">8:30 AM - 2:30 PM</p>
+              <p className="text-2xl font-bold">9:30 AM - 3:30 PM</p>
               <p className="text-sm mt-2">Monday to Saturday</p>
             </div>
           </div>
