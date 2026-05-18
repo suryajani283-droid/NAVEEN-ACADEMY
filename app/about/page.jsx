@@ -46,13 +46,14 @@ export default function AboutPage() {
               </p>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="bg-gray-200 rounded-2xl h-96 flex items-center justify-center"
-            >
-              <p className="text-gray-500 text-xl">School Building Photo</p>
-            </motion.div>
+  initial={{ opacity: 0, x: 50 }}
+  whileInView={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.6 }}>
+  <img 
+    src="/images/school-building.jpg" 
+    alt="Naveen Academy Building" 
+    className="rounded-2xl h-96 w-full object-cover shadow-lg"/>
+</motion.div>
           </div>
         </div>
       </section>
