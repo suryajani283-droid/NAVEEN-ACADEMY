@@ -19,7 +19,7 @@ export default function GalleryPage() {
     { category: 'Sports', title: 'Cricket Tournament', src: '/images/event1.jpg' },
     { category: 'Labs', title: 'Computer Lab', src: '/images/event1.jpg' },
     { category: 'Annual Function', title: 'Prize Distribution', src: '/images/farewell2.jpg' },
-    { category: 'Tours', title: 'Industrial Visit', src: '/images/event1.jpg' },
+    { category: 'Tours', title: 'Industrial Visit', src: '/images/Tour.jpg' },
     { category: 'Classroom', title: 'Project Presentation', src: '/images/event1.jpg' },
   ]
 
