@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { FaWhatsapp } from 'react-icons/fa'
 
 export default function WhatsAppButton() {
-  const phoneNumber = '919414123456'
+  const phoneNumber = '918766003200'
   const message = 'Hello Naveen Academy, I would like to know about admissions.'
   
   return (
