@@ -19,13 +19,15 @@ import ResultsMarquee from '../components/ResultsMarquee'
 export default function Home() {
   return (
     <div>
-    <ResultsMarquee />
       {/* Hero Section */}
     <section 
   className="relative h-screen flex items-center bg-cover bg-center bg-no-repeat"
   style={{ backgroundImage: "url('/images/school-building.jpg')" }}
 >
         <div className="absolute inset-0 bg-black/40"></div>
+  <div className="absolute top-20 left-0 right-0 z-20">
+  <ResultsMarquee />
+</div>
         <div className="container mx-auto px-4 relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 50 }}
