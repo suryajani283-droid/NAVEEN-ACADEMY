@@ -209,7 +209,7 @@ export default function AdmissionPage() {
                 </tr>
               </thead>
               <tbody>
-                {const feeStructure = [
+                {[
     { class: 'Nursery-UKG', Admission: '₹1,100', annual: '₹6,000', total: '₹7,100' },
     { class: 'I', Admission: '₹1,100', annual: '₹7,500', total: '₹8,600' },
     { class: 'II', Admission: '₹1,100', annual: '₹8,000', total: '₹9,100' },
@@ -229,8 +229,8 @@ export default function AdmissionPage() {
                   <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="py-4 px-6">{fee.class}</td>
                     <td className="py-4 px-6">{fee.admission}</td>
-                    <td className="py-4 px-6">{fee.tuition}</td>
                     <td className="py-4 px-6">{fee.annual}</td>
+                    <td className="py-4 px-6">{fee.total}</td>
                   </tr>
                 ))}
               </tbody>
