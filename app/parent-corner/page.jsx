@@ -70,7 +70,7 @@ export default function ParentCornerPage() {
     { class: 'XIth Arts', Admission: '₹3,100', annual: '₹18,000', total: '₹21,100' },
     { class: 'XIth Science', Admission: '₹3,100', annual: '₹20,000', total: '₹23,100' },
     { class: 'XIIth Arts', Admission: '₹3,100', annual: '₹19,000', total: '₹22,100' }
-    { class: 'XIIth Science', Admission: '₹3,100', annual: '₹21,000', total: '₹24,100' }
+    { class: 'XIIth Science', Admission: '₹3,100', annual: '₹21,000', total: '₹24,100' },
   ]
 
   const ptmSchedule = [
