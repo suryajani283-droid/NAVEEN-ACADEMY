@@ -31,7 +31,7 @@ const students = [
   {
     name: 'Sunil kumar',
     achievement: 'RBSE 10th - 94.83%',
-    img: '/images/topper1.jpg',
+    img: '/images/sunil.jpg',
   },
     {
     name: 'Tejendra Godara',
