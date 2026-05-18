@@ -11,22 +11,22 @@ const students = [
     {
     name: 'Prameshwari',
     achievement: 'RBSE 12th (Science) - 95.00%',
-    img: '/images/topper2.jpg',
+    img: '/images/Parmeshwari.jpg',
   },
     {
     name: 'Gogaram',
     achievement: 'RBSE 12th (Arts) - 95.00%',
-    img: '/images/topper3.jpg',
+    img: '/images/goga.jpg',
   },
   {
     name: 'Kalpna',
     achievement: 'RBSE 12th (Arts) - 93.00%',
-    img: '/images/topper1.jpg',
+    img: '/images/Kalpna.jpg',
   },
     {
     name: 'Kiran Patel',
     achievement: 'RBSE 12th (Science) - 91.40%',
-    img: '/images/topper2.jpg',
+    img: '/images/kiran.jpg',
   },
   {
     name: 'Sunil kumar',
@@ -36,7 +36,7 @@ const students = [
     {
     name: 'Tejendra Godara',
     achievement: 'RBSE 10th - 91.83%',
-    img: '/images/topper1.jpg',
+    img: '/images/tejendra.jpg',
   },
   {
     name: 'Kheemraj',
