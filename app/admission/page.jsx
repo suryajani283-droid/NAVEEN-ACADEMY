@@ -228,7 +228,7 @@ export default function AdmissionPage() {
   ].map((fee, index) => (
                   <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="py-4 px-6">{fee.class}</td>
-                    <td className="py-4 px-6">{fee.admission}</td>
+                    <td className="py-4 px-6">{fee.Admission}</td>
                     <td className="py-4 px-6">{fee.annual}</td>
                     <td className="py-4 px-6">{fee.total}</td>
                   </tr>
