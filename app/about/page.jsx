@@ -108,9 +108,11 @@ export default function AboutPage() {
             className="card mb-8"
           >
             <div className="flex flex-col md:flex-row gap-8 items-center">
-              <div className="w-48 h-48 bg-gray-200 rounded-full flex-shrink-0 flex items-center justify-center">
-                <p className="text-gray-500">Director Photo</p>
-              </div>
+              <img 
+  src="/images/director.jpg" 
+  alt="Director"
+  className="w-48 h-48 rounded-full object-cover flex-shrink-0"
+/>
               <div>
                 <h3 className="text-2xl font-bold text-primary-500 mb-2">Message from Director</h3>
                 <p className="text-gray-500 mb-2">Mr. [Director Name]</p>
