@@ -35,7 +35,11 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           <div className="flex lg:flex-1">
             <Link href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
-              <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
+              <img 
+  src="/images/logo.png" 
+  alt="Naveen Academy Logo" 
+  className="h-12 w-auto"
+/>
                 <span className="text-white font-bold text-xl">NA</span>
               </div>
               <div>
