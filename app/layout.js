@@ -1,8 +1,8 @@
 import './globals.css'
 import { Poppins, Hind } from 'next/font/google'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import WhatsAppButton from '@/components/WhatsAppButton'
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
+import WhatsAppButton from '../components/WhatsAppButton'
 
 const poppins = Poppins({ 
   subsets: ['latin'],
@@ -18,13 +18,7 @@ const hind = Hind({
 
 export const metadata = {
   title: 'Naveen Academy Senior Secondary School | Best School in Chohtan, Barmer',
-  description: 'Naveen Academy Senior Secondary School offers quality education from Primary to Senior Secondary with Science, Arts & Commerce streams. Admissions Open 2024-25.',
-  keywords: 'Naveen Academy, Senior Secondary School, Best School in Chohtan, School in Barmer, Rajasthan School, CBSE School, School Admission',
-  openGraph: {
-    title: 'Naveen Academy Senior Secondary School',
-    description: 'Quality Education in Chohtan, Barmer',
-    images: ['/school-building.jpg'],
-  },
+  description: 'Naveen Academy Senior Secondary School offers quality education from Primary to Senior Secondary. Admissions Open 2024-25.',
 }
 
 export default function RootLayout({ children }) {
