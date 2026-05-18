@@ -20,7 +20,7 @@ export default function GalleryPage() {
     { category: 'Labs', title: 'Computer Lab', src: '/images/event1.jpg' },
     { category: 'Annual Function', title: 'Prize Distribution', src: '/images/event1.jpg' },
     { category: 'Tours', title: 'Industrial Visit', src: '/images/event1.jpg' },
-    { category: 'Classroom', title: 'Project Presentation', src: '/images/event1.jpg' }
+    { category: 'Classroom', title: 'Project Presentation', src: '/images/event1.jpg' },
   ]
 
   const filteredItems = activeCategory === 'All' 
