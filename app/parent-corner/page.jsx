@@ -207,18 +207,18 @@ export default function ParentCornerPage() {
                   <thead>
                     <tr className="bg-primary-500 text-white">
                       <th className="py-4 px-6 text-left">Class</th>
-                      <th className="py-4 px-6 text-left">Quarterly Fee</th>
+                      <th className="py-4 px-6 text-left">Admission Fee</th>
                       <th className="py-4 px-6 text-left">Annual Fee</th>
-                      <th className="py-4 px-6 text-left">Transport</th>
+                      <th className="py-4 px-6 text-left">total</th>
                     </tr>
                   </thead>
                   <tbody>
                     {feeStructure.map((fee, index) => (
                       <tr key={index} className="border-b hover:bg-gray-50">
                         <td className="py-4 px-6 font-medium">{fee.class}</td>
-                        <td className="py-4 px-6">{fee.quarterly}</td>
+                        <td className="py-4 px-6">{fee.Admiasion}</td>
                         <td className="py-4 px-6">{fee.annual}</td>
-                        <td className="py-4 px-6">{fee.transport}</td>
+                        <td className="py-4 px-6">{fee.total}</td>
                       </tr>
                     ))}
                   </tbody>
