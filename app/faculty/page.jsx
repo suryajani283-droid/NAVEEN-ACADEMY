@@ -4,64 +4,64 @@ import { motion } from 'framer-motion'
 export default function FacultyPage() {
   const faculty = [
     {
-      name: 'Mr. Rajesh Kumar',
+      name: 'Mr. Suresh Choudhary',
       qualification: 'M.Sc., B.Ed.',
       subject: 'Physics',
-      experience: '15 Years',
+      experience: '4 Years',
       department: 'Science'
     },
     {
-      name: 'Mrs. Sunita Sharma',
+      name: 'Mrs. Jagdish kumar ujjwal',
       qualification: 'M.A., B.Ed.',
       subject: 'English',
-      experience: '12 Years',
+      experience: '10 Years',
       department: 'Languages'
     },
     {
-      name: 'Mr. Suresh Patel',
+      name: 'Mr. Suresh Kumar Jyani',
       qualification: 'M.Sc., B.Ed.',
       subject: 'Mathematics',
-      experience: '10 Years',
+      experience: '4 Years',
       department: 'Mathematics'
     },
     {
-      name: 'Mrs. Anita Singh',
+      name: 'Praveen Choudhary',
       qualification: 'M.A., B.Ed.',
       subject: 'Hindi',
-      experience: '8 Years',
+      experience: '4 Years',
       department: 'Languages'
     },
     {
-      name: 'Mr. Deepak Joshi',
+      name: 'Mr. Himanshu soni',
       qualification: 'M.Sc., B.Ed.',
       subject: 'Chemistry',
-      experience: '11 Years',
+      experience: '7 Years',
       department: 'Science'
     },
     {
-      name: 'Mrs. Priya Verma',
+      name: 'Mr. Babu lal vishnoi',
       qualification: 'M.Com., B.Ed.',
-      subject: 'Accountancy',
-      experience: '9 Years',
-      department: 'Commerce'
+      subject: 'Geography',
+      experience: '15 Years',
+      department: 'Arts'
     },
     {
-      name: 'Mr. Vikram Singh',
+      name: 'Mr. Pradeep kumar',
       qualification: 'M.A., B.P.Ed.',
       subject: 'Physical Education',
-      experience: '7 Years',
+      experience: '5 Years',
       department: 'Sports'
     },
     {
-      name: 'Mrs. Neha Gupta',
+      name: 'Mrs. Dev sharma',
       qualification: 'MCA, B.Ed.',
       subject: 'Computer Science',
-      experience: '6 Years',
+      experience: '10 Years',
       department: 'Computer'
     }
   ]
 
-  const departments = ['All', 'Science', 'Mathematics', 'Languages', 'Commerce', 'Sports', 'Computer']
+  const departments = ['All', 'Science', 'Mathematics', 'Languages', 'Arts', 'Sports', 'Computer']
 
   return (
     <div className="pt-20">
