@@ -20,7 +20,10 @@ export default function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center bg-gradient-to-r from-primary-500 to-primary-700">
+    <section 
+  className="relative h-screen flex items-center bg-cover bg-center bg-no-repeat"
+  style={{ backgroundImage: "url('/images/school-building.jpg')" }}
+>
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="container mx-auto px-4 relative z-10">
           <motion.div 
