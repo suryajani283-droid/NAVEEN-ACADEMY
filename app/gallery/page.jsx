@@ -12,7 +12,7 @@ export default function GalleryPage() {
     { category: 'Events', title: 'Independence Day 2024', src: '/images/Independence1.jpg'},
     { category: 'Sports', title: 'Annual Sports Meet', src: '/images/Sports.JPG' },
     { category: 'Labs', title: 'Science Laboratory', src: '/images/Sciencelab.jpg' },
-    { category: 'Annual Function', title: 'Cultural Program', src: '/images/Farewell.jpg' },
+    { category: 'Annual Function', title: 'Cultural Program', src: '/images/Holi.jpg' },
     { category: 'Tours', title: 'Educational Tour 2024', src: '/images/Tour.jpg' },
     { category: 'Classroom', title: 'Smart Class Session', src: '/images/event1.jpg' },
     { category: 'Events', title: 'Republic Day Celebration', src: '/images/event1.jpg' },
