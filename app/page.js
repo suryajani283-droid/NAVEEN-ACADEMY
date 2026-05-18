@@ -316,7 +316,7 @@ export default function Home() {
             transition={{ duration: 0.5 }}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Admissions Open for 2024-25
+              Admissions Open for 2026-27
             </h2>
             <p className="text-xl text-white mb-8">
               Give your child the best education at Naveen Academy
