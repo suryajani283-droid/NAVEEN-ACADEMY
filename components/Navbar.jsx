@@ -41,7 +41,7 @@ export default function Navbar() {
   className="h-12 w-auto"
 />
                 <span className="text-xl font-bold text-primary-500">Naveen Academy</span>
-                <p className="text-xs text-gray-500">Senior Secondary School</p>
+                <p className="text-xs text-primary-400">Senior Secondary School</p>
             </Link>
           </div>
           
