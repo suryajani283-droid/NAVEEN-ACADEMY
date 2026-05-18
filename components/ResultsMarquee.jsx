@@ -63,6 +63,7 @@ export default function ResultsMarquee() {
             className="flex-shrink-0 flex flex-col items-center space-y-2 w-36"
           >
             <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-primary-500 shadow-lg">
+            <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl ring-2 ring-primary-500">
               <Image
                 src={student.img}
                 alt={student.name}
