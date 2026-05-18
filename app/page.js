@@ -126,15 +126,15 @@ export default function Home() {
               </Link>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="relative h-96 rounded-2xl overflow-hidden shadow-2xl"
-            >
-              <div className="bg-primary-100 h-full flex items-center justify-center">
-                <p className="text-primary-500 text-xl">School Building Image</p>
-              </div>
-            </motion.div>
+  initial={{ opacity: 0, x: 50 }}
+  whileInView={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.6 }}
+  className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
+  <img 
+    src="/images/school-building.jpg" 
+    alt="Naveen Academy Building" 
+    className="w-full h-full object-cover"/>
+</motion.div>
           </div>
         </div>
       </section>
