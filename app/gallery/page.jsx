@@ -16,7 +16,7 @@ export default function GalleryPage() {
     { category: 'Tours', title: 'Educational Tour 2024', src: '/images/Tour.jpg' },
     { category: 'Classroom', title: 'Smart Class Session', src: '/images/event1.jpg' },
     { category: 'Events', title: 'Republic Day Celebration', src: '/images/event1.jpg' },
-    { category: 'Sports', title: 'Cricket Tournament', src: '/images/event1.jpg' },
+    { category: 'Sports', title: 'Cricket Tournament', src: '/images/Sports2.jpg' },
     { category: 'Labs', title: 'Computer Lab', src: '/images/event1.jpg' },
     { category: 'Annual Function', title: 'Prize Distribution', src: '/images/farewell2.jpg' },
     { category: 'Tours', title: 'Industrial Visit', src: '/images/Tour.jpg' },
