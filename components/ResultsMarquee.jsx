@@ -26,7 +26,7 @@ const students = [
     {
     name: 'Kiran Patel',
     achievement: 'RBSE 12th (Science) - 91.40%',
-    img: '/images/kiran.jpg',
+    img: '/images/Kiran.jpg',
   },
   {
     name: 'Sunil kumar',
