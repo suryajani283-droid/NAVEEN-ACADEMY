@@ -4,6 +4,31 @@ import Image from 'next/image'
 
 const students = [
   {
+    name: 'Rahul Kumar',
+    achievement: 'RBSE 12th (Arts) - 97.60%',
+    img: '/images/topper1.jpg',
+  },
+    {
+    name: 'Prameshwari',
+    achievement: 'RBSE 12th (Science) - 95.00%',
+    img: '/images/topper2.jpg',
+  },
+    {
+    name: 'Gogaram',
+    achievement: 'RBSE 12th (Arts) - 95.00%',
+    img: '/images/topper3.jpg',
+  },
+  {
+    name: 'Kalpna',
+    achievement: 'RBSE 12th (Arts) - 93.00%',
+    img: '/images/topper1.jpg',
+  },
+    {
+    name: 'Kiran Patel',
+    achievement: 'RBSE 12th (Science) - 91.40%',
+    img: '/images/topper2.jpg',
+  },
+  {
     name: 'Sunil kumar',
     achievement: 'RBSE 10th - 94.83%',
     img: '/images/topper1.jpg',
@@ -12,27 +37,6 @@ const students = [
     name: 'Tejendra Godara',
     achievement: 'RBSE 10th - 91.83%',
     img: '/images/topper1.jpg',
-  },
-    {
-    name: 'Rahul Kumar',
-    achievement: 'RBSE 12th (Arts) - 97.60%',
-    img: '/images/topper1.jpg',
-  },
-  {
-    name: 'Kalpna',
-    achievement: 'RBSE 12th (Arts) - 93.00%',
-    img: '/images/topper1.jpg',
-  },
-  {
-    name: 'Prameshwari',
-    achievement: 'RBSE 12th (Science) - 95.00%',
-    img: '/images/topper2.jpg',
-  },
-  
-  {
-    name: 'Kiran Patel',
-    achievement: 'RBSE 12th (Science) - 91.40%',
-    img: '/images/topper2.jpg',
   },
   {
     name: 'Kheemraj',
@@ -55,19 +59,14 @@ const students = [
     img: '/images/player1.jpg',
   },
   {
-    name: 'Mahesh mahiya',
-    achievement: 'Navodaya Selected',
-    img: '/images/player1.jpg',
-  },
-  {
-    name: 'Gogaram',
-    achievement: 'RBSE 12th (Arts) - 95.00%',
-    img: '/images/topper3.jpg',
-  },
-  {
     name: 'Kavita',
     achievement: 'State Level Netball',
     img: '/images/player2.jpg',
+  },
+    {
+    name: 'Mahesh mahiya',
+    achievement: 'Navodaya Selected',
+    img: '/images/player1.jpg',
   },
 ]
 
