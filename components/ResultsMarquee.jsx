@@ -62,7 +62,6 @@ export default function ResultsMarquee() {
             key={index}
             className="flex-shrink-0 flex flex-col items-center space-y-2 w-36"
           >
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-primary-500 shadow-lg">
             <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl ring-2 ring-primary-500">
               <Image
                 src={student.img}
@@ -73,11 +72,13 @@ export default function ResultsMarquee() {
               />
             </div>
             <div className="text-center">
-              <p className="text-sm font-bold text-primary-500 leading-tight">
-                {student.achievement}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">{student.name}</p>
-            </div>
+  <p className="text-sm font-bold text-white drop-shadow-lg leading-tight">
+    {student.achievement}
+  </p>
+  <p className="text-xs text-white/90 drop-shadow-md mt-1">
+    {student.name}
+  </p>
+</div>
           </div>
         ))}
       </div>
