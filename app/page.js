@@ -15,13 +15,12 @@ import {
   TrophyIcon,
   HeartIcon
 } from '@heroicons/react/24/outline'
-
+import ResultsMarquee from '../components/ResultsMarquee'
 export default function Home() {
   return (
     <div>
-    import ResultsMarquee from '../components/ResultsMarquee'
+    <ResultsMarquee />
       {/* Hero Section */}
-  <ResultsMarquee />
     <section 
   className="relative h-screen flex items-center bg-cover bg-center bg-no-repeat"
   style={{ backgroundImage: "url('/images/school-building.jpg')" }}
