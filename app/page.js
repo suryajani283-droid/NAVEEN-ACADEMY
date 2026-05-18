@@ -72,7 +72,7 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 py-6">
             <div className="text-center">
               <AcademicCapIcon className="h-8 w-8 mx-auto text-primary-500 mb-2" />
-              <p className="font-semibold">CBSE Affiliated</p>
+              <p className="font-semibold">RBSE Affiliated</p>
               <p className="text-sm text-gray-600">Aff. No: 1730XXX</p>
             </div>
             <div className="text-center">
