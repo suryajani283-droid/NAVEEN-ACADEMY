@@ -9,18 +9,18 @@ export default function GalleryPage() {
   const categories = ['All', 'Events', 'Sports', 'Labs', 'Annual Function', 'Tours', 'Classroom']
 
   const galleryItems = [
-    { category: 'Events', title: 'Independence Day 2024', type: 'image' },
-    { category: 'Sports', title: 'Annual Sports Meet', type: 'image' },
-    { category: 'Labs', title: 'Science Laboratory', type: 'image' },
-    { category: 'Annual Function', title: 'Cultural Program', type: 'image' },
-    { category: 'Tours', title: 'Educational Tour 2024', type: 'image' },
-    { category: 'Classroom', title: 'Smart Class Session', type: 'image' },
-    { category: 'Events', title: 'Republic Day Celebration', type: 'image' },
-    { category: 'Sports', title: 'Cricket Tournament', type: 'image' },
-    { category: 'Labs', title: 'Computer Lab', type: 'image' },
-    { category: 'Annual Function', title: 'Prize Distribution', type: 'image' },
-    { category: 'Tours', title: 'Industrial Visit', type: 'image' },
-    { category: 'Classroom', title: 'Project Presentation', type: 'image' }
+    { category: 'Events', title: 'Independence Day 2024', src: '/images/event1.jpg'},
+    { category: 'Sports', title: 'Annual Sports Meet', src: '/images/event1.jpg' },
+    { category: 'Labs', title: 'Science Laboratory', src: '/images/sciencelab.jpg' },
+    { category: 'Annual Function', title: 'Cultural Program', src: '/images/farewell.jpg' },
+    { category: 'Tours', title: 'Educational Tour 2024', src: '/images/tour.jpg' },
+    { category: 'Classroom', title: 'Smart Class Session', src: '/images/event1.jpg' },
+    { category: 'Events', title: 'Republic Day Celebration', src: '/images/event1.jpg' },
+    { category: 'Sports', title: 'Cricket Tournament', src: '/images/event1.jpg' },
+    { category: 'Labs', title: 'Computer Lab', src: '/images/event1.jpg' },
+    { category: 'Annual Function', title: 'Prize Distribution', src: '/images/event1.jpg' },
+    { category: 'Tours', title: 'Industrial Visit', src: '/images/event1.jpg' },
+    { category: 'Classroom', title: 'Project Presentation', src: '/images/event1.jpg' }
   ]
 
   const filteredItems = activeCategory === 'All' 
@@ -77,9 +77,10 @@ export default function GalleryPage() {
                 className="relative group cursor-pointer overflow-hidden rounded-xl"
                 onClick={() => setSelectedImage(item)}
               >
-                <div className="bg-gray-200 h-48 md:h-64 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <span className="text-4xl">📸</span>
-                </div>
+  <img 
+  src={item.src} 
+  alt={item.title} 
+  className="h-48 md:h-64 w-full object-cover group-hover:scale-110 transition-transform duration-300"/>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <p className="text-white font-semibold">{item.title}</p>
                   <p className="text-white/80 text-sm">{item.category}</p>
@@ -123,9 +124,10 @@ export default function GalleryPage() {
           onClick={() => setSelectedImage(null)}
         >
           <div className="max-w-4xl max-h-[90vh] bg-white rounded-2xl overflow-hidden">
-            <div className="bg-gray-200 h-96 flex items-center justify-center">
-              <span className="text-6xl">📸</span>
-            </div>
+            <img 
+  src={selectedImage.src} 
+  alt={selectedImage.title} 
+  className="max-w-full max-h-[70vh] object-contain"/>
             <div className="p-6">
               <h3 className="text-xl font-semibold">{selectedImage.title}</h3>
               <p className="text-gray-500">{selectedImage.category}</p>
