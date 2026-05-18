@@ -108,7 +108,7 @@ export default function GalleryPage() {
           transition={{ duration: 0.5, delay: index * 0.2 }}
           className="card overflow-hidden"
         >
-          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+           <div className="relative w-full" style={{ aspectRatio: '9/16', maxHeight: '80vh' }}>
             <iframe
               className="absolute top-0 left-0 w-full h-full rounded-lg"
               src={`https://www.youtube.com/embed/${video.id}`}
