@@ -82,5 +82,5 @@ export default function ResultsMarquee() {
         ))}
       </div>
     </div>
-  )
+  );
 }
