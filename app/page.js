@@ -19,7 +19,9 @@ import {
 export default function Home() {
   return (
     <div>
+    import ResultsMarquee from '../components/ResultsMarquee'
       {/* Hero Section */}
+  <ResultsMarquee />
     <section 
   className="relative h-screen flex items-center bg-cover bg-center bg-no-repeat"
   style={{ backgroundImage: "url('/images/school-building.jpg')" }}
