@@ -60,16 +60,16 @@ export default function ParentCornerPage() {
     { class: 'I', Admission: '₹1,100', annual: '₹7,500', total: '₹8,600' },
     { class: 'II', Admission: '₹1,100', annual: '₹8,000', total: '₹9,100' },
     { class: 'III', Admission: '₹2,100', annual: '₹8,500', total: '₹10,600' },
-    { class: 'IV', Admission: '₹2,100', annual: '₹8,600', total: '₹10,700' }
+    { class: 'IV', Admission: '₹2,100', annual: '₹8,600', total: '₹10,700' },
     { class: 'V', Admission: '₹2,100', annual: '₹9,000', total: '₹11,100' },
     { class: 'VI', Admission: '₹2,100', annual: '₹11,000', total: '₹13,100' },
-    { class: 'VII', Admission: '₹2,100', annual: '₹12,000', total: '₹14,100' }
+    { class: 'VII', Admission: '₹2,100', annual: '₹12,000', total: '₹14,100' },
     { class: 'VIII', Admission: '₹2,100', annual: '₹13,000', total: '₹15,100' },
     { class: 'IX', Admission: '₹3,100', annual: '₹15,000', total: '₹18,100' },
-    { class: 'X', Admission: '₹3,100', annual: '₹17,000', total: '₹20,100' }
+    { class: 'X', Admission: '₹3,100', annual: '₹17,000', total: '₹20,100' },
     { class: 'XIth Arts', Admission: '₹3,100', annual: '₹18,000', total: '₹21,100' },
     { class: 'XIth Science', Admission: '₹3,100', annual: '₹20,000', total: '₹23,100' },
-    { class: 'XIIth Arts', Admission: '₹3,100', annual: '₹19,000', total: '₹22,100' }
+    { class: 'XIIth Arts', Admission: '₹3,100', annual: '₹19,000', total: '₹22,100' },
     { class: 'XIIth Science', Admission: '₹3,100', annual: '₹21,000', total: '₹24,100' },
   ]
 
@@ -216,7 +216,7 @@ export default function ParentCornerPage() {
                     {feeStructure.map((fee, index) => (
                       <tr key={index} className="border-b hover:bg-gray-50">
                         <td className="py-4 px-6 font-medium">{fee.class}</td>
-                        <td className="py-4 px-6">{fee.Admiasion}</td>
+                        <td className="py-4 px-6">{fee.Admission}</td>
                         <td className="py-4 px-6">{fee.annual}</td>
                         <td className="py-4 px-6">{fee.total}</td>
                       </tr>
