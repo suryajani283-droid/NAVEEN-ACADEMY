@@ -204,8 +204,8 @@ export default function AdmissionPage() {
                 <tr className="bg-primary-500 text-white">
                   <th className="py-4 px-6 text-left">Class</th>
                   <th className="py-4 px-6 text-left">Admission Fee</th>
-                  <th className="py-4 px-6 text-left">Tuition Fee (Monthly)</th>
-                  <th className="py-4 px-6 text-left">Annual Fee</th>
+                  <th className="py-4 px-6 text-left">Annual fee</th>
+                  <th className="py-4 px-6 text-left">Total</th>
                 </tr>
               </thead>
               <tbody>
