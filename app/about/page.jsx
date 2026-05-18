@@ -111,11 +111,10 @@ export default function AboutPage() {
               <img 
   src="/images/director.jpg" 
   alt="Director"
-  className="w-48 h-48 rounded-full object-cover flex-shrink-0"
-/>
+  className="w-48 h-48 rounded-full object-cover flex-shrink-0"/>
               <div>
                 <h3 className="text-2xl font-bold text-primary-500 mb-2">Message from Director</h3>
-                <p className="text-gray-500 mb-2">Mr. [Director Name]</p>
+                <p className="text-gray-500 mb-2">Dr. Jagdish Vishnoi</p>
                 <p className="text-gray-600 leading-relaxed">
                   "Education is not just about filling minds with information, but about igniting the spark 
                   of curiosity and the desire to learn. At Naveen Academy, we strive to create an environment 
@@ -134,12 +133,13 @@ export default function AboutPage() {
             className="card"
           >
             <div className="flex flex-col md:flex-row gap-8 items-center">
-              <div className="w-48 h-48 bg-gray-200 rounded-full flex-shrink-0 flex items-center justify-center">
-                <p className="text-gray-500">Principal Photo</p>
-              </div>
+              <img 
+  src="/images/principal.jpg" 
+  alt="Principal"
+  className="w-48 h-48 rounded-full object-cover flex-shrink-0"/>
               <div>
                 <h3 className="text-2xl font-bold text-primary-500 mb-2">Message from Principal</h3>
-                <p className="text-gray-500 mb-2">Mr./Mrs. [Principal Name]</p>
+                <p className="text-gray-500 mb-2">Mr.Prakash kr Jangid</p>
                 <p className="text-gray-600 leading-relaxed">
                   "Welcome to Naveen Academy! Our school is a vibrant community of learners where we focus 
                   on the all-round development of each student. With experienced faculty, modern facilities, 
