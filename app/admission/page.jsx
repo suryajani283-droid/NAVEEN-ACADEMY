@@ -38,7 +38,7 @@ export default function AdmissionPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-5xl font-bold mb-4"
           >
-            Admissions Open 2024-25
+            Admissions Open 2026-27
           </motion.h1>
           <p className="text-xl">Join Naveen Academy for a bright future</p>
         </div>
