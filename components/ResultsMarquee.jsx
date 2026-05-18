@@ -51,9 +51,7 @@ export default function ResultsMarquee() {
   }, [])
 
   return (
-    <div className="relative w-full overflow-hidden bg-white border-b border-gray-200 shadow-sm">
-      <div className="absolute inset-0 bg-gradient-to-r from-primary-50 via-white to-primary-50 opacity-50 pointer-events-none" />
-
+    <div className="relative w-full overflow-hidden bg-transparent">
       <div
         ref={scrollRef}
         className="flex overflow-x-hidden py-6 px-4 space-x-8"
