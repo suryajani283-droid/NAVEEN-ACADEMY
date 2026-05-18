@@ -92,30 +92,37 @@ export default function GalleryPage() {
       </section>
 
       {/* Video Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-primary-500 text-center mb-12">School Videos</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((video) => (
-              <motion.div
-                key={video}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: video * 0.2 }}
-                className="card"
-              >
-                <div className="bg-gray-200 h-48 rounded-lg mb-4 flex items-center justify-center">
-                  <span className="text-4xl">🎥</span>
-                </div>
-                <h3 className="font-semibold mb-2">School Video {video}</h3>
-                <p className="text-gray-600 text-sm">
-                  Watch our school activities and events
-                </p>
-              </motion.div>
-            ))}
+<section className="py-16 bg-gray-50">
+  <div className="container mx-auto px-4">
+    <h2 className="text-3xl font-bold text-primary-500 text-center mb-12">School Videos</h2>
+    <div className="grid md:grid-cols-3 gap-6">
+      {[
+        { id: '9wAoUqjqcZk', title: 'Farewell 2026' },
+        { id: 'uioQ3uMOm4o', title: 'Admission Open - Science Stream' },
+        { id: 'aY-CA8dw62A', title: 'Sports Week 2026' },
+      ].map((video, index) => (
+        <motion.div
+          key={video.id}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: index * 0.2 }}
+          className="card overflow-hidden"
+        >
+          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+            <iframe
+              className="absolute top-0 left-0 w-full h-full rounded-lg"
+              src={`https://www.youtube.com/embed/${video.id}`}
+              title={video.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
           </div>
-        </div>
-      </section>
+          <h3 className="font-semibold mt-4 mb-2 text-center">{video.title}</h3>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* Lightbox Modal */}
       {selectedImage && (
