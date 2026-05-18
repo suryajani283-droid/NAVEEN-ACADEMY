@@ -10,7 +10,7 @@ export default function GalleryPage() {
 
   const galleryItems = [
     { category: 'Events', title: 'Independence Day 2024', src: '/images/Independence1.jpg'},
-    { category: 'Sports', title: 'Annual Sports Meet', src: '/images/Sports1.jpg' },
+    { category: 'Sports', title: 'Annual Sports Meet', src: '/images/Sports.jpg' },
     { category: 'Labs', title: 'Science Laboratory', src: '/images/Sciencelab.jpg' },
     { category: 'Annual Function', title: 'Cultural Program', src: '/images/Farewell.jpg' },
     { category: 'Tours', title: 'Educational Tour 2024', src: '/images/Tour.jpg' },
