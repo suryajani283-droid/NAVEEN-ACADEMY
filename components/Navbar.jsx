@@ -40,7 +40,6 @@ export default function Navbar() {
   alt="Naveen Academy Logo" 
   className="h-12 w-auto"
 />
-                <span className="text-white font-bold text-xl">NA</span>
               </div>
               <div>
                 <span className="text-xl font-bold text-primary-500">Naveen Academy</span>
