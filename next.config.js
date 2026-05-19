@@ -1,10 +1,8 @@
-const path = require('path');
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: { unoptimized: true },
   webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(__dirname);
+    config.resolve.alias['@'] = __dirname;
     return config;
   },
 };
