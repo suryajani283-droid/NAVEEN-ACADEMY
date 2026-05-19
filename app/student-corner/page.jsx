@@ -287,13 +287,83 @@ export default function StudentCornerPage() {
             </div>
           )}
 
-          {/* Downloads Tab (placeholder) */}
-          {activeTab === 'downloads' && (
-            <div className="text-center py-12">
-              <ArrowDownTrayIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">Downloads coming soon.</p>
-            </div>
-          )}
+          {activeTab === 'downloads' && <DownloadsSection />}
+       function DownloadsSection() {
+  const [downloads, setDownloads] = useState([])
+  const [selectedCategory, setSelectedCategory] = useState('All')
+
+  useEffect(() => {
+    const fetchDownloads = async () => {
+      const { data } = await supabase
+        .from('downloads')
+        .select('*')
+        .order('created_at', { ascending: false })
+      setDownloads(data || [])
+    }
+    fetchDownloads()
+  }, [])
+
+  const categories = ['All', 'Syllabus', 'Prospectus', 'Forms', 'Timetable', 'General', 'Other']
+  const filtered = selectedCategory === 'All' ? downloads : downloads.filter(d => d.category === selectedCategory)
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
+        <ArrowDownTrayIcon className="h-8 w-8 mr-2" />
+        Downloads
+      </h2>
+
+      {/* Category Filter */}
+      <div className="bg-white p-4 rounded-lg shadow">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Category</label>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-2 rounded-full text-sm border transition ${
+                selectedCategory === cat
+                  ? 'bg-primary-500 text-white border-primary-500'
+                  : 'bg-white text-primary-500 border-primary-300 hover:bg-primary-50'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Downloads List */}
+      {filtered.length === 0 ? (
+        <p className="text-gray-500 text-center py-8">No downloads found for this category.</p>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-4">
+          {filtered.map((item) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="card flex items-center justify-between"
+            >
+              <div>
+                <h3 className="font-semibold">{item.title}</h3>
+                <p className="text-sm text-gray-500">{item.category} | {item.type}</p>
+              </div>
+              <a
+                href={item.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary text-sm px-4 py-2"
+              >
+                Download
+              </a>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  )
+         }
 
           {/* Time Table Tab (placeholder) */}
           {activeTab === 'timetable' && (
