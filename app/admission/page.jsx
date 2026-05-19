@@ -1,6 +1,14 @@
 'use client'
+export const dynamic = 'force-dynamic';
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { createClient } from '@supabase/supabase-js'
+import Link from 'next/link'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
 
 export default function AdmissionPage() {
   const [formData, setFormData] = useState({
@@ -8,24 +16,43 @@ export default function AdmissionPage() {
     fatherName: '',
     motherName: '',
     dateOfBirth: '',
-    class: '',
-    address: '',
+    classApplying: '',
     phone: '',
     email: '',
-    previousSchool: ''
+    address: '',
+    previousSchool: '',
   })
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle form submission
-    console.log(formData)
-  }
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    const { error: insertError } = await supabase.from('admissions').insert({
+      student_name: formData.studentName,
+      father_name: formData.fatherName,
+      mother_name: formData.motherName,
+      date_of_birth: formData.dateOfBirth || null,
+      class_applying: formData.classApplying,
+      phone: formData.phone,
+      email: formData.email,
+      address: formData.address,
+      previous_school: formData.previousSchool,
     })
+
+    if (insertError) {
+      setError('Something went wrong. Please try again.')
+    } else {
+      setSubmitted(true)
+    }
+    setLoading(false)
   }
 
   return (
@@ -44,7 +71,7 @@ export default function AdmissionPage() {
         </div>
       </section>
 
-      {/* Admission Process */}
+      {/* Admission Process (static) */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="section-title">Admission Process</h2>
@@ -75,124 +102,97 @@ export default function AdmissionPage() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 max-w-3xl">
           <h2 className="section-title">Online Admission Form</h2>
-          <motion.form
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            onSubmit={handleSubmit}
-            className="bg-white rounded-2xl shadow-xl p-8"
-          >
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Student Name *
-                </label>
-                <input
-                  type="text"
-                  name="studentName"
-                  required
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
+          
+          {submitted ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="card text-center py-12"
+            >
+              <span className="text-6xl mb-4 block">🎉</span>
+              <h3 className="text-2xl font-bold text-green-600 mb-2">Application Submitted Successfully!</h3>
+              <p className="text-gray-600 mb-6">We will contact you soon for the next steps.</p>
+              <Link href="/" className="btn-primary">Back to Home</Link>
+            </motion.div>
+          ) : (
+            <motion.form
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              onSubmit={handleSubmit}
+              className="bg-white rounded-2xl shadow-xl p-8"
+            >
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Student Name *</label>
+                  <input type="text" name="studentName" required value={formData.studentName} onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Father's Name *</label>
+                  <input type="text" name="fatherName" required value={formData.fatherName} onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Mother's Name *</label>
+                  <input type="text" name="motherName" required value={formData.motherName} onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                  <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Class Applying For *</label>
+                  <select name="classApplying" required value={formData.classApplying} onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                    <option value="">Select Class</option>
+                    <option value="Nursery">Nursery</option>
+                    <option value="LKG">LKG</option>
+                    <option value="UKG">UKG</option>
+                    {[...Array(12)].map((_, i) => (
+                      <option key={i+1} value={i+1}>Class {i+1}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                  <input type="tel" name="phone" required value={formData.phone} onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                  <textarea name="address" rows="3" value={formData.address} onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Previous School</label>
+                  <input type="text" name="previousSchool" value={formData.previousSchool} onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Father's Name *
-                </label>
-                <input
-                  type="text"
-                  name="fatherName"
-                  required
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
+              {error && <p className="text-red-500 mt-4">{error}</p>}
+              <div className="mt-8 text-center">
+                <button type="submit" disabled={loading} className="btn-primary text-lg px-12">
+                  {loading ? 'Submitting...' : 'Submit Application'}
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Mother's Name *
-                </label>
-                <input
-                  type="text"
-                  name="motherName"
-                  required
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date of Birth *
-                </label>
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  required
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Class Applying For *
-                </label>
-                <select
-                  name="class"
-                  required
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                >
-                  <option value="">Select Class</option>
-                  <option value="Nursery">Nursery</option>
-                  <option value="LKG">LKG</option>
-                  <option value="UKG">UKG</option>
-                  {[...Array(12)].map((_, i) => (
-                    <option key={i + 1} value={i + 1}>Class {i + 1}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  required
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Address
-                </label>
-                <textarea
-                  name="address"
-                  rows="3"
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                ></textarea>
-              </div>
-            </div>
-            <div className="mt-8 text-center">
-              <button type="submit" className="btn-primary text-lg px-12">
-                Submit Application
-              </button>
-            </div>
-          </motion.form>
+            </motion.form>
+          )}
         </div>
       </section>
+
+      {/* Fee Structure (you can keep your existing static fee table or make it dynamic later) */}
+      {/* ... (your existing fee table code) ... */}
+    </div>
+  )
+}
 
       {/* Fee Structure */}
       <section className="py-16">
