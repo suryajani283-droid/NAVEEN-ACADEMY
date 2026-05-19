@@ -32,6 +32,18 @@ export default function Dashboard() {
   <span className="text-4xl">📢</span>
   <h3 className="font-semibold mt-2">Notices</h3>
 </Link>
+        <Link href="/admin/parent-circulars" className="card hover:shadow-xl transition text-center">
+  <span className="text-4xl">📣</span>
+  <h3 className="font-semibold mt-2">Parent Circulars</h3>
+</Link>
+<Link href="/admin/ptm" className="card hover:shadow-xl transition text-center">
+  <span className="text-4xl">📅</span>
+  <h3 className="font-semibold mt-2">PTM</h3>
+</Link>
+<Link href="/admin/feedback" className="card hover:shadow-xl transition text-center">
+  <span className="text-4xl">💬</span>
+  <h3 className="font-semibold mt-2">Feedback</h3>
+</Link>
       </div>
     </div>
   )
