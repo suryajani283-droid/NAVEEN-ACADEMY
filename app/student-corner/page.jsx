@@ -28,8 +28,8 @@ function NotesSection() {
   const [notes, setNotes] = useState([])
   const [selectedClass, setSelectedClass] = useState('')
   const [selectedSubject, setSelectedSubject] = useState('')
+  const [showNotes, setShowNotes] = useState(false)    // ⬅ नया state
 
-  // सभी नोट्स लोड करें
   useEffect(() => {
     const fetchNotes = async () => {
       const { data } = await supabase
@@ -41,21 +41,19 @@ function NotesSection() {
     fetchNotes()
   }, [])
 
-  // यूनिक क्लासेज़ निकालें
   const classList = useMemo(() => {
     const classes = [...new Set(notes.map((n) => n.class).filter(Boolean))]
     return classes.sort((a, b) => a - b)
   }, [notes])
 
-  // चुनी हुई क्लास के अनुसार सब्जेक्ट लिस्ट
   const subjectList = useMemo(() => {
     if (!selectedClass) return []
     const filtered = notes.filter((n) => n.class === Number(selectedClass))
     return [...new Set(filtered.map((n) => n.subject))]
   }, [notes, selectedClass])
 
-  // फ़िल्टर किए गए नोट्स
   const filteredNotes = useMemo(() => {
+    if (!showNotes) return []              // ⬅ बटन दबाने से पहले खाली
     let result = notes
     if (selectedClass) {
       result = result.filter((n) => n.class === Number(selectedClass))
@@ -64,7 +62,15 @@ function NotesSection() {
       result = result.filter((n) => n.subject === selectedSubject)
     }
     return result
-  }, [notes, selectedClass, selectedSubject])
+  }, [notes, selectedClass, selectedSubject, showNotes])
+
+  const handleSubmit = () => {
+    if (!selectedClass || !selectedSubject) {
+      alert('Please select both Class and Subject')
+      return
+    }
+    setShowNotes(true)
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -73,71 +79,88 @@ function NotesSection() {
         Study Notes
       </h2>
 
-      {/* Filters */}
-      <div className="grid md:grid-cols-2 gap-4 bg-white p-4 rounded-lg shadow">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Select Class</label>
-          <select
-            value={selectedClass}
-            onChange={(e) => {
-              setSelectedClass(e.target.value)
-              setSelectedSubject('')   // क्लास बदलने पर सब्जेक्ट रीसेट
-            }}
-            className="w-full px-4 py-2 border rounded-lg"
-          >
-            <option value="">All Classes</option>
-            {classList.map((cls) => (
-              <option key={cls} value={cls}>Class {cls}</option>
-            ))}
-          </select>
+      {/* Filters + Submit Button */}
+      <div className="bg-white p-4 rounded-lg shadow space-y-4">
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Class</label>
+            <select
+              value={selectedClass}
+              onChange={(e) => {
+                setSelectedClass(e.target.value)
+                setSelectedSubject('')
+                setShowNotes(false)          // नई क्लास चुनने पर छिपाएँ
+              }}
+              className="w-full px-4 py-2 border rounded-lg"
+            >
+              <option value="">-- Choose Class --</option>
+              {classList.map((cls) => (
+                <option key={cls} value={cls}>Class {cls}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Subject</label>
+            <select
+              value={selectedSubject}
+              onChange={(e) => {
+                setSelectedSubject(e.target.value)
+                setShowNotes(false)          // नया सब्जेक्ट चुनने पर छिपाएँ
+              }}
+              disabled={!selectedClass}
+              className="w-full px-4 py-2 border rounded-lg"
+            >
+              <option value="">-- Choose Subject --</option>
+              {subjectList.map((sub) => (
+                <option key={sub} value={sub}>{sub}</option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Select Subject</label>
-          <select
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-            disabled={!selectedClass}
-            className="w-full px-4 py-2 border rounded-lg"
-          >
-            <option value="">All Subjects</option>
-            {subjectList.map((sub) => (
-              <option key={sub} value={sub}>{sub}</option>
-            ))}
-          </select>
-        </div>
+        <button
+          onClick={handleSubmit}
+          disabled={!selectedClass || !selectedSubject}
+          className="btn-primary w-full md:w-auto"
+        >
+          Show Notes
+        </button>
       </div>
 
-      {/* Notes Grid */}
-      {filteredNotes.length === 0 ? (
-        <p className="text-gray-500 text-center py-8">No notes found for selected filters.</p>
-      ) : (
-        <div className="grid md:grid-cols-3 gap-6">
-          {filteredNotes.map((note) => (
-            <motion.div
-              key={note.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="card hover:shadow-2xl transition"
-            >
-              <div className="text-4xl mb-4">{note.type === 'PDF' ? '📄' : '🖼️'}</div>
-              <span className="bg-primary-100 text-primary-500 px-2 py-1 rounded text-xs font-medium">
-                Class {note.class}
-              </span>
-              <h3 className="font-semibold mt-2">{note.subject}</h3>
-              {note.title && <p className="text-gray-600 text-sm mt-1">{note.title}</p>}
-              {note.file_url && (
-                <a
-                  href={note.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-block w-full bg-primary-50 text-primary-500 py-2 rounded-lg font-medium text-center hover:bg-primary-500 hover:text-white transition-all"
+      {/* Notes Display – केवल तब जब बटन दबाया हो */}
+      {showNotes && (
+        <>
+          {filteredNotes.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">No notes found for {selectedSubject} (Class {selectedClass}).</p>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {filteredNotes.map((note) => (
+                <motion.div
+                  key={note.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="card hover:shadow-2xl transition"
                 >
-                  {note.type === 'PDF' ? 'Open PDF' : 'View Image'}
-                </a>
-              )}
-            </motion.div>
-          ))}
-        </div>
+                  <div className="text-4xl mb-4">{note.type === 'PDF' ? '📄' : '🖼️'}</div>
+                  <span className="bg-primary-100 text-primary-500 px-2 py-1 rounded text-xs font-medium">
+                    Class {note.class}
+                  </span>
+                  <h3 className="font-semibold mt-2">{note.subject}</h3>
+                  {note.title && <p className="text-gray-600 text-sm mt-1">{note.title}</p>}
+                  {note.file_url && (
+                    <a
+                      href={note.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-block w-full bg-primary-50 text-primary-500 py-2 rounded-lg font-medium text-center hover:bg-primary-500 hover:text-white transition-all"
+                    >
+                      {note.type === 'PDF' ? 'Open PDF' : 'View Image'}
+                    </a>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </motion.div>
   )
