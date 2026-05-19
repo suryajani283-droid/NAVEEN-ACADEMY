@@ -23,11 +23,62 @@ const tabs = [
   { id: 'timetable', name: 'Time Table', icon: ClockIcon },
 ]
 
+// Separate Notes Section component
+function NotesSection({ notes }) {
+  if (notes.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <DocumentTextIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+        <p className="text-gray-500">No notes uploaded yet.</p>
+      </div>
+    )
+  }
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+      <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
+        <DocumentTextIcon className="h-8 w-8 mr-2" />
+        Study Notes
+      </h2>
+      <div className="grid md:grid-cols-3 gap-6">
+        {notes.map((note) => (
+          <motion.div
+            key={note.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="card hover:shadow-2xl cursor-pointer group"
+          >
+            <div className="text-4xl mb-4">📝</div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="bg-primary-100 text-primary-500 px-2 py-1 rounded text-xs font-medium">
+                Class {note.class}
+              </span>
+              <span className="text-gray-400 text-xs">{note.type}</span>
+            </div>
+            <h3 className="font-semibold mb-1">{note.subject}</h3>
+            <p className="text-gray-600 text-sm">{note.title}</p>
+            {note.file_url && (
+              <a
+                href={note.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-block w-full bg-primary-50 text-primary-500 py-2 rounded-lg font-medium text-center hover:bg-primary-500 hover:text-white transition-all"
+              >
+                Download
+              </a>
+            )}
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
 export default function StudentCornerPage() {
   const [activeTab, setActiveTab] = useState('homework')
   const [homeworkList, setHomeworkList] = useState([])
+  const [notesList, setNotesList] = useState([])
 
-  // Fetch homework from Supabase
+  // Fetch homework
   useEffect(() => {
     const fetchHomework = async () => {
       const { data } = await supabase
@@ -37,6 +88,18 @@ export default function StudentCornerPage() {
       setHomeworkList(data || [])
     }
     fetchHomework()
+  }, [])
+
+  // Fetch notes
+  useEffect(() => {
+    const fetchNotes = async () => {
+      const { data } = await supabase
+        .from('notes')
+        .select('*')
+        .order('created_at', { ascending: false })
+      setNotesList(data || [])
+    }
+    fetchNotes()
   }, [])
 
   return (
@@ -120,38 +183,9 @@ export default function StudentCornerPage() {
             </motion.div>
           )}
 
-          {activeTab === 'notes' && (
-  <NotesSection />)
-const [notesList, setNotesList] = useState([])
+          {/* Notes Tab – use the NotesSection component */}
+          {activeTab === 'notes' && <NotesSection notes={notesList} />}
 
-useEffect(() => {
-  const fetchNotes = async () => {
-    const { data } = await supabase.from('notes').select('*').order('created_at', { ascending: false })
-    setNotesList(data || [])
-  }
-  fetchNotes()
-}, [])
-
-function NotesSection() {
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-      <h2 className="text-2xl font-bold text-primary-500 mb-6">Study Notes</h2>
-      <div className="grid md:grid-cols-3 gap-6">
-        {notesList.map((note) => (
-          <motion.div key={note.id} className="card">
-            <div className="text-4xl mb-4">📝</div>
-            <h3 className="font-semibold">{note.subject}</h3>
-            <p className="text-gray-600 text-sm">{note.title}</p>
-            <p className="text-xs text-gray-400">Class {note.class}</p>
-            {note.file_url && (
-              <a href={note.file_url} target="_blank" className="mt-2 inline-block text-primary-500 text-sm">Download</a>
-            )}
-          </motion.div>
-        ))}
-      </div>
-    </motion.div>
-  )
-          }
           {/* Results Tab (placeholder) */}
           {activeTab === 'results' && (
             <div className="text-center py-12">
@@ -179,4 +213,4 @@ function NotesSection() {
       </section>
     </div>
   )
-}
+          }
