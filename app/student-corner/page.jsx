@@ -1,5 +1,5 @@
-'use client'
-import { useState, useEffect } from 'react'
+ 'use client'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { createClient } from '@supabase/supabase-js'
 import {
@@ -23,52 +23,122 @@ const tabs = [
   { id: 'timetable', name: 'Time Table', icon: ClockIcon },
 ]
 
-// Separate Notes Section component
-function NotesSection({ notes }) {
-  if (notes.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <DocumentTextIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-        <p className="text-gray-500">No notes uploaded yet.</p>
-      </div>
-    )
-  }
+// ==================== Notes Section with Class / Subject Filter ====================
+function NotesSection() {
+  const [notes, setNotes] = useState([])
+  const [selectedClass, setSelectedClass] = useState('')
+  const [selectedSubject, setSelectedSubject] = useState('')
+
+  // सभी नोट्स लोड करें
+  useEffect(() => {
+    const fetchNotes = async () => {
+      const { data } = await supabase
+        .from('notes')
+        .select('*')
+        .order('created_at', { ascending: false })
+      setNotes(data || [])
+    }
+    fetchNotes()
+  }, [])
+
+  // यूनिक क्लासेज़ निकालें
+  const classList = useMemo(() => {
+    const classes = [...new Set(notes.map((n) => n.class).filter(Boolean))]
+    return classes.sort((a, b) => a - b)
+  }, [notes])
+
+  // चुनी हुई क्लास के अनुसार सब्जेक्ट लिस्ट
+  const subjectList = useMemo(() => {
+    if (!selectedClass) return []
+    const filtered = notes.filter((n) => n.class === Number(selectedClass))
+    return [...new Set(filtered.map((n) => n.subject))]
+  }, [notes, selectedClass])
+
+  // फ़िल्टर किए गए नोट्स
+  const filteredNotes = useMemo(() => {
+    let result = notes
+    if (selectedClass) {
+      result = result.filter((n) => n.class === Number(selectedClass))
+    }
+    if (selectedSubject) {
+      result = result.filter((n) => n.subject === selectedSubject)
+    }
+    return result
+  }, [notes, selectedClass, selectedSubject])
+
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
         <DocumentTextIcon className="h-8 w-8 mr-2" />
         Study Notes
       </h2>
-      <div className="grid md:grid-cols-3 gap-6">
-        {notes.map((note) => (
-          <motion.div
-            key={note.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="card hover:shadow-2xl cursor-pointer group"
+
+      {/* Filters */}
+      <div className="grid md:grid-cols-2 gap-4 bg-white p-4 rounded-lg shadow">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Select Class</label>
+          <select
+            value={selectedClass}
+            onChange={(e) => {
+              setSelectedClass(e.target.value)
+              setSelectedSubject('')   // क्लास बदलने पर सब्जेक्ट रीसेट
+            }}
+            className="w-full px-4 py-2 border rounded-lg"
           >
-            <div className="text-4xl mb-4">📝</div>
-            <div className="flex items-center gap-2 mb-2">
+            <option value="">All Classes</option>
+            {classList.map((cls) => (
+              <option key={cls} value={cls}>Class {cls}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Select Subject</label>
+          <select
+            value={selectedSubject}
+            onChange={(e) => setSelectedSubject(e.target.value)}
+            disabled={!selectedClass}
+            className="w-full px-4 py-2 border rounded-lg"
+          >
+            <option value="">All Subjects</option>
+            {subjectList.map((sub) => (
+              <option key={sub} value={sub}>{sub}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Notes Grid */}
+      {filteredNotes.length === 0 ? (
+        <p className="text-gray-500 text-center py-8">No notes found for selected filters.</p>
+      ) : (
+        <div className="grid md:grid-cols-3 gap-6">
+          {filteredNotes.map((note) => (
+            <motion.div
+              key={note.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="card hover:shadow-2xl transition"
+            >
+              <div className="text-4xl mb-4">{note.type === 'PDF' ? '📄' : '🖼️'}</div>
               <span className="bg-primary-100 text-primary-500 px-2 py-1 rounded text-xs font-medium">
                 Class {note.class}
               </span>
-              <span className="text-gray-400 text-xs">{note.type}</span>
-            </div>
-            <h3 className="font-semibold mb-1">{note.subject}</h3>
-            <p className="text-gray-600 text-sm">{note.title}</p>
-            {note.file_url && (
-              <a
-                href={note.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-block w-full bg-primary-50 text-primary-500 py-2 rounded-lg font-medium text-center hover:bg-primary-500 hover:text-white transition-all"
-              >
-                Download
-              </a>
-            )}
-          </motion.div>
-        ))}
-      </div>
+              <h3 className="font-semibold mt-2">{note.subject}</h3>
+              {note.title && <p className="text-gray-600 text-sm mt-1">{note.title}</p>}
+              {note.file_url && (
+                <a
+                  href={note.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-block w-full bg-primary-50 text-primary-500 py-2 rounded-lg font-medium text-center hover:bg-primary-500 hover:text-white transition-all"
+                >
+                  {note.type === 'PDF' ? 'Open PDF' : 'View Image'}
+                </a>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      )}
     </motion.div>
   )
 }
