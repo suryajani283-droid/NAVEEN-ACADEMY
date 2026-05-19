@@ -16,6 +16,8 @@ export default function AdminNotes() {
     file_url: '',
     type: 'PDF',
   })
+  const [editingId, setEditingId] = useState(null)
+  const [uploading, setUploading] = useState(false)
 
   const fetchNotes = async () => {
     const { data } = await supabase
@@ -27,24 +29,70 @@ export default function AdminNotes() {
 
   useEffect(() => { fetchNotes() }, [])
 
+  // Handle file upload separately
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Client-side size check (3 MB max)
+    if (file.size > 3 * 1024 * 1024) {
+      alert('File size must be less than 3MB')
+      return
+    }
+
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setForm({ ...form, file_url: data.url })
+      } else {
+        alert('Upload failed: ' + data.error)
+      }
+    } catch (err) {
+      alert('Upload error')
+    }
+    setUploading(false)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    await fetch('/api/admin/notes', {
-      method: 'POST',
+    const url = editingId ? `/api/admin/notes/${editingId}` : '/api/admin/notes'
+    const method = editingId ? 'PUT' : 'POST'
+    const res = await fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
       credentials: 'include',
     })
-    setForm({ subject: '', class: '', title: '', file_url: '', type: 'PDF' })
-    fetchNotes()
+    if (res.ok) {
+      setForm({ subject: '', class: '', title: '', file_url: '', type: 'PDF' })
+      setEditingId(null)
+      fetchNotes()
+    }
+  }
+
+  const handleEdit = (note) => {
+    setForm({
+      subject: note.subject,
+      class: note.class,
+      title: note.title || '',
+      file_url: note.file_url || '',
+      type: note.type || 'PDF',
+    })
+    setEditingId(note.id)
   }
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this note?')) return
-    await fetch(`/api/admin/notes/${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    })
+    await fetch(`/api/admin/notes/${id}`, { method: 'DELETE', credentials: 'include' })
     fetchNotes()
   }
 
@@ -52,7 +100,6 @@ export default function AdminNotes() {
     <div className="pt-20 container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold text-primary-500 mb-8">Manage Notes</h2>
 
-      {/* Add Note Form */}
       <form onSubmit={handleSubmit} className="card mb-8 space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
           <input
@@ -70,11 +117,6 @@ export default function AdminNotes() {
             onChange={(e) => setForm({...form, title: e.target.value})}
             className="w-full px-4 py-2 border rounded"
           />
-          <input
-            type="text" placeholder="File URL (image/PDF link)" value={form.file_url}
-            onChange={(e) => setForm({...form, file_url: e.target.value})}
-            className="w-full px-4 py-2 border rounded"
-          />
           <select
             value={form.type}
             onChange={(e) => setForm({...form, type: e.target.value})}
@@ -84,7 +126,43 @@ export default function AdminNotes() {
             <option value="Image">Image</option>
           </select>
         </div>
-        <button type="submit" className="btn-primary">Add Note</button>
+
+        {/* File Upload Section */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Upload File (PDF/Image, max 3MB)
+          </label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="file"
+              accept=".pdf,image/*"
+              onChange={handleFileUpload}
+              className="w-full px-4 py-2 border rounded"
+            />
+            {uploading && <span className="text-sm text-primary-500">Uploading...</span>}
+          </div>
+          {form.file_url && (
+            <p className="text-xs text-green-600">
+              File uploaded: {form.file_url.substring(0, 50)}...
+            </p>
+          )}
+        </div>
+
+        <button type="submit" className="btn-primary">
+          {editingId ? 'Update' : 'Add'} Note
+        </button>
+        {editingId && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditingId(null)
+              setForm({ subject: '', class: '', title: '', file_url: '', type: 'PDF' })
+            }}
+            className="btn-secondary ml-2"
+          >
+            Cancel
+          </button>
+        )}
       </form>
 
       {/* Notes List */}
@@ -92,17 +170,30 @@ export default function AdminNotes() {
         {notes.map((note) => (
           <div key={note.id} className="card flex justify-between items-start">
             <div>
-              <h3 className="font-semibold">{note.subject} – {note.title || 'No title'}</h3>
+              <h3 className="font-semibold">
+                {note.subject} – {note.title || 'No title'}
+              </h3>
               <p className="text-sm text-gray-600">
                 Class {note.class} | {note.type}
               </p>
               {note.file_url && (
-                <a href={note.file_url} target="_blank" className="text-xs text-primary-500 underline">
-                  View File
+                <a
+                  href={note.file_url}
+                  target="_blank"
+                  className="text-xs text-primary-500 underline"
+                >
+                  📎 View/Download
                 </a>
               )}
             </div>
-            <button onClick={() => handleDelete(note.id)} className="text-sm text-red-600">Delete</button>
+            <div className="flex gap-2">
+              <button onClick={() => handleEdit(note)} className="text-sm text-blue-600">
+                Edit
+              </button>
+              <button onClick={() => handleDelete(note.id)} className="text-sm text-red-600">
+                Delete
+              </button>
+            </div>
           </div>
         ))}
         {notes.length === 0 && <p className="text-gray-500">No notes added yet.</p>}
