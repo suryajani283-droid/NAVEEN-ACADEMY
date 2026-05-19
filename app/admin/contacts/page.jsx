@@ -1,20 +1,34 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
 
 export default function AdminContacts() {
   const [queries, setQueries] = useState([])
 
   const fetchQueries = async () => {
-    const res = await fetch('/api/admin/contacts', { credentials: 'include' })
-    if (res.ok) setQueries(await res.json())
+    const { data, error } = await supabase
+      .from('contact_queries')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (!error) setQueries(data || [])
   }
 
   useEffect(() => { fetchQueries() }, [])
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this query?')) return
-    await fetch(`/api/admin/contacts/${id}`, { method: 'DELETE', credentials: 'include' })
-    fetchQueries()
+    // अभी भी API का उपयोग करें (service role के लिए)
+    const res = await fetch(`/api/admin/contacts/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    if (res.ok) fetchQueries()
+    else alert('Delete failed – check console or try again.')
   }
 
   return (
