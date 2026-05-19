@@ -1,7 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
+import { createClient } from '@supabase/supabase-js'
+import {
   BookOpenIcon,
   DocumentTextIcon,
   ClockIcon,
@@ -9,19 +10,38 @@ import {
   ArrowDownTrayIcon,
   BeakerIcon,
   CalendarIcon,
-  ClipboardDocumentCheckIcon
+  ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
 
 export default function StudentCornerPage() {
   const [activeTab, setActiveTab] = useState('homework')
+  const [homeworkList, setHomeworkList] = useState([])   // ← नया state
+
+  // होमवर्क डेटा Supabase से लाएँ
+  useEffect(() => {
+    const fetchHomework = async () => {
+      const { data } = await supabase
+        .from('homework')
+        .select('*')
+        .order('created_at', { ascending: false })
+      setHomeworkList(data || [])
+    }
+    fetchHomework()
+  }, [])
 
   const tabs = [
     { id: 'homework', name: 'Homework', icon: BookOpenIcon },
     { id: 'notes', name: 'Notes', icon: DocumentTextIcon },
     { id: 'results', name: 'Results', icon: AcademicCapIcon },
     { id: 'downloads', name: 'Downloads', icon: ArrowDownTrayIcon },
-    { id: 'timetable', name: 'Time Table', icon: ClockIcon }
+    { id: 'timetable', name: 'Time Table', icon: ClockIcon },
   ]
+}
 
   const homework = [
     { class: 'Class 10', subject: 'Mathematics', topic: 'Quadratic Equations', date: '2024-03-20', status: 'Pending' },
