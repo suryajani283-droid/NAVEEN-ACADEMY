@@ -1,4 +1,4 @@
- 'use client'
+'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { createClient } from '@supabase/supabase-js'
@@ -23,12 +23,157 @@ const tabs = [
   { id: 'timetable', name: 'Time Table', icon: ClockIcon },
 ]
 
-// ==================== Notes Section with Class / Subject Filter ====================
+// ==================== HOMEWORK SECTION ====================
+function HomeworkSection() {
+  const [homeworks, setHomeworks] = useState([])
+  const [selectedClass, setSelectedClass] = useState('')
+  const [subjects, setSubjects] = useState([])
+  const [selectedSubject, setSelectedSubject] = useState('')
+  const [showSubjects, setShowSubjects] = useState(false)
+  const [showHomework, setShowHomework] = useState(false)
+
+  useEffect(() => {
+    const fetchHomeworks = async () => {
+      const { data } = await supabase
+        .from('homework')
+        .select('*')
+        .order('created_at', { ascending: false })
+      setHomeworks(data || [])
+    }
+    fetchHomeworks()
+  }, [])
+
+  const classList = useMemo(() => {
+    const classes = [...new Set(homeworks.map((h) => h.class).filter(Boolean))]
+    return classes.sort((a, b) => a - b)
+  }, [homeworks])
+
+  const handleClassSubmit = () => {
+    if (!selectedClass) return
+    const filtered = homeworks.filter((h) => h.class === Number(selectedClass))
+    const uniqueSubjects = [...new Set(filtered.map((h) => h.subject))]
+    setSubjects(uniqueSubjects)
+    setSelectedSubject('')
+    setShowSubjects(true)
+    setShowHomework(false)
+  }
+
+  const handleSubjectClick = (subject) => {
+    setSelectedSubject(subject)
+    setShowHomework(true)
+  }
+
+  const filteredHomeworks = useMemo(() => {
+    if (!selectedClass || !selectedSubject || !showHomework) return []
+    return homeworks.filter(
+      (h) => h.class === Number(selectedClass) && h.subject === selectedSubject
+    )
+  }, [homeworks, selectedClass, selectedSubject, showHomework])
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
+        <BookOpenIcon className="h-8 w-8 mr-2" />
+        Daily Homework
+      </h2>
+
+      <div className="bg-white p-4 rounded-lg shadow">
+        <div className="flex flex-col md:flex-row gap-4 items-end">
+          <div className="flex-grow">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Class</label>
+            <select
+              value={selectedClass}
+              onChange={(e) => {
+                setSelectedClass(e.target.value)
+                setShowSubjects(false)
+                setShowHomework(false)
+              }}
+              className="w-full px-4 py-2 border rounded-lg"
+            >
+              <option value="">-- Choose Class --</option>
+              {classList.map((cls) => (
+                <option key={cls} value={cls}>Class {cls}</option>
+              ))}
+            </select>
+          </div>
+          <button onClick={handleClassSubmit} disabled={!selectedClass} className="btn-primary whitespace-nowrap">
+            Show Subjects
+          </button>
+        </div>
+      </div>
+
+      {showSubjects && (
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h3 className="font-semibold text-lg mb-3">Subjects for Class {selectedClass}</h3>
+          {subjects.length === 0 ? (
+            <p className="text-gray-500">No homework found for this class.</p>
+          ) : (
+            <div className="flex flex-wrap gap-3">
+              {subjects.map((sub) => (
+                <button
+                  key={sub}
+                  onClick={() => handleSubjectClick(sub)}
+                  className={`px-4 py-2 rounded-full border transition ${
+                    selectedSubject === sub
+                      ? 'bg-primary-500 text-white border-primary-500'
+                      : 'bg-white text-primary-500 border-primary-300 hover:bg-primary-50'
+                  }`}
+                >
+                  {sub}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {showHomework && selectedSubject && (
+        <div className="space-y-4">
+          <h3 className="text-xl font-semibold text-primary-500">
+            {selectedSubject} - Class {selectedClass}
+          </h3>
+          {filteredHomeworks.length === 0 ? (
+            <p className="text-gray-500">No homework for this subject.</p>
+          ) : (
+            filteredHomeworks.map((hw) => (
+              <motion.div
+                key={hw.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="card"
+              >
+                <h4 className="font-semibold text-lg">{hw.topic || 'No Topic'}</h4>
+                {hw.description && <p className="text-gray-600 mt-1">{hw.description}</p>}
+                {hw.due_date && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    📅 Due: {new Date(hw.due_date).toLocaleDateString('en-IN')}
+                  </p>
+                )}
+                {hw.file_url && (
+                  <a
+                    href={hw.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-3 bg-primary-50 text-primary-500 px-4 py-2 rounded-lg font-medium hover:bg-primary-500 hover:text-white transition"
+                  >
+                    {hw.type === 'PDF' ? '📄 Open PDF' : '🖼️ View Image'}
+                  </a>
+                )}
+              </motion.div>
+            ))
+          )}
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
+// ==================== NOTES SECTION ====================
 function NotesSection() {
   const [notes, setNotes] = useState([])
   const [selectedClass, setSelectedClass] = useState('')
   const [selectedSubject, setSelectedSubject] = useState('')
-  const [showNotes, setShowNotes] = useState(false)    // ⬅ नया state
+  const [showNotes, setShowNotes] = useState(false)
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -53,14 +198,10 @@ function NotesSection() {
   }, [notes, selectedClass])
 
   const filteredNotes = useMemo(() => {
-    if (!showNotes) return []              // ⬅ बटन दबाने से पहले खाली
+    if (!showNotes) return []
     let result = notes
-    if (selectedClass) {
-      result = result.filter((n) => n.class === Number(selectedClass))
-    }
-    if (selectedSubject) {
-      result = result.filter((n) => n.subject === selectedSubject)
-    }
+    if (selectedClass) result = result.filter((n) => n.class === Number(selectedClass))
+    if (selectedSubject) result = result.filter((n) => n.subject === selectedSubject)
     return result
   }, [notes, selectedClass, selectedSubject, showNotes])
 
@@ -79,7 +220,6 @@ function NotesSection() {
         Study Notes
       </h2>
 
-      {/* Filters + Submit Button */}
       <div className="bg-white p-4 rounded-lg shadow space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
           <div>
@@ -89,7 +229,7 @@ function NotesSection() {
               onChange={(e) => {
                 setSelectedClass(e.target.value)
                 setSelectedSubject('')
-                setShowNotes(false)          // नई क्लास चुनने पर छिपाएँ
+                setShowNotes(false)
               }}
               className="w-full px-4 py-2 border rounded-lg"
             >
@@ -105,7 +245,7 @@ function NotesSection() {
               value={selectedSubject}
               onChange={(e) => {
                 setSelectedSubject(e.target.value)
-                setShowNotes(false)          // नया सब्जेक्ट चुनने पर छिपाएँ
+                setShowNotes(false)
               }}
               disabled={!selectedClass}
               className="w-full px-4 py-2 border rounded-lg"
@@ -117,16 +257,11 @@ function NotesSection() {
             </select>
           </div>
         </div>
-        <button
-          onClick={handleSubmit}
-          disabled={!selectedClass || !selectedSubject}
-          className="btn-primary w-full md:w-auto"
-        >
+        <button onClick={handleSubmit} disabled={!selectedClass || !selectedSubject} className="btn-primary w-full md:w-auto">
           Show Notes
         </button>
       </div>
 
-      {/* Notes Display – केवल तब जब बटन दबाया हो */}
       {showNotes && (
         <>
           {filteredNotes.length === 0 ? (
@@ -166,34 +301,85 @@ function NotesSection() {
   )
 }
 
+// ==================== DOWNLOADS SECTION (NEW, placed here!) ====================
+function DownloadsSection() {
+  const [downloads, setDownloads] = useState([])
+  const [selectedCategory, setSelectedCategory] = useState('All')
+
+  useEffect(() => {
+    const fetchDownloads = async () => {
+      const { data } = await supabase
+        .from('downloads')
+        .select('*')
+        .order('created_at', { ascending: false })
+      setDownloads(data || [])
+    }
+    fetchDownloads()
+  }, [])
+
+  const categories = ['All', 'Syllabus', 'Prospectus', 'Forms', 'Timetable', 'General', 'Other']
+  const filtered = selectedCategory === 'All' ? downloads : downloads.filter(d => d.category === selectedCategory)
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
+        <ArrowDownTrayIcon className="h-8 w-8 mr-2" />
+        Downloads
+      </h2>
+
+      <div className="bg-white p-4 rounded-lg shadow">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Category</label>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-2 rounded-full text-sm border transition ${
+                selectedCategory === cat
+                  ? 'bg-primary-500 text-white border-primary-500'
+                  : 'bg-white text-primary-500 border-primary-300 hover:bg-primary-50'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <p className="text-gray-500 text-center py-8">No downloads found for this category.</p>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-4">
+          {filtered.map((item) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="card flex items-center justify-between"
+            >
+              <div>
+                <h3 className="font-semibold">{item.title}</h3>
+                <p className="text-sm text-gray-500">{item.category} | {item.type}</p>
+              </div>
+              <a
+                href={item.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary text-sm px-4 py-2"
+              >
+                Download
+              </a>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
+// ==================== MAIN COMPONENT ====================
 export default function StudentCornerPage() {
   const [activeTab, setActiveTab] = useState('homework')
-  const [homeworkList, setHomeworkList] = useState([])
-  const [notesList, setNotesList] = useState([])
-
-  // Fetch homework
-  useEffect(() => {
-    const fetchHomework = async () => {
-      const { data } = await supabase
-        .from('homework')
-        .select('*')
-        .order('created_at', { ascending: false })
-      setHomeworkList(data || [])
-    }
-    fetchHomework()
-  }, [])
-
-  // Fetch notes
-  useEffect(() => {
-    const fetchNotes = async () => {
-      const { data } = await supabase
-        .from('notes')
-        .select('*')
-        .order('created_at', { ascending: false })
-      setNotesList(data || [])
-    }
-    fetchNotes()
-  }, [])
 
   return (
     <div className="pt-20">
@@ -237,49 +423,10 @@ export default function StudentCornerPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
 
-          {/* Homework Tab */}
-          {activeTab === 'homework' && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-              <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
-                <BookOpenIcon className="h-8 w-8 mr-2" />
-                Daily Homework
-              </h2>
-              {homeworkList.length === 0 && (
-                <p className="text-gray-500">No homework posted yet.</p>
-              )}
-              {homeworkList.map((hw) => (
-                <motion.div
-                  key={hw.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="card"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="bg-primary-100 text-primary-500 px-3 py-1 rounded-full text-sm font-medium">
-                        Class {hw.class}
-                      </span>
-                      <h3 className="text-lg font-semibold mt-2">{hw.subject}</h3>
-                      {hw.topic && <p className="text-gray-600">{hw.topic}</p>}
-                      {hw.description && (
-                        <p className="text-gray-500 text-sm mt-1">{hw.description}</p>
-                      )}
-                      {hw.due_date && (
-                        <p className="text-xs text-gray-400 mt-2">
-                          📅 Due: {new Date(hw.due_date).toLocaleDateString('en-IN')}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
+          {activeTab === 'homework' && <HomeworkSection />}
+          {activeTab === 'notes' && <NotesSection />}
+          {activeTab === 'downloads' && <DownloadsSection />}
 
-          {/* Notes Tab – use the NotesSection component */}
-          {activeTab === 'notes' && <NotesSection notes={notesList} />}
-
-          {/* Results Tab (placeholder) */}
           {activeTab === 'results' && (
             <div className="text-center py-12">
               <AcademicCapIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
@@ -287,85 +434,6 @@ export default function StudentCornerPage() {
             </div>
           )}
 
-          {activeTab === 'downloads' && <DownloadsSection />}
-       function DownloadsSection() {
-  const [downloads, setDownloads] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState('All')
-
-  useEffect(() => {
-    const fetchDownloads = async () => {
-      const { data } = await supabase
-        .from('downloads')
-        .select('*')
-        .order('created_at', { ascending: false })
-      setDownloads(data || [])
-    }
-    fetchDownloads()
-  }, [])
-
-  const categories = ['All', 'Syllabus', 'Prospectus', 'Forms', 'Timetable', 'General', 'Other']
-  const filtered = selectedCategory === 'All' ? downloads : downloads.filter(d => d.category === selectedCategory)
-
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
-        <ArrowDownTrayIcon className="h-8 w-8 mr-2" />
-        Downloads
-      </h2>
-
-      {/* Category Filter */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Category</label>
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm border transition ${
-                selectedCategory === cat
-                  ? 'bg-primary-500 text-white border-primary-500'
-                  : 'bg-white text-primary-500 border-primary-300 hover:bg-primary-50'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Downloads List */}
-      {filtered.length === 0 ? (
-        <p className="text-gray-500 text-center py-8">No downloads found for this category.</p>
-      ) : (
-        <div className="grid md:grid-cols-2 gap-4">
-          {filtered.map((item) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="card flex items-center justify-between"
-            >
-              <div>
-                <h3 className="font-semibold">{item.title}</h3>
-                <p className="text-sm text-gray-500">{item.category} | {item.type}</p>
-              </div>
-              <a
-                href={item.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary text-sm px-4 py-2"
-              >
-                Download
-              </a>
-            </motion.div>
-          ))}
-        </div>
-      )}
-    </motion.div>
-  )
-         }
-
-          {/* Time Table Tab (placeholder) */}
           {activeTab === 'timetable' && (
             <div className="text-center py-12">
               <ClockIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
@@ -376,4 +444,4 @@ export default function StudentCornerPage() {
       </section>
     </div>
   )
-          }
+   }
