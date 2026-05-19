@@ -120,14 +120,38 @@ export default function StudentCornerPage() {
             </motion.div>
           )}
 
-          {/* Notes Tab (placeholder) */}
           {activeTab === 'notes' && (
-            <div className="text-center py-12">
-              <DocumentTextIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">Notes will be uploaded soon.</p>
-            </div>
-          )}
+  <NotesSection />)
+const [notesList, setNotesList] = useState([])
 
+useEffect(() => {
+  const fetchNotes = async () => {
+    const { data } = await supabase.from('notes').select('*').order('created_at', { ascending: false })
+    setNotesList(data || [])
+  }
+  fetchNotes()
+}, [])
+
+function NotesSection() {
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+      <h2 className="text-2xl font-bold text-primary-500 mb-6">Study Notes</h2>
+      <div className="grid md:grid-cols-3 gap-6">
+        {notesList.map((note) => (
+          <motion.div key={note.id} className="card">
+            <div className="text-4xl mb-4">📝</div>
+            <h3 className="font-semibold">{note.subject}</h3>
+            <p className="text-gray-600 text-sm">{note.title}</p>
+            <p className="text-xs text-gray-400">Class {note.class}</p>
+            {note.file_url && (
+              <a href={note.file_url} target="_blank" className="mt-2 inline-block text-primary-500 text-sm">Download</a>
+            )}
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  )
+          }
           {/* Results Tab (placeholder) */}
           {activeTab === 'results' && (
             <div className="text-center py-12">
