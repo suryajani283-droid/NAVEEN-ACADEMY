@@ -119,36 +119,20 @@ export default function StudentCornerPage() {
 
           {activeTab === 'homework' && (
   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-    <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
-      <BookOpenIcon className="h-8 w-8 mr-2" />
-      Daily Homework
-    </h2>
-    {homeworkList.length === 0 && <p className="text-gray-500">No homework posted yet.</p>}
-    {homeworkList.map((hw) => (
-      <motion.div
-        key={hw.id}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="card"
-      >
-        <div className="flex justify-between items-start">
-          <div>
-            <span className="bg-primary-100 text-primary-500 px-3 py-1 rounded-full text-sm font-medium">
-              Class {hw.class}
-            </span>
-            <h3 className="text-lg font-semibold mt-2">{hw.subject}</h3>
-            {hw.topic && <p className="text-gray-600">{hw.topic}</p>}
-            {hw.description && <p className="text-gray-500 text-sm mt-1">{hw.description}</p>}
-            {hw.due_date && (
-              <p className="text-xs text-gray-400 mt-2">📅 Due: {new Date(hw.due_date).toLocaleDateString('en-IN')}</p>
-            )}
-          </div>
-        </div>
+    <h2 cl{activeTab === 'homework' && (
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+    {homeworkList.map((hw, index) => (
+      <motion.div key={hw.id} className="card">
+        <p className="font-semibold">{hw.subject}</p>
+        <p className="text-sm text-gray-600">{hw.topic}</p>
+        <p className="text-xs text-gray-400">Class {hw.class}</p>
       </motion.div>
     ))}
+    {homeworkList.length === 0 && <p className="text-gray-500">No homework posted yet.</p>}
   </motion.div>
 )}
-          {/* Notes Section */}
+      
+       {/* Notes Section */}
           {activeTab === 'notes' && (
             <motion.div
               initial={{ opacity: 0 }}
