@@ -1,7 +1,8 @@
 'use client'
 export const dynamic = 'force-dynamic';
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { createClient } from '@supabase/supabase-js'
 import {
   MapPinIcon,
   PhoneIcon,
@@ -9,8 +10,10 @@ import {
   ClockIcon,
 } from '@heroicons/react/24/outline'
 
-// Supabase client will be set later (only in browser)
-let supabaseClient = null;
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -22,24 +25,15 @@ export default function ContactPage() {
   })
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
-  const [ready, setReady] = useState(false)
-
-  // Initialize Supabase client only on the client side
-  useEffect(() => {
-    import('../../lib/supabase').then((mod) => {
-      supabaseClient = mod.supabase;
-      setReady(true);
-    }).catch(() => setReady(false));
-  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!supabaseClient) {
-      setError('System not ready. Please try again.')
+    if (!supabase) {
+      setError('System not ready. Please refresh and try again.')
       return
     }
     setError('')
-    const { error: insertError } = await supabaseClient.from('contact_queries').insert({
+    const { error: insertError } = await supabase.from('contact_queries').insert({
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
@@ -47,7 +41,7 @@ export default function ContactPage() {
       message: formData.message,
     })
     if (insertError) {
-      setError('Something went wrong. Please try again.')
+      setError('Something went wrong: ' + insertError.message)
     } else {
       setSubmitted(true)
     }
@@ -224,4 +218,4 @@ export default function ContactPage() {
       </section>
     </div>
   )
-                                                      }
+                      }
