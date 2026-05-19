@@ -1,5 +1,14 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
+
+const categories = ['Academic', 'Events', 'Exams', 'Holidays', 'Results']
+const types = ['Notice', 'Important', 'Urgent', 'Event']
 
 export default function AdminNotices() {
   const [notices, setNotices] = useState([])
@@ -10,23 +19,20 @@ export default function AdminNotices() {
     type: 'Notice',
   })
   const [editingId, setEditingId] = useState(null)
-  const [loading, setLoading] = useState(false)
 
   const fetchNotices = async () => {
-    const res = await fetch('/api/admin/notices', { credentials: 'include' })
-    if (res.ok) setNotices(await res.json())
+    const { data } = await supabase
+      .from('notices')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setNotices(data || [])
   }
 
-  useEffect(() => {
-    fetchNotices()
-  }, [])
+  useEffect(() => { fetchNotices() }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
-    const url = editingId
-      ? `/api/admin/notices/${editingId}`
-      : '/api/admin/notices'
+    const url = editingId ? `/api/admin/notices/${editingId}` : '/api/admin/notices'
     const method = editingId ? 'PUT' : 'POST'
     const res = await fetch(url, {
       method,
@@ -39,7 +45,6 @@ export default function AdminNotices() {
       setEditingId(null)
       fetchNotices()
     }
-    setLoading(false)
   }
 
   const handleEdit = (notice) => {
@@ -55,10 +60,7 @@ export default function AdminNotices() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this notice?')) return
-    await fetch(`/api/admin/notices/${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    })
+    await fetch(`/api/admin/notices/${id}`, { method: 'DELETE', credentials: 'include' })
     fetchNotices()
   }
 
@@ -66,92 +68,48 @@ export default function AdminNotices() {
     <div className="pt-20 container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold text-primary-500 mb-8">Manage Notices</h2>
 
-      {/* Add / Edit Form */}
       <form onSubmit={handleSubmit} className="card mb-8 space-y-4">
-        <input
-          type="text"
-          placeholder="Notice Title"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-          className="w-full px-4 py-2 border rounded-lg"
-          required
-        />
-        <textarea
-          placeholder="Description (optional)"
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-          className="w-full px-4 py-2 border rounded-lg"
-          rows="3"
-        />
-        <div className="flex flex-wrap gap-4">
-          <select
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-            className="px-4 py-2 border rounded-lg"
-          >
-            <option>Academic</option>
-            <option>Events</option>
-            <option>Exams</option>
-            <option>Holidays</option>
-            <option>Results</option>
+        <input type="text" placeholder="Title *" value={form.title}
+          onChange={(e) => setForm({...form, title: e.target.value})}
+          className="w-full px-4 py-2 border rounded" required />
+        <textarea placeholder="Description (optional)" value={form.description}
+          onChange={(e) => setForm({...form, description: e.target.value})}
+          className="w-full px-4 py-2 border rounded" rows="3" />
+        <div className="flex gap-4">
+          <select value={form.category} onChange={(e) => setForm({...form, category: e.target.value})}
+            className="px-4 py-2 border rounded">
+            {categories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <select
-            value={form.type}
-            onChange={(e) => setForm({ ...form, type: e.target.value })}
-            className="px-4 py-2 border rounded-lg"
-          >
-            <option>Notice</option>
-            <option>Important</option>
-            <option>Urgent</option>
-            <option>Event</option>
+          <select value={form.type} onChange={(e) => setForm({...form, type: e.target.value})}
+            className="px-4 py-2 border rounded">
+            {types.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
-        <button type="submit" disabled={loading} className="btn-primary">
+        <button type="submit" className="btn-primary">
           {editingId ? 'Update Notice' : 'Add Notice'}
         </button>
-        {editingId && (
-          <button
-            type="button"
-            onClick={() => {
-              setEditingId(null)
-              setForm({ title: '', description: '', category: 'Academic', type: 'Notice' })
-            }}
-            className="btn-secondary"
-          >
-            Cancel Edit
-          </button>
-        )}
+        {editingId && <button type="button" onClick={() => { setEditingId(null); setForm({ title: '', description: '', category: 'Academic', type: 'Notice' }) }} className="btn-secondary ml-2">Cancel</button>}
       </form>
 
-      {/* Notices List */}
       <div className="space-y-4">
         {notices.map((notice) => (
           <div key={notice.id} className="card flex justify-between items-start">
             <div>
               <h3 className="font-semibold text-lg">{notice.title}</h3>
-              <p className="text-sm text-gray-600">
-                {notice.description?.substring(0, 150)}
-              </p>
+              <p className="text-sm text-gray-600">{notice.description?.substring(0, 150)}</p>
               <div className="flex gap-2 mt-2">
-                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                  {notice.category}
-                </span>
-                <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
-                  {notice.type}
-                </span>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{notice.category}</span>
+                <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">{notice.type}</span>
               </div>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => handleEdit(notice)} className="text-sm text-blue-600">
-                Edit
-              </button>
-              <button onClick={() => handleDelete(notice.id)} className="text-sm text-red-600">
-                Delete
-              </button>
+              <button onClick={() => handleEdit(notice)} className="text-sm text-blue-600">Edit</button>
+              <button onClick={() => handleDelete(notice.id)} className="text-sm text-red-600">Delete</button>
             </div>
           </div>
         ))}
+        {notices.length === 0 && <p className="text-gray-500">No notices added yet.</p>}
       </div>
     </div>
   )
-      }
+}
