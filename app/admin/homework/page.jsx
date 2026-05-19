@@ -15,8 +15,11 @@ export default function AdminHomework() {
     topic: '',
     due_date: '',
     description: '',
+    file_url: '',
+    type: 'PDF',
   })
   const [editingId, setEditingId] = useState(null)
+  const [uploading, setUploading] = useState(false)
 
   const fetchHomeworks = async () => {
     const { data } = await supabase
@@ -28,11 +31,42 @@ export default function AdminHomework() {
 
   useEffect(() => { fetchHomeworks() }, [])
 
+  // Handle file upload separately
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Client-side size check
+    if (file.size > 3 * 1024 * 1024) {
+      alert('File size must be less than 3MB')
+      return
+    }
+
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setForm({ ...form, file_url: data.url })
+      } else {
+        alert('Upload failed: ' + data.error)
+      }
+    } catch (err) {
+      alert('Upload error')
+    }
+    setUploading(false)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const url = editingId
-      ? `/api/admin/homework/${editingId}`
-      : '/api/admin/homework'
+    const url = editingId ? `/api/admin/homework/${editingId}` : '/api/admin/homework'
     const method = editingId ? 'PUT' : 'POST'
     const res = await fetch(url, {
       method,
@@ -41,7 +75,7 @@ export default function AdminHomework() {
       credentials: 'include',
     })
     if (res.ok) {
-      setForm({ class: '', subject: '', topic: '', due_date: '', description: '' })
+      setForm({ class: '', subject: '', topic: '', due_date: '', description: '', file_url: '', type: 'PDF' })
       setEditingId(null)
       fetchHomeworks()
     }
@@ -54,6 +88,8 @@ export default function AdminHomework() {
       topic: hw.topic || '',
       due_date: hw.due_date || '',
       description: hw.description || '',
+      file_url: hw.file_url || '',
+      type: hw.type || 'PDF',
     })
     setEditingId(hw.id)
   }
@@ -68,7 +104,6 @@ export default function AdminHomework() {
     <div className="pt-20 container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold text-primary-500 mb-8">Manage Homework</h2>
 
-      {/* Add/Edit Form */}
       <form onSubmit={handleSubmit} className="card mb-8 space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
           <input type="number" placeholder="Class" value={form.class}
@@ -83,17 +118,42 @@ export default function AdminHomework() {
           <input type="date" value={form.due_date}
             onChange={(e) => setForm({...form, due_date: e.target.value})}
             className="w-full px-4 py-2 border rounded" />
+          <select value={form.type}
+            onChange={(e) => setForm({...form, type: e.target.value})}
+            className="w-full px-4 py-2 border rounded">
+            <option value="PDF">PDF</option>
+            <option value="Image">Image</option>
+          </select>
         </div>
+
+        {/* File Upload Section */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Upload File (PDF/Image, max 3MB)</label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="file"
+              accept=".pdf,image/*"
+              onChange={handleFileUpload}
+              className="w-full px-4 py-2 border rounded"
+            />
+            {uploading && <span className="text-sm text-primary-500">Uploading...</span>}
+          </div>
+          {form.file_url && (
+            <p className="text-xs text-green-600">File uploaded: {form.file_url.substring(0, 50)}...</p>
+          )}
+        </div>
+
         <textarea placeholder="Description (optional)" value={form.description}
           onChange={(e) => setForm({...form, description: e.target.value})}
           className="w-full px-4 py-2 border rounded" rows="3" />
+
         <button type="submit" className="btn-primary">
           {editingId ? 'Update' : 'Add'} Homework
         </button>
-        {editingId && <button type="button" onClick={() => { setEditingId(null); setForm({ class: '', subject: '', topic: '', due_date: '', description: '' }) }} className="btn-secondary ml-2">Cancel</button>}
+        {editingId && <button type="button" onClick={() => { setEditingId(null); setForm({ class: '', subject: '', topic: '', due_date: '', description: '', file_url: '', type: 'PDF' }) }} className="btn-secondary ml-2">Cancel</button>}
       </form>
 
-      {/* Homework List */}
+      {/* Homework List (same as before) */}
       <div className="space-y-4">
         {homeworks.map((hw) => (
           <div key={hw.id} className="card flex justify-between items-start">
@@ -102,6 +162,11 @@ export default function AdminHomework() {
               {hw.topic && <p className="text-sm text-gray-600">{hw.topic}</p>}
               {hw.due_date && <p className="text-xs text-gray-400">Due: {hw.due_date}</p>}
               {hw.description && <p className="text-sm text-gray-500 mt-1">{hw.description}</p>}
+              {hw.file_url && (
+                <a href={hw.file_url} target="_blank" className="text-xs text-primary-500 underline">
+                  📎 {hw.type} View/Download
+                </a>
+              )}
             </div>
             <div className="flex gap-2">
               <button onClick={() => handleEdit(hw)} className="text-sm text-blue-600">Edit</button>
@@ -109,8 +174,7 @@ export default function AdminHomework() {
             </div>
           </div>
         ))}
-        {homeworks.length === 0 && <p className="text-gray-500">No homework added yet.</p>}
       </div>
     </div>
   )
-        }
+              }
