@@ -27,6 +27,10 @@ export default function Dashboard() {
   <span className="text-4xl">📚</span>
   <h3 className="font-semibold mt-2">Notes</h3>
 </Link>
+        <Link href="/admin/downloads" className="card hover:shadow-xl transition text-center">
+  <span className="text-4xl">📥</span>
+  <h3 className="font-semibold mt-2">Downloads</h3>
+</Link>
       </div>
     </div>
   )
