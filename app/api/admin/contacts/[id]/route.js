@@ -9,7 +9,9 @@ export async function DELETE(request, { params }) {
       .from('contact_queries')
       .delete()
       .eq('id', params.id);
-    if (error) throw error;
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
