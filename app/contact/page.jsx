@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { supabase } from '../../lib/supabase'
 import {
   MapPinIcon,
   PhoneIcon,
@@ -36,13 +37,8 @@ export default function ContactPage() {
     }
   }
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
   return (
     <div className="pt-20">
-      {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary-500 to-primary-700 text-white py-20">
         <div className="container mx-auto px-4 text-center">
           <motion.h1
@@ -56,11 +52,9 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Contact Info & Form */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12">
-            {/* Contact Information */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -118,7 +112,6 @@ export default function ContactPage() {
               </div>
             </motion.div>
 
-            {/* Contact Form */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -136,63 +129,33 @@ export default function ContactPage() {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Your Name *</label>
-                      <input
-                        type="text"
-                        name="name"
-                        required
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      />
+                      <input type="text" name="name" required onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
-                      <input
-                        type="email"
-                        name="email"
-                        required
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      />
+                      <input type="email" name="email" required onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      />
+                      <input type="tel" name="phone" onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Subject *</label>
-                      <select
-                        name="subject"
-                        required
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      >
+                      <select name="subject" required onChange={(e) => setFormData({...formData, subject: e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
                         <option value="">Select Subject</option>
-                        <option value="Admission Inquiry">Admission Inquiry</option>
-                        <option value="General Inquiry">General Inquiry</option>
-                        <option value="Complaint">Complaint</option>
-                        <option value="Feedback">Feedback</option>
-                        <option value="Other">Other</option>
+                        <option>Admission Inquiry</option>
+                        <option>General Inquiry</option>
+                        <option>Complaint</option>
+                        <option>Feedback</option>
+                        <option>Other</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Message *</label>
-                      <textarea
-                        name="message"
-                        required
-                        rows="4"
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      />
+                      <textarea name="message" required rows="4" onChange={(e) => setFormData({...formData, message: e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
                     </div>
                     {error && <p className="text-red-500 text-sm">{error}</p>}
-                    <button type="submit" className="w-full btn-primary py-3 text-lg">
-                      Send Message
-                    </button>
+                    <button type="submit" className="w-full btn-primary py-3 text-lg">Send Message</button>
                   </form>
                 )}
               </div>
@@ -202,4 +165,4 @@ export default function ContactPage() {
       </section>
     </div>
   )
-                        }
+}
