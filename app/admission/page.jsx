@@ -10,6 +10,24 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
+const feeStructure = [
+  { class: 'Nursery-UKG', Admission: '₹1,100', annual: '₹6,000', total: '₹7,100' },
+  { class: 'I', Admission: '₹1,100', annual: '₹7,500', total: '₹8,600' },
+  { class: 'II', Admission: '₹1,100', annual: '₹8,000', total: '₹9,100' },
+  { class: 'III', Admission: '₹2,100', annual: '₹8,500', total: '₹10,600' },
+  { class: 'IV', Admission: '₹2,100', annual: '₹8,600', total: '₹10,700' },
+  { class: 'V', Admission: '₹2,100', annual: '₹9,000', total: '₹11,100' },
+  { class: 'VI', Admission: '₹2,100', annual: '₹11,000', total: '₹13,100' },
+  { class: 'VII', Admission: '₹2,100', annual: '₹12,000', total: '₹14,100' },
+  { class: 'VIII', Admission: '₹2,100', annual: '₹13,000', total: '₹15,100' },
+  { class: 'IX', Admission: '₹3,100', annual: '₹15,000', total: '₹18,100' },
+  { class: 'X', Admission: '₹3,100', annual: '₹17,000', total: '₹20,100' },
+  { class: 'XIth Arts', Admission: '₹3,100', annual: '₹18,000', total: '₹21,100' },
+  { class: 'XIth Science', Admission: '₹3,100', annual: '₹20,000', total: '₹23,100' },
+  { class: 'XIIth Arts', Admission: '₹3,100', annual: '₹19,000', total: '₹22,100' },
+  { class: 'XIIth Science', Admission: '₹3,100', annual: '₹21,000', total: '₹24,100' },
+]
+
 export default function AdmissionPage() {
   const [formData, setFormData] = useState({
     studentName: '',
@@ -60,7 +78,7 @@ export default function AdmissionPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary-500 to-primary-700 text-white py-20">
         <div className="container mx-auto px-4 text-center">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-5xl font-bold mb-4"
@@ -71,7 +89,7 @@ export default function AdmissionPage() {
         </div>
       </section>
 
-      {/* Admission Process (static) */}
+      {/* Admission Process */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="section-title">Admission Process</h2>
@@ -80,7 +98,7 @@ export default function AdmissionPage() {
               { step: '01', title: 'Inquiry', description: 'Visit school or fill online inquiry form' },
               { step: '02', title: 'Registration', description: 'Submit registration form with documents' },
               { step: '03', title: 'Interaction', description: 'Student and parent interaction with principal' },
-              { step: '04', title: 'Admission', description: 'Fee payment and admission confirmation' }
+              { step: '04', title: 'Admission', description: 'Fee payment and admission confirmation' },
             ].map((process, index) => (
               <motion.div
                 key={index}
@@ -102,7 +120,7 @@ export default function AdmissionPage() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 max-w-3xl">
           <h2 className="section-title">Online Admission Form</h2>
-          
+
           {submitted ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -152,7 +170,7 @@ export default function AdmissionPage() {
                     <option value="LKG">LKG</option>
                     <option value="UKG">UKG</option>
                     {[...Array(12)].map((_, i) => (
-                      <option key={i+1} value={i+1}>Class {i+1}</option>
+                      <option key={i + 1} value={i + 1}>Class {i + 1}</option>
                     ))}
                   </select>
                 </div>
@@ -188,13 +206,7 @@ export default function AdmissionPage() {
         </div>
       </section>
 
-      {/* Fee Structure (you can keep your existing static fee table or make it dynamic later) */}
-      {/* ... (your existing fee table code) ... */}
-    </div>
-  )
-}
-
-      {/* Fee Structure */}
+      {/* Fee Structure (your exact table) */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="section-title">Fee Structure</h2>
@@ -204,28 +216,12 @@ export default function AdmissionPage() {
                 <tr className="bg-primary-500 text-white">
                   <th className="py-4 px-6 text-left">Class</th>
                   <th className="py-4 px-6 text-left">Admission Fee</th>
-                  <th className="py-4 px-6 text-left">Annual fee</th>
+                  <th className="py-4 px-6 text-left">Annual Fee</th>
                   <th className="py-4 px-6 text-left">Total</th>
                 </tr>
               </thead>
               <tbody>
-                {[
-    { class: 'Nursery-UKG', Admission: '₹1,100', annual: '₹6,000', total: '₹7,100' },
-    { class: 'I', Admission: '₹1,100', annual: '₹7,500', total: '₹8,600' },
-    { class: 'II', Admission: '₹1,100', annual: '₹8,000', total: '₹9,100' },
-    { class: 'III', Admission: '₹2,100', annual: '₹8,500', total: '₹10,600' },
-    { class: 'IV', Admission: '₹2,100', annual: '₹8,600', total: '₹10,700' },
-    { class: 'V', Admission: '₹2,100', annual: '₹9,000', total: '₹11,100' },
-    { class: 'VI', Admission: '₹2,100', annual: '₹11,000', total: '₹13,100' },
-    { class: 'VII', Admission: '₹2,100', annual: '₹12,000', total: '₹14,100' },
-    { class: 'VIII', Admission: '₹2,100', annual: '₹13,000', total: '₹15,100' },
-    { class: 'IX', Admission: '₹3,100', annual: '₹15,000', total: '₹18,100' },
-    { class: 'X', Admission: '₹3,100', annual: '₹17,000', total: '₹20,100' },
-    { class: 'XIth Arts', Admission: '₹3,100', annual: '₹18,000', total: '₹21,100' },
-    { class: 'XIth Science', Admission: '₹3,100', annual: '₹20,000', total: '₹23,100' },
-    { class: 'XIIth Arts', Admission: '₹3,100', annual: '₹19,000', total: '₹22,100' },
-    { class: 'XIIth Science', Admission: '₹3,100', annual: '₹21,000', total: '₹24,100' },
-  ].map((fee, index) => (
+                {feeStructure.map((fee, index) => (
                   <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="py-4 px-6">{fee.class}</td>
                     <td className="py-4 px-6">{fee.Admission}</td>
@@ -241,4 +237,4 @@ export default function AdmissionPage() {
       </section>
     </div>
   )
-        }
+                  }
