@@ -97,52 +97,37 @@ export default function StudentCornerPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
 
-          {/* Homework Section */}
           {activeTab === 'homework' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-4"
-            >
-              <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
-                <BookOpenIcon className="h-8 w-8 mr-2" />
-                Daily Homework
-              </h2>
-              {homework.map((hw, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="card flex flex-col md:flex-row md:items-center justify-between gap-4"
-                >
-                  <div className="flex-grow">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="bg-primary-100 text-primary-500 px-3 py-1 rounded-full text-sm font-medium">
-                        {hw.class}
-                      </span>
-                      <span className="text-gray-500 text-sm">{hw.date}</span>
-                    </div>
-                    <h3 className="text-lg font-semibold">{hw.subject}</h3>
-                    <p className="text-gray-600">{hw.topic}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                      hw.status === 'Pending' 
-                        ? 'bg-yellow-100 text-yellow-700' 
-                        : 'bg-green-100 text-green-700'
-                    }`}>
-                      {hw.status}
-                    </span>
-                    <button className="btn-primary text-sm py-2">
-                      View
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+    <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
+      <BookOpenIcon className="h-8 w-8 mr-2" />
+      Daily Homework
+    </h2>
+    {homeworkList.length === 0 && <p className="text-gray-500">No homework posted yet.</p>}
+    {homeworkList.map((hw) => (
+      <motion.div
+        key={hw.id}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="card"
+      >
+        <div className="flex justify-between items-start">
+          <div>
+            <span className="bg-primary-100 text-primary-500 px-3 py-1 rounded-full text-sm font-medium">
+              Class {hw.class}
+            </span>
+            <h3 className="text-lg font-semibold mt-2">{hw.subject}</h3>
+            {hw.topic && <p className="text-gray-600">{hw.topic}</p>}
+            {hw.description && <p className="text-gray-500 text-sm mt-1">{hw.description}</p>}
+            {hw.due_date && (
+              <p className="text-xs text-gray-400 mt-2">📅 Due: {new Date(hw.due_date).toLocaleDateString('en-IN')}</p>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    ))}
+  </motion.div>
+)}
           {/* Notes Section */}
           {activeTab === 'notes' && (
             <motion.div
