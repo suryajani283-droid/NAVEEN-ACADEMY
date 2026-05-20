@@ -7,7 +7,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-export default function AdminAdvertisements() {
+export default function AdminAdvertisement() {
   const [ads, setAds] = useState([])
   const [form, setForm] = useState({ image_url: '', title: '', link_url: '' })
   const [uploading, setUploading] = useState(false)
@@ -15,7 +15,7 @@ export default function AdminAdvertisements() {
 
   const fetchAds = async () => {
     const { data } = await supabase
-      .from('advertisements')
+      .from('advertisement')
       .select('*')
       .order('created_at', { ascending: false })
     setAds(data || [])
@@ -50,7 +50,7 @@ export default function AdminAdvertisements() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const res = await fetch('/api/admin/advertisements', {
+    const res = await fetch('/api/admin/advertisement', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
@@ -67,13 +67,13 @@ export default function AdminAdvertisements() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this ad?')) return
-    await fetch(`/api/admin/advertisements/${id}`, { method: 'DELETE', credentials: 'include' })
+    await fetch(`/api/admin/advertisement/${id}`, { method: 'DELETE', credentials: 'include' })
     fetchAds()
   }
 
   return (
     <div className="pt-20 container mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold text-primary-500 mb-8">Manage Advertisements</h2>
+      <h2 className="text-3xl font-bold text-primary-500 mb-8">Manage Advertisement</h2>
 
       <form onSubmit={handleSubmit} className="card mb-8 space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
