@@ -49,7 +49,10 @@ export default function LoginPage() {
     if (error) {
       setMessage(error.message)
     } else {
-      router.push('/student-corner')
+      // Check for a redirect query parameter
+const params = new URLSearchParams(window.location.search);
+const redirectTo = params.get('redirect') || '/student-corner';
+router.push(redirectTo);
     }
     setLoading(false)
   }
