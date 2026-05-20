@@ -16,8 +16,9 @@ export async function POST(request) {
         roll_number: body.roll_number,
         dob: body.dob,
         exam_type: body.exam_type,
-        subjects: body.subjects,
+        subjects: body.subjects,          // { name: { obtained, max } }
         total: body.total,
+        total_max: body.total_max,
         percentage: body.percentage,
         grade: body.grade,
         email: body.email || null,
