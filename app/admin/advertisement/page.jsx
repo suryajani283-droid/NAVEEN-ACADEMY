@@ -11,11 +11,12 @@ export default function AdminAdvertisement() {
   const [ads, setAds] = useState([])
   const [form, setForm] = useState({ image_url: '', title: '', link_url: '' })
   const [uploading, setUploading] = useState(false)
-  const [inputMode, setInputMode] = useState('upload') // 'upload' or 'link'
+  const [inputMode, setInputMode] = useState('upload')
+  const [editingId, setEditingId] = useState(null)
 
   const fetchAds = async () => {
     const { data } = await supabase
-      .from('advertisement')
+      .from('advertisements')
       .select('*')
       .order('created_at', { ascending: false })
     setAds(data || [])
@@ -50,32 +51,59 @@ export default function AdminAdvertisement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const res = await fetch('/api/admin/advertisement', {
-      method: 'POST',
+    const url = editingId
+      ? `/api/admin/advertisements/${editingId}`
+      : '/api/admin/advertisements'
+    const method = editingId ? 'PUT' : 'POST'
+    const res = await fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
       credentials: 'include',
     })
     if (res.ok) {
       setForm({ image_url: '', title: '', link_url: '' })
+      setEditingId(null)
       fetchAds()
     } else {
-  const errData = await res.json().catch(() => ({ error: 'Unknown error' }));
-  alert('Error adding ad: ' + (errData.error || res.statusText));
+      const text = await res.text()
+      let msg = text
+      try { const json = JSON.parse(text); msg = json.error || text } catch {}
+      alert('Error: ' + msg)
     }
   }
 
+  const handleEdit = (ad) => {
+    setForm({
+      image_url: ad.image_url,
+      title: ad.title || '',
+      link_url: ad.link_url || '',
+    })
+    setEditingId(ad.id)
+    setInputMode('link')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const handleDelete = async (id) => {
-    if (!confirm('Delete this ad?')) return
-    await fetch(`/api/admin/advertisement/${id}`, { method: 'DELETE', credentials: 'include' })
+    if (!confirm('Delete this advertisement?')) return
+    await fetch(`/api/admin/advertisements/${id}`, { method: 'DELETE', credentials: 'include' })
     fetchAds()
+  }
+
+  const cancelEdit = () => {
+    setForm({ image_url: '', title: '', link_url: '' })
+    setEditingId(null)
+    setInputMode('upload')
   }
 
   return (
     <div className="pt-20 container mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold text-primary-500 mb-8">Manage Advertisement</h2>
+      <h2 className="text-3xl font-bold text-primary-500 mb-8">Manage Advertisements</h2>
 
       <form onSubmit={handleSubmit} className="card mb-8 space-y-4">
+        <h3 className="text-lg font-semibold text-gray-700">
+          {editingId ? 'Edit Advertisement' : 'Add New Advertisement'}
+        </h3>
         <div className="grid md:grid-cols-2 gap-4">
           <input type="text" placeholder="Title (optional)" value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -118,25 +146,44 @@ export default function AdminAdvertisement() {
           </div>
         )}
 
-        <button type="submit" className="btn-primary">Add Advertisement</button>
+        <div className="flex gap-2">
+          <button type="submit" className="btn-primary">
+            {editingId ? 'Update Advertisement' : 'Add Advertisement'}
+          </button>
+          {editingId && (
+            <button type="button" onClick={cancelEdit} className="btn-secondary">
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {ads.map((ad) => (
           <div key={ad.id} className="relative group overflow-hidden rounded-xl shadow">
             <img src={ad.image_url} alt={ad.title} className="h-32 w-full object-cover" />
-            <button
-              onClick={() => handleDelete(ad.id)}
-              className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full text-xs"
-            >
-              ✕
-            </button>
+            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => handleEdit(ad)}
+                className="bg-blue-500 text-white p-1 rounded-full text-xs hover:bg-blue-600"
+                title="Edit"
+              >
+                ✎
+              </button>
+              <button
+                onClick={() => handleDelete(ad.id)}
+                className="bg-red-500 text-white p-1 rounded-full text-xs hover:bg-red-600"
+                title="Delete"
+              >
+                ✕
+              </button>
+            </div>
             <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
-              <p className="text-white text-xs truncate">{ad.title || 'Ad'}</p>
+              <p className="text-white text-xs truncate">{ad.title || 'Advertisement'}</p>
             </div>
           </div>
         ))}
       </div>
     </div>
   )
-      }
+}
