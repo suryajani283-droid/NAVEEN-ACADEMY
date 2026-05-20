@@ -51,6 +51,9 @@ export default function Footer() {
                   >
                     {item}
                   </Link>
+                  <Link href="/student-corner?tab=results" className="text-gray-400 hover:text-white transition-colors">
+  Results
+</Link>
                 </li>
               ))}
             </ul>
