@@ -33,8 +33,8 @@ export default function Navbar() {
     <header
       className={`fixed w-full z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-dark-900/95 backdrop-blur-sm shadow-lg'
-          : 'bg-dark-800'
+          ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-gray-200'
+          : 'bg-transparent'
       }`}
     >
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8" aria-label="Global">
@@ -48,10 +48,10 @@ export default function Navbar() {
                 className="h-12 w-auto"
               />
               <div>
-                <span className="text-xl font-bold text-white">
+                <span className={`text-xl font-bold transition-colors ${scrolled ? 'text-dark-800' : 'text-white'}`}>
                   Naveen Academy
                 </span>
-                <p className="text-xs text-primary-400">
+                <p className={`text-xs transition-colors ${scrolled ? 'text-primary-500' : 'text-primary-300'}`}>
                   Sr. Sec. School, Chohtan
                 </p>
               </div>
@@ -62,7 +62,7 @@ export default function Navbar() {
           <div className="flex lg:hidden">
             <button
               type="button"
-              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-300 hover:text-white"
+              className={`-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 transition-colors ${scrolled ? 'text-gray-700 hover:text-primary-500' : 'text-white hover:text-primary-300'}`}
               onClick={() => setMobileMenuOpen(true)}
             >
               <Bars3Icon className="h-6 w-6" aria-hidden="true" />
@@ -77,8 +77,10 @@ export default function Navbar() {
                 href={item.href}
                 className={`text-sm font-semibold leading-6 transition-colors ${
                   item.color
-                    ? 'text-red-400 hover:text-red-300'  // maroon for Student & Parent Corner
-                    : 'text-gray-300 hover:text-primary-400'
+                    ? 'text-red-600 hover:text-red-800'  // maroon for Student & Parent Corner
+                    : scrolled
+                      ? 'text-dark-600 hover:text-primary-500'
+                      : 'text-white/80 hover:text-white'
                 }`}
               >
                 {item.name}
@@ -90,7 +92,7 @@ export default function Navbar() {
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
             <Link
               href="/admission"
-              className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md"
+              className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
             >
               Admission Open 2026-27
             </Link>
@@ -101,21 +103,21 @@ export default function Navbar() {
       {/* Mobile Menu Dialog */}
       <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
         <div className="fixed inset-0 z-50" />
-        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-dark-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-white/10">
+        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
             <Link href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
-              <span className="text-xl font-bold text-white">Naveen Academy</span>
+              <span className="text-xl font-bold text-dark-800">Naveen Academy</span>
             </Link>
             <button
               type="button"
-              className="-m-2.5 rounded-md p-2.5 text-gray-300 hover:text-white"
+              className="-m-2.5 rounded-md p-2.5 text-gray-700 hover:text-primary-500"
               onClick={() => setMobileMenuOpen(false)}
             >
               <XMarkIcon className="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
           <div className="mt-6 flow-root">
-            <div className="-my-6 divide-y divide-gray-700">
+            <div className="-my-6 divide-y divide-gray-200">
               <div className="space-y-2 py-6">
                 {navigation.map((item) => (
                   <Link
@@ -124,8 +126,8 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 ${
                       item.color
-                        ? 'text-red-400 hover:bg-red-400/10'
-                        : 'text-gray-300 hover:bg-primary-400/10'
+                        ? 'text-red-600 hover:bg-red-50'
+                        : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
                     {item.name}
