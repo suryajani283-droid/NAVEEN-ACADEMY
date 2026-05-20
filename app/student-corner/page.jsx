@@ -478,6 +478,61 @@ function ResultsSection() {
   )
 }
 
+
+// ==================== TIMETABLE SECTION ====================
+
+function TimetableSection() {
+  const [selectedClass, setSelectedClass] = useState('')
+  const [timetable, setTimetable] = useState(null)
+
+  useEffect(() => {
+    if (!selectedClass) return
+    const fetchTimetable = async () => {
+      const { data } = await supabase
+        .from('timetables')
+        .select('*')
+        .eq('class', selectedClass)
+        .single()
+      setTimetable(data || null)
+    }
+    fetchTimetable()
+  }, [selectedClass])
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
+        <ClockIcon className="h-8 w-8 mr-2" />
+        Class Timetable
+      </h2>
+
+      <div className="bg-white p-4 rounded-lg shadow">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Select Class</label>
+        <select
+          value={selectedClass}
+          onChange={(e) => setSelectedClass(e.target.value)}
+          className="w-full px-4 py-2 border rounded"
+        >
+          <option value="">-- Choose Class --</option>
+          {[1,2,3,4,5,6,7,8,9,10,11,12].map(c => (
+            <option key={c} value={c}>Class {c}</option>
+          ))}
+        </select>
+      </div>
+
+      {timetable && (
+        <div className="card text-center">
+          <img src={timetable.file_url} alt={`Class ${selectedClass} Timetable`}
+            className="max-w-full h-auto rounded mx-auto" />
+          <a href={timetable.file_url} target="_blank" className="btn-primary mt-4 inline-block">Download</a>
+        </div>
+      )}
+      {selectedClass && !timetable && (
+        <p className="text-gray-500 text-center">Timetable not available for this class.</p>
+      )}
+    </motion.div>
+  )
+}
+
 // ==================== MAIN COMPONENT ====================
 export default function StudentCornerPage() {
   const [activeTab, setActiveTab] = useState('homework')
@@ -528,13 +583,7 @@ export default function StudentCornerPage() {
           {activeTab === 'notes' && <NotesSection />}
           {activeTab === 'downloads' && <DownloadsSection />}
           {activeTab === 'results' && <ResultsSection />}
-
-          {activeTab === 'timetable' && (
-            <div className="text-center py-12">
-              <ClockIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">Timetable will be updated soon.</p>
-            </div>
-          )}
+          {activeTab === 'timetable' && <TimetableSection />} 
         </div>
       </section>
     </div>
