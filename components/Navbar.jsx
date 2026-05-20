@@ -7,14 +7,15 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/about' },
+  { name: 'Student Corner', href: '/student-corner', color: true },
+  { name: 'Parent Corner', href: '/parent-corner', color: true },
   { name: 'Academics', href: '/academics' },
   { name: 'Faculty', href: '/faculty' },
   { name: 'Gallery', href: '/gallery' },
   { name: 'Admission', href: '/admission' },
   { name: 'Notices', href: '/notices' },
   { name: 'Contact', href: '/contact' },
-  {name: 'student corner',href:'/student-corner'},
-  {name: 'parent corner',href:'/parent-corner'},
+  
 ]
 
 export default function Navbar() {
