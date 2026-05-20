@@ -9,7 +9,7 @@ export default function Dashboard() {
 
   const sections = [
     { href: '/admin/contacts', label: '📬 Contact Queries', color: 'bg-blue-50' },
-    { href: '/admin/admissions', label: '🎓 Admissions', color: 'bg-emerald-50' },
+    { href: '/admin/admission', label: '🎓 Admissions', color: 'bg-emerald-50' },
     { href: '/admin/notices', label: '📢 Notices', color: 'bg-amber-50' },
     { href: '/admin/homework', label: '📝 Homework', color: 'bg-orange-50' },
     { href: '/admin/notes', label: '📚 Notes', color: 'bg-violet-50' },
