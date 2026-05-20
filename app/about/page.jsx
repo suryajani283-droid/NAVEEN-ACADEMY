@@ -1,4 +1,4 @@
-// app/about/page.jsx
+// app/about/page.jsx (Manipal-inspired colors – cards and accents)
 'use client'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
@@ -7,16 +7,16 @@ export default function AboutPage() {
   return (
     <div className="pt-20">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-dark-700 to-dark-800 text-white py-20">
+      <section className="bg-gradient-to-r from-slate-800 to-slate-700 text-white py-20">
         <div className="container mx-auto px-4 text-center">
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-5xl font-bold mb-4"
           >
-            About Naveen Academy
+            About <span className="text-orange-500">Naveen Academy</span>
           </motion.h1>
-          <p className="text-xl text-gray-300">Excellence in Education Since 2005</p>
+          <p className="text-xl text-slate-300">Excellence in Education Since 2005</p>
         </div>
       </section>
 
@@ -29,22 +29,27 @@ export default function AboutPage() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl font-bold text-dark-700 mb-6">Our History</h2>
-              <p className="text-gray-600 mb-4 leading-relaxed">
-                Naveen Academy Senior Secondary School was established in 2005 with a vision to provide quality education to the students of Chohtan and surrounding areas of Barmer district. What started as a small school with just 50 students has now grown into one of the most respected educational institutions in the region.
+              <h2 className="text-3xl font-bold text-slate-800 mb-6">Our History</h2>
+              <p className="text-slate-600 mb-4 leading-relaxed">
+                Naveen Academy Senior Secondary School was established in 2005 with a vision to provide quality
+                education to the students of Chohtan and surrounding areas of Barmer district. What started as a
+                small school with just 50 students has now grown into one of the most respected educational
+                institutions in the region.
               </p>
-              <p className="text-gray-600 mb-4 leading-relaxed">
-                Over the years, we have consistently produced excellent board results and our students have gone on to pursue successful careers in medicine, engineering, civil services, and various other fields.
+              <p className="text-slate-600 mb-4 leading-relaxed">
+                Over the years, we have consistently produced excellent board results and our students have gone
+                on to pursue successful careers in medicine, engineering, civil services, and various other fields.
               </p>
-              <p className="text-gray-600 leading-relaxed">
-                Today, Naveen Academy stands as a beacon of quality education, serving over 1000+ students with state‑of‑the‑art infrastructure and dedicated faculty.
+              <p className="text-slate-600 leading-relaxed">
+                Today, Naveen Academy stands as a beacon of quality education, serving over 1000+ students with
+                state‑of‑the‑art infrastructure and dedicated faculty.
               </p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="relative h-96 rounded-2xl overflow-hidden shadow-2xl"
+              className="relative h-96 rounded-2xl overflow-hidden shadow-xl border border-slate-200"
             >
               <img
                 src="/images/school-building.jpg"
@@ -57,31 +62,41 @@ export default function AboutPage() {
       </section>
 
       {/* Vision & Mission */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="card bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow"
+              className="bg-white rounded-xl p-8 border border-slate-100 shadow-lg hover:shadow-xl transition-shadow"
             >
-              <div className="text-4xl mb-4">👁️</div>
-              <h3 className="text-2xl font-bold text-dark-700 mb-4">Our Vision</h3>
-              <p className="text-gray-600 leading-relaxed">
-                To be a premier educational institution that nurtures young minds, fosters creativity, and develops responsible global citizens who contribute positively to society. We aim to create an environment where every student discovers their potential and achieves excellence in academics, sports, and life.
+              <div className="w-14 h-14 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-2xl mb-6">
+                👁️
+              </div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-4">Our Vision</h3>
+              <p className="text-slate-600 leading-relaxed">
+                To be a premier educational institution that nurtures young minds, fosters creativity, and
+                develops responsible global citizens who contribute positively to society. We aim to create an
+                environment where every student discovers their potential and achieves excellence in academics,
+                sports, and life.
               </p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="card bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow"
+              className="bg-white rounded-xl p-8 border border-slate-100 shadow-lg hover:shadow-xl transition-shadow"
             >
-              <div className="text-4xl mb-4">🎯</div>
-              <h3 className="text-2xl font-bold text-dark-700 mb-4">Our Mission</h3>
-              <p className="text-gray-600 leading-relaxed">
-                To provide holistic education that combines academic rigor with character building. We are committed to creating a supportive learning environment with modern infrastructure, innovative teaching methods, and emphasis on moral values. Our mission is to empower students with knowledge, skills, and confidence to face future challenges.
+              <div className="w-14 h-14 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-2xl mb-6">
+                🎯
+              </div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-4">Our Mission</h3>
+              <p className="text-slate-600 leading-relaxed">
+                To provide holistic education that combines academic rigor with character building. We are
+                committed to creating a supportive learning environment with modern infrastructure, innovative
+                teaching methods, and emphasis on moral values. Our mission is to empower students with
+                knowledge, skills, and confidence to face future challenges.
               </p>
             </motion.div>
           </div>
@@ -91,25 +106,28 @@ export default function AboutPage() {
       {/* Director & Principal Message */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-dark-700 text-center mb-12">Leadership Messages</h2>
-          
+          <h2 className="text-3xl font-bold text-slate-800 text-center mb-12">Leadership Messages</h2>
+
           {/* Director Message */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="card bg-white border border-gray-100 shadow-lg mb-8"
+            className="bg-white rounded-xl p-8 border border-slate-100 shadow-lg mb-8"
           >
             <div className="flex flex-col md:flex-row gap-8 items-center">
               <img
                 src="/images/director.jpg"
                 alt="Director"
-                className="w-48 h-48 rounded-full object-cover flex-shrink-0"
+                className="w-48 h-48 rounded-full object-cover border-4 border-orange-200"
               />
               <div>
-                <h3 className="text-2xl font-bold text-dark-700 mb-2">Message from Director</h3>
-                <p className="text-gray-500 mb-2">Dr. Jagdish Vishnoi</p>
-                <p className="text-gray-600 leading-relaxed">
-                  "Education is not just about filling minds with information, but about igniting the spark of curiosity and the desire to learn. At Naveen Academy, we strive to create an environment where every child feels valued, challenged, and supported. Our commitment to excellence in education has made us one of the most trusted schools in the region."
+                <h3 className="text-2xl font-bold text-slate-800 mb-2">Message from Director</h3>
+                <p className="text-orange-600 font-medium mb-2">Dr. Jagdish Vishnoi</p>
+                <p className="text-slate-600 leading-relaxed">
+                  "Education is not just about filling minds with information, but about igniting the spark of
+                  curiosity and the desire to learn. At Naveen Academy, we strive to create an environment where
+                  every child feels valued, challenged, and supported. Our commitment to excellence in education
+                  has made us one of the most trusted schools in the region."
                 </p>
               </div>
             </div>
@@ -120,19 +138,22 @@ export default function AboutPage() {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="card bg-white border border-gray-100 shadow-lg"
+            className="bg-white rounded-xl p-8 border border-slate-100 shadow-lg"
           >
             <div className="flex flex-col md:flex-row gap-8 items-center">
               <img
                 src="/images/principal.jpg"
                 alt="Principal"
-                className="w-48 h-48 rounded-full object-cover flex-shrink-0"
+                className="w-48 h-48 rounded-full object-cover border-4 border-orange-200"
               />
               <div>
-                <h3 className="text-2xl font-bold text-dark-700 mb-2">Message from Principal</h3>
-                <p className="text-gray-500 mb-2">Mr. Prakash Kr Jangid</p>
-                <p className="text-gray-600 leading-relaxed">
-                  "Welcome to Naveen Academy! Our school is a vibrant community of learners where we focus on the all‑round development of each student. With experienced faculty, modern facilities, and a nurturing environment, we ensure that every child receives the best possible education. I invite you to be a part of our journey towards excellence."
+                <h3 className="text-2xl font-bold text-slate-800 mb-2">Message from Principal</h3>
+                <p className="text-orange-600 font-medium mb-2">Mr. Prakash Kr Jangid</p>
+                <p className="text-slate-600 leading-relaxed">
+                  "Welcome to Naveen Academy! Our school is a vibrant community of learners where we focus on the
+                  all‑round development of each student. With experienced faculty, modern facilities, and a
+                  nurturing environment, we ensure that every child receives the best possible education. I
+                  invite you to be a part of our journey towards excellence."
                 </p>
               </div>
             </div>
@@ -141,9 +162,9 @@ export default function AboutPage() {
       </section>
 
       {/* Infrastructure */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-slate-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-dark-700 text-center mb-12">Our Infrastructure</h2>
+          <h2 className="text-3xl font-bold text-slate-800 text-center mb-12">Our Infrastructure</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               { title: 'Smart Classrooms', desc: 'Technology‑enabled classrooms with digital boards and projectors' },
@@ -158,10 +179,12 @@ export default function AboutPage() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="card bg-white border border-gray-100 shadow-md hover:shadow-lg transition-shadow"
+                className="bg-white rounded-xl p-6 border border-slate-100 shadow-md hover:shadow-lg transition-shadow group"
               >
-                <h3 className="text-lg font-semibold text-primary-600 mb-2">{item.title}</h3>
-                <p className="text-gray-600">{item.desc}</p>
+                <h3 className="text-lg font-semibold text-orange-600 mb-2 group-hover:text-orange-700 transition-colors">
+                  {item.title}
+                </h3>
+                <p className="text-slate-600">{item.desc}</p>
               </motion.div>
             ))}
           </div>
