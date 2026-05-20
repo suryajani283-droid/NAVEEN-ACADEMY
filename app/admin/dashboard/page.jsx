@@ -22,7 +22,7 @@ export default function Dashboard() {
     { href: '/admin/parent-circulars', label: '📣 Parent Circulars', color: 'bg-indigo-50' },
     { href: '/admin/ptm', label: '📅 PTM', color: 'bg-teal-50' },
     { href: '/admin/feedback', label: '💬 Feedback', color: 'bg-pink-50' },
-    { href: '/admin/advertisements', label: '📢 Ads', color: 'bg-fuchsia-50' },
+    { href: '/admin/advertisement', label: '📢 Ads', color: 'bg-fuchsia-50' },
   ]
 
   return (
