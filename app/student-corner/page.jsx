@@ -1,34 +1,9 @@
+```javascript
 'use client'
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-
-export default function StudentCornerPage() {
-  const router = useRouter();
-  const [sessionChecked, setSessionChecked] = useState(false);
-
-  // Session protection
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push('/login');
-      } else {
-        setSessionChecked(true);
-      }
-    };
-    checkSession();
-  }, [router]);
-
-  // Block render until session is confirmed
-  if (!sessionChecked) return null;
-
-  // ... rest of your component (tabs, sections, etc.)
-}
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { createClient } from '@supabase/supabase-js'
-import { createClient } from '@supabase/supabase-js';
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+import { useRouter } from 'next/navigation'
 import {
   BookOpenIcon,
   DocumentTextIcon,
@@ -404,7 +379,7 @@ function DownloadsSection() {
   )
 }
 
-// ==================== RESULTS SECTION (DOB BASED)====================
+// ==================== RESULTS SECTION (DOB‑based + rank) ====================
 function ResultsSection() {
   const [cls, setCls] = useState('')
   const [roll, setRoll] = useState('')
@@ -523,9 +498,7 @@ function ResultsSection() {
   )
 }
 
-
 // ==================== TIMETABLE SECTION ====================
-
 function TimetableSection() {
   const [selectedClass, setSelectedClass] = useState('')
   const [timetable, setTimetable] = useState(null)
@@ -566,7 +539,6 @@ function TimetableSection() {
 
       {timetable && (
         <div className="card">
-          {/* New: show date, time, description */}
           <div className="mb-4 space-y-1">
             {timetable.description && (
               <p className="text-gray-700 font-medium">{timetable.description}</p>
@@ -580,7 +552,6 @@ function TimetableSection() {
               )}
             </div>
           </div>
-
           <img
             src={timetable.file_url}
             alt={`Class ${selectedClass} Timetable`}
@@ -605,7 +576,25 @@ function TimetableSection() {
 
 // ==================== MAIN COMPONENT ====================
 export default function StudentCornerPage() {
+  const router = useRouter()
+  const [sessionChecked, setSessionChecked] = useState(false)
   const [activeTab, setActiveTab] = useState('homework')
+
+  // Session protection – redirect to login if not authenticated
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        router.push('/login')
+      } else {
+        setSessionChecked(true)
+      }
+    }
+    checkSession()
+  }, [router])
+
+  // Block render until session is confirmed
+  if (!sessionChecked) return null
 
   return (
     <div className="pt-20">
@@ -648,14 +637,13 @@ export default function StudentCornerPage() {
       {/* Content Sections */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-
           {activeTab === 'homework' && <HomeworkSection />}
           {activeTab === 'notes' && <NotesSection />}
-          {activeTab === 'downloads' && <DownloadsSection />}
           {activeTab === 'results' && <ResultsSection />}
-          {activeTab === 'timetable' && <TimetableSection />} 
+          {activeTab === 'downloads' && <DownloadsSection />}
+          {activeTab === 'timetable' && <TimetableSection />}
         </div>
       </section>
     </div>
   )
-    }
+}
