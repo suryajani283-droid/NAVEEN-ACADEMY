@@ -48,6 +48,10 @@ export default function Dashboard() {
   <span className="text-4xl">🎓</span>
   <h3 className="font-semibold mt-2">Admissions</h3>
 </Link>
+        <Link href="/admin/timetable" className="card hover:shadow-xl transition text-center">
+  <span className="text-4xl">🕒</span>
+  <h3 className="font-semibold mt-2">Timetable</h3>
+</Link>
       </div>
     </div>
   )
