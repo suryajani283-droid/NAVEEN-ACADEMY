@@ -22,6 +22,7 @@ export default function AdminResults() {
   const [selectedClass, setSelectedClass] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
+  const [editingId, setEditingId] = useState(null)   // null = add mode, otherwise edit mode
 
   const [form, setForm] = useState({
     student_name: '',
@@ -30,7 +31,7 @@ export default function AdminResults() {
     dob: '',
     exam_type: 'Half Yearly',
     email: '',
-    subjects: [],
+    subjects: [],   // array of { name, marks }
   })
   const [newSubject, setNewSubject] = useState({ name: '', marks: '' })
 
@@ -50,6 +51,7 @@ export default function AdminResults() {
     fetchResults()
   }, [selectedClass])
 
+  // Add a subject to the form's subjects array
   const addSubject = () => {
     if (!newSubject.name || !newSubject.marks) return
     setForm({
@@ -59,14 +61,50 @@ export default function AdminResults() {
     setNewSubject({ name: '', marks: '' })
   }
 
+  // Remove a subject by index
   const removeSubject = (idx) => {
     setForm({ ...form, subjects: form.subjects.filter((_, i) => i !== idx) })
   }
 
+  // Clear form and exit edit mode
+  const resetForm = () => {
+    setForm({
+      student_name: '',
+      father_name: '',
+      roll_number: '',
+      dob: '',
+      exam_type: 'Half Yearly',
+      email: '',
+      subjects: [],
+    })
+    setEditingId(null)
+  }
+
+  // Populate form with existing result data for editing
+  const handleEdit = (result) => {
+    // Convert subjects object back to array of { name, marks }
+    const subjectsArray = result.subjects
+      ? Object.entries(result.subjects).map(([name, marks]) => ({ name, marks }))
+      : []
+
+    setForm({
+      student_name: result.student_name,
+      father_name: result.father_name || '',
+      roll_number: result.roll_number,
+      dob: result.dob || '',
+      exam_type: result.exam_type,
+      email: result.email || '',
+      subjects: subjectsArray,
+    })
+    setEditingId(result.id)
+  }
+
+  // Submit form – handles both add and update
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!selectedClass) return
 
+    // Build subjects object and calculate totals
     const subjectsObj = {}
     form.subjects.forEach(s => { subjectsObj[s.name] = s.marks })
 
@@ -88,15 +126,21 @@ export default function AdminResults() {
       grade,
     }
 
-    const res = await fetch('/api/admin/results', {
-      method: 'POST',
+    const url = editingId
+      ? `/api/admin/results/${editingId}`
+      : '/api/admin/results'
+    const method = editingId ? 'PUT' : 'POST'
+
+    const res = await fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
       credentials: 'include',
     })
+
     if (res.ok) {
-      alert('Result added successfully!')
-      setForm({ student_name: '', father_name: '', roll_number: '', dob: '', exam_type: 'Half Yearly', email: '', subjects: [] })
+      alert(editingId ? 'Result updated!' : 'Result added!')
+      resetForm()
       fetchResults()
     } else {
       const err = await res.json()
@@ -114,17 +158,28 @@ export default function AdminResults() {
     <div className="pt-20 container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold text-primary-500 mb-8">Manage Results</h2>
 
+      {/* Class Selector */}
       <div className="card mb-8">
         <label className="block text-sm font-medium text-gray-700 mb-2">Select Class</label>
-        <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)} className="px-4 py-2 border rounded">
+        <select
+          value={selectedClass}
+          onChange={(e) => {
+            setSelectedClass(e.target.value)
+            resetForm()  // class बदलने पर फ़ॉर्म साफ़ करें
+          }}
+          className="px-4 py-2 border rounded"
+        >
           <option value="">-- Choose Class --</option>
           {classes.map(c => <option key={c} value={c}>Class {c}</option>)}
         </select>
       </div>
 
+      {/* Add / Edit Form */}
       {selectedClass && (
         <form onSubmit={handleSubmit} className="card mb-8 space-y-4">
-          <h3 className="text-xl font-semibold text-primary-500">Add New Result (Class {selectedClass})</h3>
+          <h3 className="text-xl font-semibold text-primary-500">
+            {editingId ? 'Edit Result' : 'Add New Result'} (Class {selectedClass})
+          </h3>
           <div className="grid md:grid-cols-2 gap-4">
             <input type="text" placeholder="Student Name *" value={form.student_name}
               onChange={(e) => setForm({ ...form, student_name: e.target.value })}
@@ -138,7 +193,8 @@ export default function AdminResults() {
             <input type="date" placeholder="Date of Birth *" value={form.dob}
               onChange={(e) => setForm({ ...form, dob: e.target.value })}
               className="w-full px-4 py-2 border rounded" required />
-            <select value={form.exam_type} onChange={(e) => setForm({ ...form, exam_type: e.target.value })}
+            <select value={form.exam_type}
+              onChange={(e) => setForm({ ...form, exam_type: e.target.value })}
               className="w-full px-4 py-2 border rounded">
               <option>Half Yearly</option>
               <option>Yearly</option>
@@ -149,6 +205,7 @@ export default function AdminResults() {
               className="w-full px-4 py-2 border rounded" />
           </div>
 
+          {/* Subjects / Marks builder */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Subjects & Marks</label>
             <div className="flex gap-2 mb-2">
@@ -168,10 +225,20 @@ export default function AdminResults() {
             ))}
           </div>
 
-          <button type="submit" className="btn-primary">Submit Result</button>
+          <div className="flex gap-2">
+            <button type="submit" className="btn-primary">
+              {editingId ? 'Update Result' : 'Submit Result'}
+            </button>
+            {editingId && (
+              <button type="button" onClick={resetForm} className="btn-secondary">
+                Cancel Edit
+              </button>
+            )}
+          </div>
         </form>
       )}
 
+      {/* Results List */}
       {loading && <p className="text-gray-500">Loading...</p>}
       {selectedClass && !loading && (
         <div className="overflow-x-auto">
@@ -186,7 +253,7 @@ export default function AdminResults() {
                 <th className="p-3">Total</th>
                 <th className="p-3">%</th>
                 <th className="p-3">Grade</th>
-                <th className="p-3">Delete</th>
+                <th className="p-3">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -199,14 +266,20 @@ export default function AdminResults() {
                   <td className="p-3">{res.exam_type}</td>
                   <td className="p-3">{res.total}</td>
                   <td className="p-3">{res.percentage}%</td>
-                  <td className="p-3">{res.grade}</td>
-                  <td className="p-3"><button onClick={() => handleDelete(res.id)} className="text-red-600 text-sm">Delete</button></td>
+                  <td className="p-3 font-semibold">{res.grade}</td>
+                  <td className="p-3 flex gap-2">
+                    <button onClick={() => handleEdit(res)} className="text-blue-600 text-sm">Edit</button>
+                    <button onClick={() => handleDelete(res.id)} className="text-red-600 text-sm">Delete</button>
+                  </td>
                 </tr>
               ))}
+              {results.length === 0 && (
+                <tr><td colSpan="9" className="text-center py-8 text-gray-500">No results for this class.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
       )}
     </div>
   )
-    }
+        }
