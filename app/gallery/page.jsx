@@ -1,30 +1,33 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
 
 export default function GalleryPage() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [selectedImage, setSelectedImage] = useState(null)
+  const [galleryItems, setGalleryItems] = useState([])
+
+  useEffect(() => {
+    const fetchGallery = async () => {
+      const { data } = await supabase
+        .from('gallery_items')
+        .select('*')
+        .order('created_at', { ascending: false })
+      setGalleryItems(data || [])
+    }
+    fetchGallery()
+  }, [])
 
   const categories = ['All', 'Events', 'Sports', 'Labs', 'Annual Function', 'Tours', 'Classroom']
 
-  const galleryItems = [
-    { category: 'Events', title: 'Independence Day 2024', src: '/images/Independence1.jpg'},
-    { category: 'Sports', title: 'Annual Sports Meet', src: '/images/Sports.JPG' },
-    { category: 'Labs', title: 'Science Laboratory', src: '/images/Sciencelab.jpg' },
-    { category: 'Annual Function', title: 'Cultural Program', src: '/images/Holi.jpg' },
-    { category: 'Tours', title: 'Educational Tour 2024', src: '/images/Tour.jpg' },
-    { category: 'Classroom', title: 'Smart Class Session', src: '/images/event1.jpg' },
-    { category: 'Events', title: 'Republic Day Celebration', src: '/images/event1.jpg' },
-    { category: 'Sports', title: 'Cricket Tournament', src: '/images/Sports2.jpg' },
-    { category: 'Labs', title: 'Computer Lab', src: '/images/event1.jpg' },
-    { category: 'Annual Function', title: 'Prize Distribution', src: '/images/farewell2.jpg' },
-    { category: 'Tours', title: 'Industrial Visit', src: '/images/Tour.jpg' },
-    { category: 'Classroom', title: 'Project Presentation', src: '/images/event1.jpg' },
-  ]
-
-  const filteredItems = activeCategory === 'All' 
-    ? galleryItems 
+  const filteredItems = activeCategory === 'All'
+    ? galleryItems
     : galleryItems.filter(item => item.category === activeCategory)
 
   return (
@@ -47,9 +50,9 @@ export default function GalleryPage() {
       <section className="py-8 bg-gray-50 sticky top-20 z-30">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <button
-                key={index}
+                key={category}
                 onClick={() => setActiveCategory(category)}
                 className={`px-6 py-2 rounded-full font-medium transition-all ${
                   activeCategory === category
@@ -68,19 +71,20 @@ export default function GalleryPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {filteredItems.map((item, index) => (
+            {filteredItems.map((item) => (
               <motion.div
-                key={index}
+                key={item.id}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
+                transition={{ duration: 0.3 }}
                 className="relative group cursor-pointer overflow-hidden rounded-xl"
                 onClick={() => setSelectedImage(item)}
               >
-  <img 
-  src={item.src} 
-  alt={item.title} 
-  className="h-48 md:h-64 w-full object-cover group-hover:scale-110 transition-transform duration-300"/>
+                <img 
+                  src={item.image_url} 
+                  alt={item.title} 
+                  className="h-48 md:h-64 w-full object-cover group-hover:scale-110 transition-transform duration-300"
+                />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <p className="text-white font-semibold">{item.title}</p>
                   <p className="text-white/80 text-sm">{item.category}</p>
@@ -88,41 +92,44 @@ export default function GalleryPage() {
               </motion.div>
             ))}
           </div>
+          {filteredItems.length === 0 && (
+            <p className="text-center text-gray-500 py-12">No images in this category yet.</p>
+          )}
         </div>
       </section>
 
       {/* Video Section */}
-<section className="py-16 bg-gray-50">
-  <div className="container mx-auto px-4">
-    <h2 className="text-3xl font-bold text-primary-500 text-center mb-12">School Videos</h2>
-    <div className="grid md:grid-cols-3 gap-6">
-      {[
-        { id: '9wAoUqjqcZk', title: 'Farewell 2026' },
-        { id: 'uioQ3uMOm4o', title: 'Admission Open - Science Stream' },
-        { id: 'aY-CA8dw62A', title: 'Sports Week 2026' },
-      ].map((video, index) => (
-        <motion.div
-          key={video.id}
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: index * 0.2 }}
-          className="card overflow-hidden"
-        >
-           <div className="relative w-full" style={{ aspectRatio: '9/16', maxHeight: '80vh' }}>
-            <iframe
-              className="absolute top-0 left-0 w-full h-full rounded-lg"
-              src={`https://www.youtube.com/embed/${video.id}`}
-              title={video.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-primary-500 text-center mb-12">School Videos</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { id: '9wAoUqjqcZk', title: 'Farewell 2026' },
+              { id: 'uioQ3uMOm4o', title: 'Admission Open - Science Stream' },
+              { id: 'aY-CA8dw62A', title: 'Sports Week 2026' },
+            ].map((video, index) => (
+              <motion.div
+                key={video.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.2 }}
+                className="card overflow-hidden"
+              >
+                <div className="relative w-full" style={{ aspectRatio: '9/16', maxHeight: '80vh' }}>
+                  <iframe
+                    className="absolute top-0 left-0 w-full h-full rounded-lg"
+                    src={`https://www.youtube.com/embed/${video.id}`}
+                    title={video.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+                <h3 className="font-semibold mt-4 mb-2 text-center">{video.title}</h3>
+              </motion.div>
+            ))}
           </div>
-          <h3 className="font-semibold mt-4 mb-2 text-center">{video.title}</h3>
-        </motion.div>
-      ))}
-    </div>
-  </div>
-</section>
+        </div>
+      </section>
 
       {/* Lightbox Modal */}
       {selectedImage && (
@@ -132,9 +139,10 @@ export default function GalleryPage() {
         >
           <div className="max-w-4xl max-h-[90vh] bg-white rounded-2xl overflow-hidden">
             <img 
-  src={selectedImage.src} 
-  alt={selectedImage.title} 
-  className="max-w-full max-h-[70vh] object-contain"/>
+              src={selectedImage.image_url} 
+              alt={selectedImage.title} 
+              className="max-w-full max-h-[70vh] object-contain"
+            />
             <div className="p-6">
               <h3 className="text-xl font-semibold">{selectedImage.title}</h3>
               <p className="text-gray-500">{selectedImage.category}</p>
@@ -150,4 +158,4 @@ export default function GalleryPage() {
       )}
     </div>
   )
-}
+              }
