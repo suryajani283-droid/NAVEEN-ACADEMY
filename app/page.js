@@ -1,61 +1,94 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import Image from 'next/image'
-import { 
-  AcademicCapIcon, 
-  MapPinIcon, 
-  PhoneIcon, 
-  ClockIcon,
-  BeakerIcon,
-  ComputerDesktopIcon,
+import { createClient } from '@supabase/supabase-js'
+import {
+  AcademicCapIcon,
+  MapPinIcon,
   BookOpenIcon,
   UserGroupIcon,
   ShieldCheckIcon,
+  ComputerDesktopIcon,
+  BeakerIcon,
   TrophyIcon,
-  HeartIcon
 } from '@heroicons/react/24/outline'
 import ResultsMarquee from '../components/ResultsMarquee'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
+
+// Icon mapping for "Why Choose Us" (because JSON can't store components)
+const iconMap = {
+  AcademicCapIcon: AcademicCapIcon,
+  ComputerDesktopIcon: ComputerDesktopIcon,
+  BeakerIcon: BeakerIcon,
+  TrophyIcon: TrophyIcon,
+  BookOpenIcon: BookOpenIcon,
+  ShieldCheckIcon: ShieldCheckIcon,
+}
+
 export default function Home() {
+  const [content, setContent] = useState({})
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      const { data } = await supabase.from('homepage_content').select('*')
+      if (data) {
+        const map = {}
+        data.forEach(item => { map[item.section] = item.content })
+        setContent(map)
+      }
+    }
+    fetchContent()
+  }, [])
+
+  // Default fallback while loading
+  const hero = content.hero || { title: 'Naveen Academy', tagline: 'Senior Secondary School', subtitle: 'Building Future Leaders with Quality Education', admission_text: 'Admission Open 2026-27', phone_number: '+918766003200', background_image: '/images/school-building.jpg' }
+  const quickInfo = content.quick_info || { affiliation: 'RBSE Affiliated', affiliation_no: 'Aff. No: 1730XXX', classes: 'Nursery to XII', medium: 'English & Hindi', location: 'Chohtan, Barmer', transport: 'Available' }
+  const about = content.about || { text: 'Loading...', image: '/images/school-building.jpg' }
+  const whyChooseUs = content.why_choose_us || []
+  const facilities = content.facilities || []
+  const academicPrograms = content.academic_programs || []
+  const achievements = content.achievements || []
+  const testimonials = content.testimonials || []
+  const admissionCta = content.admission_cta || { title: 'Admissions Open for 2026-27', subtitle: 'Give your child the best education at Naveen Academy', apply_text: 'Apply Now', contact_text: 'Contact Us' }
+
   return (
     <div>
       {/* Hero Section */}
-    <section 
-  className="relative h-screen flex items-center bg-cover bg-center bg-no-repeat"
-  style={{ backgroundImage: "url('/images/school-building.jpg')" }}
->
+      <section
+        className="relative h-screen flex items-center bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url('${hero.background_image}')` }}
+      >
         <div className="absolute inset-0 bg-black/40"></div>
-  <div className="absolute top-20 left-0 right-0 z-20">
-  <ResultsMarquee />
-</div>
+        <div className="absolute top-20 left-0 right-0 z-20">
+          <ResultsMarquee />
+        </div>
         <div className="container mx-auto px-4 relative z-10">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="text-center text-white"
           >
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              Naveen Academy
-            </h1>
-            <p className="text-2xl md:text-3xl mb-4">
-              Senior Secondary School
-            </p>
-            <p className="text-xl mb-8">
-              Building Future Leaders with Quality Education
-            </p>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6">{hero.title}</h1>
+            <p className="text-2xl md:text-3xl mb-4">{hero.tagline}</p>
+            <p className="text-xl mb-8">{hero.subtitle}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/admission" className="btn-secondary text-lg px-8 py-4">
-                Admission Open 2026-27
+                {hero.admission_text}
               </Link>
-              <a href="tel:+918766003200" className="bg-white text-primary-500 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all text-lg">
+              <a href={`tel:${hero.phone_number}`} className="bg-white text-primary-500 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all text-lg">
                 Call Now
               </a>
             </div>
           </motion.div>
         </div>
         <div className="absolute bottom-10 left-0 right-0">
-          <motion.div 
+          <motion.div
             animate={{ y: [0, 10, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
             className="flex justify-center"
@@ -75,28 +108,28 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 py-6">
             <div className="text-center">
               <AcademicCapIcon className="h-8 w-8 mx-auto text-primary-500 mb-2" />
-              <p className="font-semibold">RBSE Affiliated</p>
-              <p className="text-sm text-gray-600">Aff. No: 1730XXX</p>
+              <p className="font-semibold">{quickInfo.affiliation}</p>
+              <p className="text-sm text-gray-600">{quickInfo.affiliation_no}</p>
             </div>
             <div className="text-center">
               <BookOpenIcon className="h-8 w-8 mx-auto text-primary-500 mb-2" />
               <p className="font-semibold">Classes</p>
-              <p className="text-sm text-gray-600">Nursery to XII</p>
+              <p className="text-sm text-gray-600">{quickInfo.classes}</p>
             </div>
             <div className="text-center">
               <UserGroupIcon className="h-8 w-8 mx-auto text-primary-500 mb-2" />
               <p className="font-semibold">Medium</p>
-              <p className="text-sm text-gray-600">English & Hindi</p>
+              <p className="text-sm text-gray-600">{quickInfo.medium}</p>
             </div>
             <div className="text-center">
               <MapPinIcon className="h-8 w-8 mx-auto text-primary-500 mb-2" />
               <p className="font-semibold">Location</p>
-              <p className="text-sm text-gray-600">Chohtan, Barmer</p>
+              <p className="text-sm text-gray-600">{quickInfo.location}</p>
             </div>
             <div className="text-center">
               <ShieldCheckIcon className="h-8 w-8 mx-auto text-primary-500 mb-2" />
               <p className="font-semibold">Transport</p>
-              <p className="text-sm text-gray-600">Available</p>
+              <p className="text-sm text-gray-600">{quickInfo.transport}</p>
             </div>
           </div>
         </div>
@@ -112,32 +145,19 @@ export default function Home() {
               transition={{ duration: 0.6 }}
             >
               <h2 className="section-title text-left">About Our School</h2>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Naveen Academy Senior Secondary School, established with a vision to provide quality education 
-                in the Chohtan region of Barmer district, has been a beacon of learning and excellence. 
-                Our school is affiliated with CBSE and offers education from Nursery to Class XII with 
-                Science, Arts, and Commerce streams.
-              </p>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                We believe in holistic development of students through academic excellence, sports, 
-                cultural activities, and value-based education. Our state-of-the-art infrastructure, 
-                experienced faculty, and modern teaching methodologies ensure that every student reaches 
-                their full potential.
-              </p>
+              <p className="text-gray-600 mb-6 leading-relaxed">{about.text}</p>
               <Link href="/about" className="btn-primary inline-block">
                 Read More About Us
               </Link>
             </motion.div>
             <motion.div
-  initial={{ opacity: 0, x: 50 }}
-  whileInView={{ opacity: 1, x: 0 }}
-  transition={{ duration: 0.6 }}
-  className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
-  <img 
-    src="/images/school-building.jpg" 
-    alt="Naveen Academy Building" 
-    className="w-full h-full object-cover"/>
-</motion.div>
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="relative h-96 rounded-2xl overflow-hidden shadow-2xl"
+            >
+              <img src={about.image} alt="Naveen Academy Building" className="w-full h-full object-cover" />
+            </motion.div>
           </div>
         </div>
       </section>
@@ -147,50 +167,22 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <h2 className="section-title">Why Choose Naveen Academy?</h2>
           <div className="grid md:grid-cols-3 gap-8 mt-12">
-            {[
-              {
-                icon: AcademicCapIcon,
-                title: 'Experienced Faculty',
-                description: 'Highly qualified teachers with years of experience in their respective subjects'
-              },
-              {
-                icon: ComputerDesktopIcon,
-                title: 'Smart Classes',
-                description: 'Modern digital classrooms with interactive learning technology'
-              },
-              {
-                icon: BeakerIcon,
-                title: 'Science Labs',
-                description: 'Well-equipped Physics, Chemistry, and Biology laboratories'
-              },
-              {
-                icon: TrophyIcon,
-                title: 'Sports Facilities',
-                description: 'Excellent sports infrastructure for overall physical development'
-              },
-              {
-                icon: BookOpenIcon,
-                title: 'Competitive Preparation',
-                description: 'Special coaching for JEE, NEET, and other competitive exams'
-              },
-              {
-                icon: ShieldCheckIcon,
-                title: 'Discipline',
-                description: 'Focus on character building and discipline along with academics'
-              }
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="card text-center"
-              >
-                <item.icon className="h-12 w-12 mx-auto text-primary-500 mb-4" />
-                <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
-              </motion.div>
-            ))}
+            {whyChooseUs.map((item, index) => {
+              const IconComponent = iconMap[item.icon] || null
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="card text-center"
+                >
+                  {IconComponent && <IconComponent className="h-12 w-12 mx-auto text-primary-500 mb-4" />}
+                  <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+                  <p className="text-gray-600">{item.description}</p>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -200,16 +192,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <h2 className="section-title">Our Facilities</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
-            {[
-              { name: 'Biology Lab', icon: '🧬' },
-              { name: 'Physics Lab', icon: '⚡' },
-              { name: 'Chemistry Lab', icon: '🧪' },
-              { name: 'Library', icon: '📚' },
-              { name: 'Computer Lab', icon: '💻' },
-              { name: 'Playground', icon: '⚽' },
-              { name: 'CCTV Security', icon: '📹' },
-              { name: 'Smart Classes', icon: '🖥️' }
-            ].map((facility, index) => (
+            {facilities.map((item, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -217,8 +200,8 @@ export default function Home() {
                 transition={{ duration: 0.3, delay: index * 0.1 }}
                 className="card text-center hover:bg-primary-50 cursor-pointer"
               >
-                <span className="text-4xl mb-3 block">{facility.icon}</span>
-                <h3 className="font-semibold">{facility.name}</h3>
+                <span className="text-4xl mb-3 block">{item.icon}</span>
+                <h3 className="font-semibold">{item.name}</h3>
               </motion.div>
             ))}
           </div>
@@ -230,12 +213,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <h2 className="section-title">Academic Programs</h2>
           <div className="grid md:grid-cols-4 gap-6 mt-12">
-            {[
-              { level: 'Primary', classes: 'I to V', description: 'Strong foundation in basic subjects with activity-based learning' },
-              { level: 'Middle', classes: 'VI to VIII', description: 'Comprehensive curriculum with focus on conceptual understanding' },
-              { level: 'Secondary', classes: 'IX to X', description: 'CBSE curriculum with preparation for board examinations' },
-              { level: 'Senior Secondary', classes: 'XI to XII', description: 'Science, Arts & Commerce streams with competitive exam preparation' }
-            ].map((program, index) => (
+            {academicPrograms.map((program, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: -20 }}
@@ -257,12 +235,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Our Achievements</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { number: '95%', label: 'Board Results' },
-              { number: '50+', label: 'Awards Won' },
-              { number: '1000+', label: 'Students' },
-              { number: '50+', label: 'Expert Faculty' }
-            ].map((achievement, index) => (
+            {achievements.map((item, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -270,8 +243,8 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className="text-4xl md:text-5xl font-bold mb-2">{achievement.number}</div>
-                <div className="text-lg">{achievement.label}</div>
+                <div className="text-4xl md:text-5xl font-bold mb-2">{item.number}</div>
+                <div className="text-lg">{item.label}</div>
               </motion.div>
             ))}
           </div>
@@ -283,27 +256,24 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <h2 className="section-title">What Parents Say</h2>
           <div className="grid md:grid-cols-3 gap-8 mt-12">
-            {[1, 2, 3].map((item) => (
+            {testimonials.map((item, index) => (
               <motion.div
-                key={item}
+                key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: item * 0.2 }}
+                transition={{ duration: 0.5, delay: index * 0.2 }}
                 className="card"
               >
                 <div className="flex items-center mb-4">
                   <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-primary-500 font-bold">P{item}</span>
+                    <span className="text-primary-500 font-bold">{item.name.charAt(0)}</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold">Parent Name</h4>
-                    <p className="text-sm text-gray-500">Parent of Class {item + 7}</p>
+                    <h4 className="font-semibold">{item.name}</h4>
+                    <p className="text-sm text-gray-500">{item.class}</p>
                   </div>
                 </div>
-                <p className="text-gray-600">
-                  "Naveen Academy has provided excellent education to my child. The teachers are very supportive 
-                  and the infrastructure is great. I'm very satisfied with my child's progress."
-                </p>
+                <p className="text-gray-600">"{item.text}"</p>
               </motion.div>
             ))}
           </div>
@@ -319,17 +289,15 @@ export default function Home() {
             transition={{ duration: 0.5 }}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Admissions Open for 2026-27
+              {admissionCta.title}
             </h2>
-            <p className="text-xl text-white mb-8">
-              Give your child the best education at Naveen Academy
-            </p>
+            <p className="text-xl text-white mb-8">{admissionCta.subtitle}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/admission" className="bg-white text-secondary-500 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-all text-lg">
-                Apply Now
+                {admissionCta.apply_text}
               </Link>
               <Link href="/contact" className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white/10 transition-all text-lg">
-                Contact Us
+                {admissionCta.contact_text}
               </Link>
             </div>
           </motion.div>
@@ -337,4 +305,4 @@ export default function Home() {
       </section>
     </div>
   )
-              }
+        }
