@@ -1,4 +1,4 @@
-```javascript
+
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
