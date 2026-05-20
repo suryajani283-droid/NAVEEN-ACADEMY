@@ -1,9 +1,13 @@
+import { NextResponse } from 'next/server';
+import { supabaseAdmin } from '../../../../lib/supabase';
+import { verifyAdminToken } from '../../../../lib/auth';
+
 export async function POST(request) {
   try {
     await verifyAdminToken(request);
     const body = await request.json();
 
-    const { data: result, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('results')
       .insert({
         student_name: body.student_name,
@@ -21,7 +25,7 @@ export async function POST(request) {
       .single();
 
     if (error) throw error;
-    return NextResponse.json({ result }, { status: 201 });
+    return NextResponse.json(data, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
