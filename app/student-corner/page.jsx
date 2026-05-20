@@ -1,4 +1,29 @@
 'use client'
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+
+export default function StudentCornerPage() {
+  const router = useRouter();
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  // Session protection
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/login');
+      } else {
+        setSessionChecked(true);
+      }
+    };
+    checkSession();
+  }, [router]);
+
+  // Block render until session is confirmed
+  if (!sessionChecked) return null;
+
+  // ... rest of your component (tabs, sections, etc.)
+}
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { createClient } from '@supabase/supabase-js'
