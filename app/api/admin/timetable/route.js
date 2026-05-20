@@ -21,11 +21,15 @@ export async function POST(request) {
     await verifyAdminToken(request);
     const body = await request.json();
 
-    // Upsert: अगर उस क्लास का टाइमटेबल पहले से है तो update करें
+    // Upsert: if a timetable for this class already exists, update it; otherwise insert
     const { data, error } = await supabaseAdmin
       .from('timetables')
-      .upsert(body, { onConflict: 'class' })
+      .upsert(
+        { class: body.class, file_url: body.file_url },
+        { onConflict: 'class' }
+      )
       .single();
+
     if (error) throw error;
     return NextResponse.json(data, { status: 201 });
   } catch (err) {
