@@ -427,12 +427,100 @@ export default function StudentCornerPage() {
           {activeTab === 'notes' && <NotesSection />}
           {activeTab === 'downloads' && <DownloadsSection />}
 
-          {activeTab === 'results' && (
-            <div className="text-center py-12">
-              <AcademicCapIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">Results will be available after exams.</p>
-            </div>
-          )}
+          {activeTab === 'results' && <ResultsSection />}
+            function ResultsSection() {
+  const [pin, setPin] = useState('')
+  const [serial, setSerial] = useState('')
+  const [roll, setRoll] = useState('')
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
+
+  const handleCheck = async (e) => {
+    e.preventDefault()
+    setError('')
+    setResult(null)
+
+    const res = await fetch('/api/results/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin, serial, roll }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setResult(data.result)
+    } else {
+      setError(data.error || 'Something went wrong')
+    }
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto space-y-6">
+      <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
+        <AcademicCapIcon className="h-8 w-8 mr-2" />
+        View Result (PIN)
+      </h2>
+
+      <form onSubmit={handleCheck} className="card space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">PIN Code *</label>
+          <input type="text" required value={pin} onChange={(e) => setPin(e.target.value)}
+            className="w-full px-4 py-2 border rounded" placeholder="Enter PIN" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Serial Number *</label>
+          <input type="text" required value={serial} onChange={(e) => setSerial(e.target.value)}
+            className="w-full px-4 py-2 border rounded" placeholder="Enter serial number" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Roll Number *</label>
+          <input type="text" required value={roll} onChange={(e) => setRoll(e.target.value)}
+            className="w-full px-4 py-2 border rounded" placeholder="Enter roll number" />
+        </div>
+        <button type="submit" className="btn-primary w-full">Check Result</button>
+      </form>
+
+      {error && <p className="text-red-500 text-center">{error}</p>}
+
+      {result && (
+        <div className="card bg-gray-50">
+          <h3 className="text-xl font-bold text-center mb-2">{result.student_name}</h3>
+          <p className="text-center text-gray-600 mb-4">Father: {result.father_name} | Class {result.class} | Roll: {result.roll_number}</p>
+          <p className="text-center text-sm text-gray-500 mb-4">Exam: {result.exam_type}</p>
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left py-2">Subject</th>
+                <th className="text-right py-2">Marks</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.subjects && Object.entries(result.subjects).map(([sub, marks]) => (
+                <tr key={sub} className="border-b">
+                  <td className="py-2">{sub}</td>
+                  <td className="text-right">{marks}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="font-bold border-t">
+                <td className="py-2">Total</td>
+                <td className="text-right">{result.total}</td>
+              </tr>
+              <tr className="font-bold text-primary-500">
+                <td className="py-2">Percentage</td>
+                <td className="text-right">{result.percentage}%</td>
+              </tr>
+              <tr>
+                <td className="py-2 font-semibold">Grade</td>
+                <td className="text-right font-semibold">{result.grade}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      )}
+    </motion.div>
+  )
+            }
 
           {activeTab === 'timetable' && (
             <div className="text-center py-12">
