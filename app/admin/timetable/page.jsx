@@ -35,8 +35,9 @@ export default function AdminTimetable() {
       setForm({ class: '', file_url: '' })
       fetchTimetables()
     } else {
-      alert('Error saving timetable')
-    }
+  const errData = await res.json().catch(() => ({ error: 'Unknown error' }));
+  alert('Error saving timetable: ' + (errData.error || res.statusText));
+  }
   }
 
   const handleDelete = async (id) => {
