@@ -1,74 +1,50 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
 
 export default function FacultyPage() {
-  const faculty = [
-    {
-      name: 'Mr. Suresh Choudhary',
-      qualification: 'M.Sc., B.Ed.',
-      subject: 'Physics',
-      experience: '4 Years',
-      department: 'Science'
-    },
-    {
-      name: 'Mrs. Jagdish kumar ujjwal',
-      qualification: 'M.A., B.Ed.',
-      subject: 'English',
-      experience: '10 Years',
-      department: 'Languages'
-    },
-    {
-      name: 'Mr. Suresh Kumar Jyani',
-      qualification: 'M.Sc., B.Ed.',
-      subject: 'Mathematics',
-      experience: '4 Years',
-      department: 'Mathematics'
-    },
-    {
-      name: 'Praveen Choudhary',
-      qualification: 'M.A., B.Ed.',
-      subject: 'Hindi',
-      experience: '4 Years',
-      department: 'Languages'
-    },
-    {
-      name: 'Mr. Himanshu soni',
-      qualification: 'M.Sc., B.Ed.',
-      subject: 'Chemistry',
-      experience: '7 Years',
-      department: 'Science'
-    },
-    {
-      name: 'Mr. Babu lal vishnoi',
-      qualification: 'M.Com., B.Ed.',
-      subject: 'Geography',
-      experience: '15 Years',
-      department: 'Arts'
-    },
-    {
-      name: 'Mr. Pradeep kumar',
-      qualification: 'M.A., B.P.Ed.',
-      subject: 'Physical Education',
-      experience: '5 Years',
-      department: 'Sports'
-    },
-    {
-      name: 'Mrs. Dev sharma',
-      qualification: 'MCA, B.Ed.',
-      subject: 'Computer Science',
-      experience: '10 Years',
-      department: 'Computer'
-    }
-  ]
+  const [faculty, setFaculty] = useState([])
+  const [activeDept, setActiveDept] = useState('All')
 
-  const departments = ['All', 'Science', 'Mathematics', 'Languages', 'Arts', 'Sports', 'Computer']
+  useEffect(() => {
+    const fetchFaculty = async () => {
+      const { data } = await supabase
+        .from('faculty')
+        .select('*')
+        .order('created_at', { ascending: false })
+      setFaculty(data || [])
+    }
+    fetchFaculty()
+  }, [])
+
+  // Stats calculation
+  const totalTeachers = faculty.length
+  const postGradCount = faculty.filter(f => f.qualification?.toLowerCase().includes('m.')).length
+  const postGradPercent = totalTeachers ? Math.round((postGradCount / totalTeachers) * 100) : 0
+  const avgExperience = totalTeachers
+    ? Math.round(faculty.reduce((sum, f) => sum + (f.experience || 0), 0) / totalTeachers)
+    : 0
+  const teacherStudentRatio = '1:25' // you can adjust or make dynamic if student count is available
+
+  // Unique departments from data
+  const departments = ['All', ...new Set(faculty.map(f => f.department).filter(Boolean))]
+
+  const filteredFaculty = activeDept === 'All'
+    ? faculty
+    : faculty.filter(f => f.department === activeDept)
 
   return (
     <div className="pt-20">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary-500 to-primary-700 text-white py-20">
         <div className="container mx-auto px-4 text-center">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-5xl font-bold mb-4"
@@ -84,10 +60,10 @@ export default function FacultyPage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
-              { number: '50+', label: 'Total Teachers' },
-              { number: '80%', label: 'Post Graduate' },
-              { number: '15+', label: 'Avg Experience (Years)' },
-              { number: '1:25', label: 'Teacher-Student Ratio' }
+              { number: `${totalTeachers}+`, label: 'Total Teachers' },
+              { number: `${postGradPercent}%`, label: 'Post Graduate' },
+              { number: `${avgExperience}+`, label: 'Avg Experience (Years)' },
+              { number: teacherStudentRatio, label: 'Teacher-Student Ratio' },
             ].map((stat, index) => (
               <motion.div
                 key={index}
@@ -107,13 +83,18 @@ export default function FacultyPage() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-primary-500 text-center mb-12">Meet Our Teachers</h2>
-          
+
           {/* Department Filter */}
           <div className="flex flex-wrap justify-center gap-3 mb-12">
-            {departments.map((dept, index) => (
+            {departments.map((dept) => (
               <button
-                key={index}
-                className="px-6 py-2 rounded-full border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white transition-all font-medium"
+                key={dept}
+                onClick={() => setActiveDept(dept)}
+                className={`px-6 py-2 rounded-full border-2 transition-all font-medium ${
+                  activeDept === dept
+                    ? 'bg-primary-500 text-white border-primary-500'
+                    : 'border-primary-500 text-primary-500 hover:bg-primary-50'
+                }`}
               >
                 {dept}
               </button>
@@ -122,22 +103,28 @@ export default function FacultyPage() {
 
           {/* Teachers Grid */}
           <div className="grid md:grid-cols-4 gap-6">
-            {faculty.map((teacher, index) => (
+            {filteredFaculty.map((teacher) => (
               <motion.div
-                key={index}
+                key={teacher.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
+                transition={{ duration: 0.4 }}
                 className="card text-center group hover:shadow-2xl transition-all"
               >
-                <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                  <span className="text-4xl">👨‍🏫</span>
+                <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden flex items-center justify-center group-hover:bg-primary-100 transition-colors">
+                  <img
+                    src={teacher.image_url || '/images/placeholder.jpg'}
+                    alt={teacher.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
+                  />
+                  <span className="text-4xl" style={{ display: teacher.image_url ? 'none' : 'block' }}>👨‍🏫</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-1">{teacher.name}</h3>
                 <p className="text-primary-500 font-medium text-sm mb-1">{teacher.subject}</p>
                 <p className="text-gray-500 text-sm mb-2">{teacher.qualification}</p>
                 <div className="inline-block bg-primary-50 text-primary-500 px-3 py-1 rounded-full text-xs font-medium">
-                  {teacher.experience} Experience
+                  {teacher.experience} Years Experience
                 </div>
               </motion.div>
             ))}
@@ -157,4 +144,4 @@ export default function FacultyPage() {
       </section>
     </div>
   )
-      }
+}
