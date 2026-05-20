@@ -379,9 +379,9 @@ function DownloadsSection() {
 
 // ==================== RESULTS SECTION (PIN‑based) ====================
 function ResultsSection() {
-  const [pin, setPin] = useState('')
-  const [serial, setSerial] = useState('')
+  const [cls, setCls] = useState('')
   const [roll, setRoll] = useState('')
+  const [dob, setDob] = useState('')
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
 
@@ -393,7 +393,7 @@ function ResultsSection() {
     const res = await fetch('/api/results/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin, serial, roll }),
+      body: JSON.stringify({ class: cls, roll, dob }),
     })
     const data = await res.json()
     if (res.ok) {
@@ -407,26 +407,30 @@ function ResultsSection() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto space-y-6">
       <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
         <AcademicCapIcon className="h-8 w-8 mr-2" />
-        View Result (PIN)
+        Check Your Result
       </h2>
 
       <form onSubmit={handleCheck} className="card space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">PIN Code *</label>
-          <input type="text" required value={pin} onChange={(e) => setPin(e.target.value)}
-            className="w-full px-4 py-2 border rounded" placeholder="Enter PIN" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Serial Number *</label>
-          <input type="text" required value={serial} onChange={(e) => setSerial(e.target.value)}
-            className="w-full px-4 py-2 border rounded" placeholder="Enter serial number" />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Class *</label>
+          <select value={cls} onChange={(e) => setCls(e.target.value)} className="w-full px-4 py-2 border rounded" required>
+            <option value="">-- Choose Class --</option>
+            {[1,2,3,4,5,6,7,8,9,10,11,12].map(c => (
+              <option key={c} value={c}>Class {c}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Roll Number *</label>
           <input type="text" required value={roll} onChange={(e) => setRoll(e.target.value)}
             className="w-full px-4 py-2 border rounded" placeholder="Enter roll number" />
         </div>
-        <button type="submit" className="btn-primary w-full">Check Result</button>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
+          <input type="date" required value={dob} onChange={(e) => setDob(e.target.value)}
+            className="w-full px-4 py-2 border rounded" />
+        </div>
+        <button type="submit" className="btn-primary w-full">View Result</button>
       </form>
 
       {error && <p className="text-red-500 text-center">{error}</p>}
@@ -434,7 +438,9 @@ function ResultsSection() {
       {result && (
         <div className="card bg-gray-50">
           <h3 className="text-xl font-bold text-center mb-2">{result.student_name}</h3>
-          <p className="text-center text-gray-600 mb-4">Father: {result.father_name} | Class {result.class} | Roll: {result.roll_number}</p>
+          <p className="text-center text-gray-600 mb-4">
+            Father: {result.father_name} | Class {result.class} | Roll: {result.roll_number}
+          </p>
           <p className="text-center text-sm text-gray-500 mb-4">Exam: {result.exam_type}</p>
           <table className="w-full">
             <thead>
