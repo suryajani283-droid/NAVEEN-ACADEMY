@@ -13,6 +13,8 @@ const navigation = [
   { name: 'Admission', href: '/admission' },
   { name: 'Notices', href: '/notices' },
   { name: 'Contact', href: '/contact' },
+  {name: 'student corner',href:'/student corner'},
+  {name: 'parent corner',href:'/parent corner'},
 ]
 
 export default function Navbar() {
