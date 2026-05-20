@@ -2,6 +2,7 @@ import './globals.css'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import WhatsAppButton from '../components/WhatsAppButton'
+import AdBanner from '../components/AdBanner'
 
 export const metadata = {
   title: 'Naveen Academy Senior Secondary School | Best School in Chohtan, Barmer',
@@ -17,10 +18,14 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body style={{ fontFamily: "'Poppins', 'Hind', sans-serif" }}>
+      <body
+        className="flex flex-col min-h-screen"
+        style={{ fontFamily: "'Poppins', 'Hind', sans-serif" }}
+      >
         <Navbar />
-        <main className="min-h-screen">
-          {children}
+        <main className="flex-1 flex flex-col">
+          <div className="flex-1">{children}</div>
+          <AdBanner />
         </main>
         <Footer />
         <WhatsAppButton />
