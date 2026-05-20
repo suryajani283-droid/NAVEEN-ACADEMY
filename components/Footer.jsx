@@ -43,19 +43,23 @@ export default function Footer() {
                 'Results',
                 'Fee Structure',
                 'Transport'
-              ].map((item) => (
-                <li key={item}>
-                  <Link 
-                    href={`/${item.toLowerCase().replace(' ', '-')}`}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    {item}
-                  </Link>
-                  <Link href="/student-corner?tab=results" className="text-gray-400 hover:text-white transition-colors">
-  Results
-</Link>
-                </li>
-              ))}
+              ].map((item) => {
+                // Special link for Results – points directly to the results tab in Student Corner
+                const href = item === 'Results'
+                  ? '/student-corner?tab=results'
+                  : `/${item.toLowerCase().replace(' ', '-')}`
+
+                return (
+                  <li key={item}>
+                    <Link 
+                      href={href}
+                      className="text-gray-400 hover:text-white transition-colors"
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           </div>
 
