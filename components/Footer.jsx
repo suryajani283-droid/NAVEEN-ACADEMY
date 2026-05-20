@@ -12,7 +12,7 @@ export default function Footer() {
             <p className="text-gray-400 mb-4">
               Senior Secondary School providing quality education in Chohtan, Barmer, Rajasthan.
             </p>
-            <p className="text-gray-400">CBSE Affiliation No: 1730XXX</p>
+            <p className="text-gray-400">RBSE Affiliation No: 1730XXX</p>
           </div>
 
           {/* Quick Links */}
