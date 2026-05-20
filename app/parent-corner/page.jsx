@@ -373,25 +373,37 @@ function FeeInfoSection() {
 
 // ---------- Main ParentCornerPage (with session protection) ----------
 export default function ParentCornerPage() {
-  const router = useRouter()
-  const [sessionChecked, setSessionChecked] = useState(false)
-  const [activeTab, setActiveTab] = useState('circulars')
+  const router = useRouter();
+const [checking, setChecking] = useState(true);
 
-  // Session protection – redirect to login if not authenticated
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        router.push('/login')
-      } else {
-        setSessionChecked(true)
-      }
+useEffect(() => {
+  const checkSession = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      // Redirect to login with the current page as the return destination
+      const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+      router.push(`/login?redirect=${returnUrl}`);
+    } else {
+      setChecking(false);
     }
-    checkSession()
-  }, [router])
+  };
+  checkSession();
+}, [router]);
 
-  // Block render until session is confirmed
-  if (!sessionChecked) return null
+// Show a stylish loading screen while checking
+if (checking) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="text-center">
+        <svg className="animate-spin h-10 w-10 text-orange-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+        <p className="mt-4 text-slate-500">Checking authentication...</p>
+      </div>
+    </div>
+  );
+}
 
   const tabs = [
     { id: 'circulars', name: 'Circulars', icon: BellAlertIcon },
