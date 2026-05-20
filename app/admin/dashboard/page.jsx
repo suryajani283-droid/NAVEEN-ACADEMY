@@ -17,6 +17,7 @@ export default function Dashboard() {
     { href: '/admin/results', label: '🏆 Results', color: 'bg-yellow-50' },
     { href: '/admin/timetable', label: '🕒 Timetable', color: 'bg-cyan-50' },
     { href: '/admin/gallery', label: '🖼️ Gallery', color: 'bg-purple-50' },
+    { href: '/admin/faculty', label: 'Faculty', icon: UserGroupIcon, color: 'bg-lime-50 text-lime-600' },
     { href: '/admin/parent-circulars', label: '📣 Parent Circulars', color: 'bg-indigo-50' },
     { href: '/admin/ptm', label: '📅 PTM', color: 'bg-teal-50' },
     { href: '/admin/feedback', label: '💬 Feedback', color: 'bg-pink-50' },
