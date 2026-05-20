@@ -377,7 +377,7 @@ function DownloadsSection() {
   )
 }
 
-// ==================== RESULTS SECTION (PIN‑based) ====================
+// ==================== RESULTS SECTION (DOB BASED)====================
 function ResultsSection() {
   const [cls, setCls] = useState('')
   const [roll, setRoll] = useState('')
@@ -446,21 +446,25 @@ function ResultsSection() {
             <thead>
               <tr className="border-b">
                 <th className="text-left py-2">Subject</th>
-                <th className="text-right py-2">Marks</th>
+                <th className="text-right py-2">Marks (O / M)</th>
               </tr>
             </thead>
             <tbody>
-              {result.subjects && Object.entries(result.subjects).map(([sub, marks]) => (
-                <tr key={sub} className="border-b">
-                  <td className="py-2">{sub}</td>
-                  <td className="text-right">{marks}</td>
-                </tr>
-              ))}
+              {result.subjects && Object.entries(result.subjects).map(([sub, marks]) => {
+                const obtained = typeof marks === 'object' ? marks.obtained : marks
+                const max = typeof marks === 'object' ? marks.max : 100
+                return (
+                  <tr key={sub} className="border-b">
+                    <td className="py-2">{sub}</td>
+                    <td className="text-right">{obtained} / {max}</td>
+                  </tr>
+                )
+              })}
             </tbody>
             <tfoot>
               <tr className="font-bold border-t">
                 <td className="py-2">Total</td>
-                <td className="text-right">{result.total}</td>
+                <td className="text-right">{result.total} / {result.total_max || '?'}</td>
               </tr>
               <tr className="font-bold text-primary-500">
                 <td className="py-2">Percentage</td>
