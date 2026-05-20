@@ -23,6 +23,7 @@ export default function Dashboard() {
   const sections = [
     { href: '/admin/contacts', label: 'Contact Queries', icon: PhoneIcon, color: 'bg-blue-50 text-blue-600' },
     { href: '/admin/admissions', label: 'Admissions', icon: AcademicCapIcon, color: 'bg-emerald-50 text-emerald-600' },
+    { href: '/admin/gallery', label: 'Gallery', icon: CameraIcon, color: 'bg-purple-50 text-purple-600' },
     { href: '/admin/notices', label: 'Notices', icon: BellAlertIcon, color: 'bg-amber-50 text-amber-600' },
     { href: '/admin/homework', label: 'Homework', icon: BookOpenIcon, color: 'bg-orange-50 text-orange-600' },
     { href: '/admin/notes', label: 'Notes', icon: DocumentTextIcon, color: 'bg-violet-50 text-violet-600' },
