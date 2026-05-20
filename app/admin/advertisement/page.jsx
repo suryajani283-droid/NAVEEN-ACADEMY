@@ -60,7 +60,8 @@ export default function AdminAdvertisements() {
       setForm({ image_url: '', title: '', link_url: '' })
       fetchAds()
     } else {
-      alert('Error adding ad')
+  const errData = await res.json().catch(() => ({ error: 'Unknown error' }));
+  alert('Error adding ad: ' + (errData.error || res.statusText));
     }
   }
 
