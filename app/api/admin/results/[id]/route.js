@@ -7,7 +7,6 @@ export async function PUT(request, { params }) {
     await verifyAdminToken(request);
     const body = await request.json();
 
-    // Recalculate from the subjects object if needed (as a safety)
     const subjects = body.subjects || {};
     let totalObtained = 0, totalMax = 0;
     Object.values(subjects).forEach(val => {
@@ -15,7 +14,7 @@ export async function PUT(request, { params }) {
         totalObtained += val.obtained;
         totalMax += val.max;
       } else {
-        totalObtained += val; // old plain number
+        totalObtained += val;
         totalMax += 100;
       }
     });
@@ -46,6 +45,20 @@ export async function PUT(request, { params }) {
 
     if (error) throw error;
     return NextResponse.json(data);
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    await verifyAdminToken(request);
+    const { error } = await supabaseAdmin
+      .from('results')
+      .delete()
+      .eq('id', params.id);
+    if (error) throw error;
+    return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
