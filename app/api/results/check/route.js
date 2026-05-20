@@ -5,7 +5,7 @@ export async function POST(request) {
   try {
     const { class: cls, roll, dob } = await request.json();
 
-    // Find result matching class, roll number and date of birth
+    // Find the exact result
     const { data: result, error } = await supabaseAdmin
       .from('results')
       .select('*')
@@ -18,7 +18,22 @@ export async function POST(request) {
       return NextResponse.json({ error: 'No result found. Check your details.' }, { status: 404 });
     }
 
-    return NextResponse.json({ result });
+    // Calculate rank: count of students with higher percentage in the same class & exam type
+    const { count, error: rankError } = await supabaseAdmin
+      .from('results')
+      .select('*', { count: 'exact', head: true })
+      .eq('class', result.class)
+      .eq('exam_type', result.exam_type)
+      .gt('percentage', result.percentage);
+
+    if (rankError) {
+      // if rank query fails, still return result without rank
+      return NextResponse.json({ result });
+    }
+
+    const rank = count + 1;
+
+    return NextResponse.json({ result, rank });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
