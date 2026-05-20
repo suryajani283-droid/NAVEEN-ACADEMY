@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
 import { EnvelopeIcon, KeyIcon, ArrowRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
 
 const supabase = createClient(
@@ -63,12 +62,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4 pt-20 pb-12">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
+      <div className="w-full max-w-md">
         {/* Logo / Branding */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-lg border border-slate-100 mb-4">
@@ -80,127 +74,98 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
-          <AnimatePresence mode="wait">
-            {step === 'email' ? (
-              <motion.div
-                key="email-step"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-5"
+          {step === 'email' ? (
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
+                <div className="relative">
+                  <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                    onKeyDown={(e) => e.key === 'Enter' && sendOTP()}
+                  />
+                </div>
+              </div>
+              <button
+                onClick={sendOTP}
+                disabled={loading}
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-orange-200"
               >
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
-                      onKeyDown={(e) => e.key === 'Enter' && sendOTP()}
-                    />
-                  </div>
+                {loading ? (
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <>
+                    Send OTP <ArrowRightIcon className="h-5 w-5" />
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <div className="text-center text-sm text-slate-500">
+                We sent a 6‑digit code to <span className="font-semibold text-slate-700">{email}</span>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Verification Code</label>
+                <div className="relative">
+                  <KeyIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                    placeholder="000000"
+                    className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all text-center text-2xl tracking-widest font-mono"
+                    onKeyDown={(e) => e.key === 'Enter' && verifyOTP()}
+                    autoFocus
+                  />
                 </div>
-
-                <button
-                  onClick={sendOTP}
-                  disabled={loading}
-                  className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-orange-200"
-                >
-                  {loading ? (
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                  ) : (
-                    <>
-                      Send OTP <ArrowRightIcon className="h-5 w-5" />
-                    </>
-                  )}
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="otp-step"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-5"
+              </div>
+              <button
+                onClick={verifyOTP}
+                disabled={loading}
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-orange-200"
               >
-                <div className="text-center text-sm text-slate-500">
-                  We sent a 6‑digit code to <span className="font-semibold text-slate-700">{email}</span>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Verification Code
-                  </label>
-                  <div className="relative">
-                    <KeyIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                      placeholder="000000"
-                      className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all text-center text-2xl tracking-widest font-mono"
-                      onKeyDown={(e) => e.key === 'Enter' && verifyOTP()}
-                      autoFocus
-                    />
-                  </div>
-                </div>
-
-                <button
-                  onClick={verifyOTP}
-                  disabled={loading}
-                  className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-orange-200"
-                >
-                  {loading ? (
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                  ) : (
-                    <>
-                      Verify & Login <ArrowRightIcon className="h-5 w-5" />
-                  )}
-                </button>
-
-                <button
-                  onClick={handleBack}
-                  className="w-full text-sm text-slate-500 hover:text-orange-600 transition-colors flex items-center justify-center gap-1"
-                >
-                  <ArrowLeftIcon className="h-4 w-4" />
-                  Change email
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                {loading ? (
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <>
+                    Verify & Login <ArrowRightIcon className="h-5 w-5" />
+                  </>
+                )}
+              </button>
+              <button
+                onClick={handleBack}
+                className="w-full text-sm text-slate-500 hover:text-orange-600 transition-colors flex items-center justify-center gap-1"
+              >
+                <ArrowLeftIcon className="h-4 w-4" />
+                Change email
+              </button>
+            </div>
+          )}
 
           {message && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`mt-4 text-sm text-center ${
-                message.includes('error') || message.includes('Invalid') ? 'text-red-500' : 'text-green-600'
-              }`}
-            >
+            <p className={`mt-4 text-sm text-center ${message.includes('error') || message.includes('Invalid') ? 'text-red-500' : 'text-green-600'}`}>
               {message}
-            </motion.p>
+            </p>
           )}
         </div>
 
         <p className="text-center text-slate-400 text-xs mt-6">
           Naveen Academy Senior Secondary School
         </p>
-      </motion.div>
+      </div>
     </div>
   )
 }
