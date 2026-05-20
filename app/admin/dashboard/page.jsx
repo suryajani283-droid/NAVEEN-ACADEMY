@@ -16,6 +16,7 @@ export default function Dashboard() {
     { href: '/admin/downloads', label: '📥 Downloads', color: 'bg-rose-50' },
     { href: '/admin/results', label: '🏆 Results', color: 'bg-yellow-50' },
     { href: '/admin/timetable', label: '🕒 Timetable', color: 'bg-cyan-50' },
+    { href: '/admin/homepage', label: '🏠 Homepage', color: 'bg-gray-50' }
     { href: '/admin/gallery', label: '🖼️ Gallery', color: 'bg-purple-50' },
     { href: '/admin/faculty', label: '👨‍🏫 Faculty', color: 'bg-lime-50 text-lime-600' },
     { href: '/admin/parent-circulars', label: '📣 Parent Circulars', color: 'bg-indigo-50' },
