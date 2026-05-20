@@ -383,12 +383,14 @@ function ResultsSection() {
   const [roll, setRoll] = useState('')
   const [dob, setDob] = useState('')
   const [result, setResult] = useState(null)
+  const [rank, setRank] = useState(null)
   const [error, setError] = useState('')
 
   const handleCheck = async (e) => {
     e.preventDefault()
     setError('')
     setResult(null)
+    setRank(null)
 
     const res = await fetch('/api/results/check', {
       method: 'POST',
@@ -398,6 +400,7 @@ function ResultsSection() {
     const data = await res.json()
     if (res.ok) {
       setResult(data.result)
+      if (data.rank) setRank(data.rank)
     } else {
       setError(data.error || 'Something went wrong')
     }
@@ -437,11 +440,22 @@ function ResultsSection() {
 
       {result && (
         <div className="card bg-gray-50">
-          <h3 className="text-xl font-bold text-center mb-2">{result.student_name}</h3>
-          <p className="text-center text-gray-600 mb-4">
-            Father: {result.father_name} | Class {result.class} | Roll: {result.roll_number}
-          </p>
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="text-xl font-bold">{result.student_name}</h3>
+              <p className="text-gray-600">
+                Father: {result.father_name} | Class {result.class} | Roll: {result.roll_number}
+              </p>
+            </div>
+            {rank && (
+              <div className="bg-primary-500 text-white px-4 py-2 rounded-full text-center">
+                <span className="text-sm block">Class Rank</span>
+                <span className="text-2xl font-bold">{rank}</span>
+              </div>
+            )}
+          </div>
           <p className="text-center text-sm text-gray-500 mb-4">Exam: {result.exam_type}</p>
+
           <table className="w-full">
             <thead>
               <tr className="border-b">
