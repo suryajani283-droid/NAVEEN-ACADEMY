@@ -301,7 +301,7 @@ function NotesSection() {
   )
 }
 
-// ==================== DOWNLOADS SECTION (NEW, placed here!) ====================
+// ==================== DOWNLOADS SECTION ====================
 function DownloadsSection() {
   const [downloads, setDownloads] = useState([])
   const [selectedCategory, setSelectedCategory] = useState('All')
@@ -377,58 +377,8 @@ function DownloadsSection() {
   )
 }
 
-// ==================== MAIN COMPONENT ====================
-export default function StudentCornerPage() {
-  const [activeTab, setActiveTab] = useState('homework')
-
-  return (
-    <div className="pt-20">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary-500 to-primary-700 text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-bold mb-4"
-          >
-            Student Corner 📚
-          </motion.h1>
-          <p className="text-xl">All Study Materials, Homework & Resources in One Place</p>
-        </div>
-      </section>
-
-      {/* Tabs Navigation */}
-      <section className="bg-white shadow-md sticky top-20 z-30">
-        <div className="container mx-auto px-4">
-          <div className="flex overflow-x-auto gap-1 py-3">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-primary-500 text-white'
-                    : 'text-gray-600 hover:bg-primary-50'
-                }`}
-              >
-                <tab.icon className="h-5 w-5" />
-                <span className="font-medium">{tab.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Content Sections */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-
-          {activeTab === 'homework' && <HomeworkSection />}
-          {activeTab === 'notes' && <NotesSection />}
-          {activeTab === 'downloads' && <DownloadsSection />}
-
-          {activeTab === 'results' && <ResultsSection />}
-            function ResultsSection() {
+// ==================== RESULTS SECTION (PIN‑based) ====================
+function ResultsSection() {
   const [pin, setPin] = useState('')
   const [serial, setSerial] = useState('')
   const [roll, setRoll] = useState('')
@@ -520,7 +470,58 @@ export default function StudentCornerPage() {
       )}
     </motion.div>
   )
-            }
+}
+
+// ==================== MAIN COMPONENT ====================
+export default function StudentCornerPage() {
+  const [activeTab, setActiveTab] = useState('homework')
+
+  return (
+    <div className="pt-20">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-primary-500 to-primary-700 text-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-5xl font-bold mb-4"
+          >
+            Student Corner 📚
+          </motion.h1>
+          <p className="text-xl">All Study Materials, Homework & Resources in One Place</p>
+        </div>
+      </section>
+
+      {/* Tabs Navigation */}
+      <section className="bg-white shadow-md sticky top-20 z-30">
+        <div className="container mx-auto px-4">
+          <div className="flex overflow-x-auto gap-1 py-3">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-primary-500 text-white'
+                    : 'text-gray-600 hover:bg-primary-50'
+                }`}
+              >
+                <tab.icon className="h-5 w-5" />
+                <span className="font-medium">{tab.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Content Sections */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+
+          {activeTab === 'homework' && <HomeworkSection />}
+          {activeTab === 'notes' && <NotesSection />}
+          {activeTab === 'downloads' && <DownloadsSection />}
+          {activeTab === 'results' && <ResultsSection />}
 
           {activeTab === 'timetable' && (
             <div className="text-center py-12">
@@ -532,4 +533,4 @@ export default function StudentCornerPage() {
       </section>
     </div>
   )
-   }
+    }
