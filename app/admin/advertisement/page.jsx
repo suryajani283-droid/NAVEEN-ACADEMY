@@ -7,7 +7,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-export default function AdminAdvertisement() {
+export default function AdminAdvertisements() {
   const [ads, setAds] = useState([])
   const [form, setForm] = useState({ image_url: '', title: '', link_url: '' })
   const [uploading, setUploading] = useState(false)
@@ -69,7 +69,7 @@ export default function AdminAdvertisement() {
       const text = await res.text()
       let msg = text
       try { const json = JSON.parse(text); msg = json.error || text } catch {}
-      alert('Error: ' + msg)
+      alert('Error (' + res.status + '): ' + msg)
     }
   }
 
@@ -86,8 +86,18 @@ export default function AdminAdvertisement() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this advertisement?')) return
-    await fetch(`/api/admin/advertisements/${id}`, { method: 'DELETE', credentials: 'include' })
-    fetchAds()
+    const res = await fetch(`/api/admin/advertisements/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    if (res.ok) {
+      fetchAds()
+    } else {
+      const text = await res.text()
+      let msg = text
+      try { const json = JSON.parse(text); msg = json.error || text } catch {}
+      alert('Delete failed (' + res.status + '): ' + msg)
+    }
   }
 
   const cancelEdit = () => {
