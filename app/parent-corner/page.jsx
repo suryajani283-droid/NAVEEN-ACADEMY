@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { createClient } from '@supabase/supabase-js'
+import { useRouter } from 'next/navigation'
 import {
   BellAlertIcon,
   CurrencyRupeeIcon,
@@ -287,7 +288,7 @@ function FeedbackSection() {
   )
 }
 
-// ---------- Static Fee Section (you can make it dynamic later) ----------
+// ---------- Static Fee Section ----------
 const feeStructure = [
   { class: 'Nursery-UKG', Admission: '₹1,100', annual: '₹6,000', total: '₹7,100' },
   { class: 'I', Admission: '₹1,100', annual: '₹7,500', total: '₹8,600' },
@@ -370,9 +371,27 @@ function FeeInfoSection() {
   )
 }
 
-// ---------- Main ParentCornerPage ----------
+// ---------- Main ParentCornerPage (with session protection) ----------
 export default function ParentCornerPage() {
+  const router = useRouter()
+  const [sessionChecked, setSessionChecked] = useState(false)
   const [activeTab, setActiveTab] = useState('circulars')
+
+  // Session protection – redirect to login if not authenticated
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        router.push('/login')
+      } else {
+        setSessionChecked(true)
+      }
+    }
+    checkSession()
+  }, [router])
+
+  // Block render until session is confirmed
+  if (!sessionChecked) return null
 
   const tabs = [
     { id: 'circulars', name: 'Circulars', icon: BellAlertIcon },
@@ -485,4 +504,4 @@ export default function ParentCornerPage() {
       </section>
     </div>
   )
-        }
+}
