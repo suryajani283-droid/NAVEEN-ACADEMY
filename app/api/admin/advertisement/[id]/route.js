@@ -7,7 +7,7 @@ export async function PUT(request, { params }) {
     await verifyAdminToken(request);
     const body = await request.json();
     const { data, error } = await supabaseAdmin
-      .from('advertisements')
+      .from('advertisement')
       .update({
         image_url: body.image_url,
         title: body.title,
@@ -26,7 +26,7 @@ export async function DELETE(request, { params }) {
   try {
     await verifyAdminToken(request);
     const { error } = await supabaseAdmin
-      .from('advertisements')
+      .from('advertisement')
       .delete()
       .eq('id', params.id);
     if (error) throw error;
