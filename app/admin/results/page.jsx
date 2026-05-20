@@ -22,7 +22,7 @@ export default function AdminResults() {
   const [selectedClass, setSelectedClass] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
-  const [editingId, setEditingId] = useState(null)   // null = add mode, otherwise edit mode
+  const [editingId, setEditingId] = useState(null)
 
   const [form, setForm] = useState({
     student_name: '',
@@ -31,9 +31,9 @@ export default function AdminResults() {
     dob: '',
     exam_type: 'Half Yearly',
     email: '',
-    subjects: [],   // array of { name, marks }
+    subjects: [],   // array of { name, obtained, max }
   })
-  const [newSubject, setNewSubject] = useState({ name: '', marks: '' })
+  const [newSubject, setNewSubject] = useState({ name: '', obtained: '', max: '' })
 
   const fetchResults = async () => {
     if (!selectedClass) return
@@ -51,22 +51,23 @@ export default function AdminResults() {
     fetchResults()
   }, [selectedClass])
 
-  // Add a subject to the form's subjects array
   const addSubject = () => {
-    if (!newSubject.name || !newSubject.marks) return
+    if (!newSubject.name || !newSubject.obtained || !newSubject.max) return
     setForm({
       ...form,
-      subjects: [...form.subjects, { name: newSubject.name, marks: Number(newSubject.marks) }],
+      subjects: [...form.subjects, {
+        name: newSubject.name,
+        obtained: Number(newSubject.obtained),
+        max: Number(newSubject.max),
+      }],
     })
-    setNewSubject({ name: '', marks: '' })
+    setNewSubject({ name: '', obtained: '', max: '' })
   }
 
-  // Remove a subject by index
   const removeSubject = (idx) => {
     setForm({ ...form, subjects: form.subjects.filter((_, i) => i !== idx) })
   }
 
-  // Clear form and exit edit mode
   const resetForm = () => {
     setForm({
       student_name: '',
@@ -80,11 +81,17 @@ export default function AdminResults() {
     setEditingId(null)
   }
 
-  // Populate form with existing result data for editing
   const handleEdit = (result) => {
-    // Convert subjects object back to array of { name, marks }
     const subjectsArray = result.subjects
-      ? Object.entries(result.subjects).map(([name, marks]) => ({ name, marks }))
+      ? Object.entries(result.subjects).map(([name, marks]) => {
+          // handle both old and new format
+          if (typeof marks === 'object' && marks !== null && 'obtained' in marks) {
+            return { name, obtained: marks.obtained, max: marks.max }
+          } else {
+            // old format: plain number -> assume max=100
+            return { name, obtained: marks, max: 100 }
+          }
+        })
       : []
 
     setForm({
@@ -99,17 +106,19 @@ export default function AdminResults() {
     setEditingId(result.id)
   }
 
-  // Submit form – handles both add and update
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!selectedClass) return
 
-    // Build subjects object and calculate totals
+    // Build subjects object with { obtained, max }
     const subjectsObj = {}
-    form.subjects.forEach(s => { subjectsObj[s.name] = s.marks })
+    form.subjects.forEach(s => {
+      subjectsObj[s.name] = { obtained: s.obtained, max: s.max }
+    })
 
-    const total = form.subjects.reduce((sum, s) => sum + s.marks, 0)
-    const percentage = form.subjects.length ? (total / (form.subjects.length * 100)) * 100 : 0
+    const totalObtained = form.subjects.reduce((sum, s) => sum + s.obtained, 0)
+    const totalMax = form.subjects.reduce((sum, s) => sum + s.max, 0)
+    const percentage = totalMax > 0 ? Math.round((totalObtained / totalMax) * 10000) / 100 : 0
     const grade = gradeScale(percentage)
 
     const payload = {
@@ -121,8 +130,9 @@ export default function AdminResults() {
       exam_type: form.exam_type,
       email: form.email,
       subjects: subjectsObj,
-      total,
-      percentage: Math.round(percentage * 100) / 100,
+      total: totalObtained,
+      total_max: totalMax,
+      percentage,
       grade,
     }
 
@@ -158,15 +168,11 @@ export default function AdminResults() {
     <div className="pt-20 container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold text-primary-500 mb-8">Manage Results</h2>
 
-      {/* Class Selector */}
       <div className="card mb-8">
         <label className="block text-sm font-medium text-gray-700 mb-2">Select Class</label>
         <select
           value={selectedClass}
-          onChange={(e) => {
-            setSelectedClass(e.target.value)
-            resetForm()  // class बदलने पर फ़ॉर्म साफ़ करें
-          }}
+          onChange={(e) => { setSelectedClass(e.target.value); resetForm() }}
           className="px-4 py-2 border rounded"
         >
           <option value="">-- Choose Class --</option>
@@ -174,7 +180,6 @@ export default function AdminResults() {
         </select>
       </div>
 
-      {/* Add / Edit Form */}
       {selectedClass && (
         <form onSubmit={handleSubmit} className="card mb-8 space-y-4">
           <h3 className="text-xl font-semibold text-primary-500">
@@ -205,21 +210,24 @@ export default function AdminResults() {
               className="w-full px-4 py-2 border rounded" />
           </div>
 
-          {/* Subjects / Marks builder */}
+          {/* Subjects with Obtained & Max Marks */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Subjects & Marks</label>
-            <div className="flex gap-2 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Subjects (Obtained / Max)</label>
+            <div className="flex flex-wrap gap-2 mb-2">
               <input type="text" placeholder="Subject" value={newSubject.name}
                 onChange={(e) => setNewSubject({ ...newSubject, name: e.target.value })}
-                className="flex-grow px-4 py-2 border rounded" />
-              <input type="number" placeholder="Marks" value={newSubject.marks}
-                onChange={(e) => setNewSubject({ ...newSubject, marks: e.target.value })}
+                className="flex-grow min-w-[120px] px-4 py-2 border rounded" />
+              <input type="number" placeholder="Obtained" value={newSubject.obtained}
+                onChange={(e) => setNewSubject({ ...newSubject, obtained: e.target.value })}
+                className="w-24 px-4 py-2 border rounded" />
+              <input type="number" placeholder="Max" value={newSubject.max}
+                onChange={(e) => setNewSubject({ ...newSubject, max: e.target.value })}
                 className="w-24 px-4 py-2 border rounded" />
               <button type="button" onClick={addSubject} className="btn-primary py-2 px-4">Add</button>
             </div>
             {form.subjects.map((s, idx) => (
               <div key={idx} className="flex justify-between bg-gray-100 p-2 rounded mb-1">
-                <span>{s.name} – {s.marks}</span>
+                <span>{s.name} – {s.obtained} / {s.max}</span>
                 <button type="button" onClick={() => removeSubject(idx)} className="text-red-600">Remove</button>
               </div>
             ))}
@@ -238,7 +246,6 @@ export default function AdminResults() {
         </form>
       )}
 
-      {/* Results List */}
       {loading && <p className="text-gray-500">Loading...</p>}
       {selectedClass && !loading && (
         <div className="overflow-x-auto">
@@ -246,9 +253,7 @@ export default function AdminResults() {
             <thead>
               <tr className="bg-primary-500 text-white">
                 <th className="p-3">Name</th>
-                <th className="p-3">Father</th>
                 <th className="p-3">Roll</th>
-                <th className="p-3">DOB</th>
                 <th className="p-3">Exam</th>
                 <th className="p-3">Total</th>
                 <th className="p-3">%</th>
@@ -260,11 +265,9 @@ export default function AdminResults() {
               {results.map((res) => (
                 <tr key={res.id} className="border-b hover:bg-gray-50">
                   <td className="p-3">{res.student_name}</td>
-                  <td className="p-3">{res.father_name}</td>
                   <td className="p-3">{res.roll_number}</td>
-                  <td className="p-3">{res.dob}</td>
                   <td className="p-3">{res.exam_type}</td>
-                  <td className="p-3">{res.total}</td>
+                  <td className="p-3">{res.total} / {res.total_max || '?'}</td>
                   <td className="p-3">{res.percentage}%</td>
                   <td className="p-3 font-semibold">{res.grade}</td>
                   <td className="p-3 flex gap-2">
@@ -273,13 +276,10 @@ export default function AdminResults() {
                   </td>
                 </tr>
               ))}
-              {results.length === 0 && (
-                <tr><td colSpan="9" className="text-center py-8 text-gray-500">No results for this class.</td></tr>
-              )}
             </tbody>
           </table>
         </div>
       )}
     </div>
   )
-        }
+                                       }
