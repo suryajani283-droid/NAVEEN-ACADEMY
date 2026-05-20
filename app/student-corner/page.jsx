@@ -520,12 +520,37 @@ function TimetableSection() {
       </div>
 
       {timetable && (
-        <div className="card text-center">
-          <img src={timetable.file_url} alt={`Class ${selectedClass} Timetable`}
-            className="max-w-full h-auto rounded mx-auto" />
-          <a href={timetable.file_url} target="_blank" className="btn-primary mt-4 inline-block">Download</a>
+        <div className="card">
+          {/* New: show date, time, description */}
+          <div className="mb-4 space-y-1">
+            {timetable.description && (
+              <p className="text-gray-700 font-medium">{timetable.description}</p>
+            )}
+            <div className="flex flex-wrap gap-3 text-sm text-gray-500">
+              {timetable.start_date && (
+                <span className="flex items-center gap-1">📅 Effective from: {new Date(timetable.start_date).toLocaleDateString('en-IN')}</span>
+              )}
+              {timetable.time_details && (
+                <span className="flex items-center gap-1">🕒 {timetable.time_details}</span>
+              )}
+            </div>
+          </div>
+
+          <img
+            src={timetable.file_url}
+            alt={`Class ${selectedClass} Timetable`}
+            className="max-w-full h-auto rounded mx-auto"
+          />
+          <a
+            href={timetable.file_url}
+            target="_blank"
+            className="btn-primary mt-4 inline-block"
+          >
+            Download / View Full Size
+          </a>
         </div>
       )}
+
       {selectedClass && !timetable && (
         <p className="text-gray-500 text-center">Timetable not available for this class.</p>
       )}
