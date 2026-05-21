@@ -22,10 +22,10 @@ jobs:
 
       - name: Dump database
         env:
-          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PGPASSWORD: ${{ uHQ3$h-EATSxAWn }}
         run: |
           pg_dump \
-            -h ${{ secrets.SUPABASE_DB_HOST }} \
+            -h ${{ db.juxxlnmmecvejjbankex.supabase.co}} \
             -U postgres \
             -d postgres \
             --no-owner \
