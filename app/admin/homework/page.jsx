@@ -79,6 +79,20 @@ export default function AdminHomework() {
       setEditingId(null)
       setInputMode('upload')
       fetchHomeworks()
+
+      // ✅ Trigger push notification after successful save
+      const action = editingId ? 'updated' : 'added'
+      fetch('/api/push/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: '📝 Homework Update',
+          body: `Homework ${action} for Class ${form.class}: ${form.subject}`,
+          url: '/student-corner?tab=homework',
+          targetClass: form.class || null,
+        }),
+        credentials: 'include',
+      }).catch(console.error)
     }
   }
 
@@ -238,4 +252,4 @@ export default function AdminHomework() {
       </div>
     </div>
   )
-            }
+}
