@@ -2,7 +2,7 @@ name: Daily Database Backup
 
 on:
   schedule:
-    - cron: '0 20 * * *'    # 2 AM IST every day
+    - cron: '0 20 * * *'   # 2 AM IST daily
   workflow_dispatch:
 
 jobs:
