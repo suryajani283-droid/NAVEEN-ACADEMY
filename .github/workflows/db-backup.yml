@@ -2,8 +2,8 @@ name: Daily Database Backup
 
 on:
   schedule:
-    - cron: '0 20 * * *'   # रोज़ 8 PM UTC (भारत में 2 AM)
-  workflow_dispatch:        # मैन्युअली चलाने के लिए
+    - cron: '0 20 * * *'   # 8 PM UTC (2 AM IST) every day
+  workflow_dispatch:        # allows manual trigger from GitHub
 
 jobs:
   backup:
@@ -12,7 +12,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          ref: db-backups
+          ref: db-backups   # we'll use a separate branch for backups
 
       - name: Setup PostgreSQL client
         run: sudo apt-get install -y postgresql-client
@@ -22,10 +22,10 @@ jobs:
 
       - name: Dump database
         env:
-          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PGPASSWORD: ${{ uHQ3$h-EATSxAWn }}
         run: |
           pg_dump \
-            -h ${{ secrets.SUPABASE_DB_HOST }} \
+            -h ${{ db.juxxlnmmecvejjbankex.supabase.co}} \
             -U postgres \
             -d postgres \
             --no-owner \
