@@ -50,7 +50,7 @@ const sidebarSections = [
     links: [
       { href: '/admin/notices', label: 'Notices', icon: BellAlertIcon },
       { href: '/admin/contacts', label: 'Contact Queries', icon: PhoneIcon },
-      { href: '/admin/admission', label: 'Admissions', icon: AcademicCapIcon },
+      { href: '/admin/admissions', label: 'Admissions', icon: AcademicCapIcon },
     ],
   },
   {
@@ -60,7 +60,7 @@ const sidebarSections = [
     links: [
       { href: '/admin/gallery', label: 'Gallery', icon: CameraIcon },
       { href: '/admin/faculty', label: 'Faculty', icon: UserGroupIcon },
-      { href: '/admin/advertisement', label: 'Advertisements', icon: TagIcon },
+      { href: '/admin/advertisements', label: 'Advertisements', icon: TagIcon },
       { href: '/admin/homepage', label: 'Homepage', icon: DocumentTextIcon },
     ],
   },
