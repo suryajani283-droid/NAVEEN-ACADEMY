@@ -716,6 +716,7 @@ export default function StudentCornerPage() {
   const [activeTab, setActiveTab] = useState('homework');
   const [checking, setChecking] = useState(true);
   const [studentClass, setStudentClass] = useState(null);
+  const [studentName, setStudentName] = useState('');
 
   // Session check
   useEffect(() => {
