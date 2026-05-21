@@ -7,7 +7,7 @@ export async function DELETE(request) {
     await verifyAdminToken(request);
     const { id } = await request.json();
     const { error } = await supabaseAdmin
-      .from('admissions')
+      .from('admission')
       .delete()
       .eq('id', id);
     if (error) throw error;
