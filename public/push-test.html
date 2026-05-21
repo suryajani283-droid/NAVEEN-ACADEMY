@@ -3,18 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Push Test</title>
+  <title>Push Notification Test</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
-    .msg { background: white; padding: 10px; margin: 8px 0; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-    .err { color: red; }
+    body { font-family: sans-serif; padding: 20px; background: #f0f4ff; }
+    button { background: #1e40af; color: white; border: none; padding: 14px 28px; border-radius: 12px; font-size: 16px; margin-top: 20px; }
+    .msg { background: white; padding: 12px; margin: 8px 0; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); word-break: break-word; }
+    .err { color: red; background: #ffeaea; }
     .ok { color: green; }
-    button { background: #1e40af; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; }
   </style>
 </head>
 <body>
-  <h2>Push Notification Test</h2>
+  <h2>📢 Push Notification Test</h2>
+  <p>यह पेज जाँच करेगा कि पुश नोटिफिकेशन काम करता है या नहीं।</p>
+  <button onclick="runTest()">Start Test</button>
   <div id="log"></div>
+
   <script>
     const log = (msg, isError) => {
       const d = document.createElement('div');
@@ -23,65 +26,76 @@
       document.getElementById('log').appendChild(d);
     };
 
+    function urlBase64ToUint8Array(base64String) {
+      try {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+          outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+      } catch (e) {
+        throw new Error('Invalid VAPID public key');
+      }
+    }
+
     async function runTest() {
-      log('Service Worker registration...');
+      document.getElementById('log').innerHTML = '';
+      log('🔍 Checking Service Worker...');
       if (!('serviceWorker' in navigator)) {
-        log('❌ Service Worker not supported', true);
+        log('❌ Service Worker not supported in this browser', true);
         return;
       }
+
       try {
         const reg = await navigator.serviceWorker.register('/sw.js');
-        log('✅ SW registered');
+        log('✅ Service Worker registered');
         await navigator.serviceWorker.ready;
 
-        log('Checking notification permission...');
+        log('📌 Checking notification permission...');
         if (Notification.permission === 'denied') {
-          log('❌ Notification permission is denied. Please go to site settings and allow notifications.', true);
+          log('❌ Permission is DENIED. Please go to site settings → Notifications → Allow.', true);
           return;
         }
+
         let permission = Notification.permission;
         if (permission === 'default') {
-          log('Requesting permission...');
+          log('⏳ Requesting permission...');
           permission = await Notification.requestPermission();
-          log('Permission result: ' + permission);
+          log('📩 Permission result: ' + permission);
         }
+
         if (permission !== 'granted') {
           log('❌ Permission not granted', true);
           return;
         }
         log('✅ Permission granted');
 
-        log('Subscribing to push...');
+        log('🔐 Subscribing to push...');
+        // 👇 यह आपकी असली पब्लिक की है (पहले से डली हुई)
         const vapidPublicKey = 'BIJH9a5uY10Mz-tfzF9AGOB9JnG7diCfLr_LHM70LUi5h9KsyPOxPg0gK0cG-hz7UlxJERoofGAMimHUEYQbn18';
         const sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
         });
         log('✅ Subscription successful!');
-        log('Subscription endpoint: ' + sub.endpoint.substring(0, 50) + '...');
-        log('Now go to Admin Homework and add a homework to receive notification.');
+        log('📬 Endpoint: ' + sub.endpoint.substring(0, 60) + '...');
+
+        // Save subscription to server
+        await fetch('/api/push/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subscription: sub.toJSON() }),
+        });
+        log('💾 Subscription saved to server.');
+
+        log('🎉 अब Admin Panel से कोई Homework जोड़ें और नोटिफिकेशन आएगा।');
       } catch (err) {
         log('❌ Error: ' + err.message, true);
       }
     }
-
-    function urlBase64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-      const rawData = atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
-      for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-      }
-      return outputArray;
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.createElement('button');
-      btn.textContent = 'Start Test';
-      btn.onclick = runTest;
-      document.body.insertBefore(btn, document.getElementById('log'));
-    });
   </script>
 </body>
 </html>
