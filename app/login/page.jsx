@@ -119,17 +119,17 @@ router.push(redirectTo);
                 <label className="block text-sm font-medium text-slate-700 mb-2">Verification Code</label>
                 <div className="relative">
                   <KeyIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                    placeholder="000000"
-                    className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all text-center text-2xl tracking-widest font-mono"
-                    onKeyDown={(e) => e.key === 'Enter' && verifyOTP()}
-                    autoFocus
-                  />
+             <input
+  type="text"
+  inputMode="numeric"
+  maxLength={8}
+  value={otp}
+  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+  placeholder="Enter 6-8 digit OTP"
+  className="..."
+  onKeyDown={(e) => e.key === 'Enter' && verifyOTP()}
+  autoFocus
+/>
                 </div>
               </div>
               <button
