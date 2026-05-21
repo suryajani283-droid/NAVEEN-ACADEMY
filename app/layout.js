@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
         className="flex flex-col min-h-screen"
         style={{ fontFamily: "'Poppins', 'Hind', sans-serif" }}
       >
-        <ServiceWorkerRegister />
+        {/*<ServiceWorkerRegister />*/}
         <Navbar />
         <main className="flex-1 flex flex-col">
           <div className="flex-1">{children}</div>
