@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VAPID Key Generator</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: 40px auto; background: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { color: #1e40af; }
+    button { background: #1e40af; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; }
+    button:hover { background: #1e3a8a; }
+    pre { background: #f0f0f0; padding: 10px; border-radius: 6px; word-break: break-word; white-space: pre-wrap; }
+    .key-box { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Naveen Academy - VAPID Key Generator</h2>
+  <p>Click the button to generate a new pair of VAPID keys (public & private).<br>Use these keys for Push Notifications.</p>
+  <button onclick="generateKeys()">Generate VAPID Keys</button>
+  <div id="output" style="margin-top: 20px;"></div>
+  <script>
+    async function generateKeys() {
+      try {
+        const keyPair = await crypto.subtle.generateKey(
+          { name: 'ECDH', namedCurve: 'P-256' },
+          true,
+          ['deriveBits']
+        );
+        const publicKey = await crypto.subtle.exportKey('raw', keyPair.publicKey);
+        const privateKey = await crypto.subtle.exportKey('jwk', keyPair.privateKey);
+        const publicBase64 = btoa(String.fromCharCode(...new Uint8Array(publicKey)))
+          .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        const privateBase64 = privateKey.d;
+        document.getElementById('output').innerHTML = `
+          <div class="key-box">
+            <strong>Public Key:</strong>
+            <pre>${publicBase64}</pre>
+          </div>
+          <div class="key-box">
+            <strong>Private Key:</strong>
+            <pre>${privateBase64}</pre>
+          </div>
+          <p style="color:red;">⚠️ Copy the private key and store it safely. It cannot be recovered.</p>
+        `;
+      } catch (err) {
+        document.getElementById('output').innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
