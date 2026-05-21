@@ -52,7 +52,9 @@
         log('✅ Permission granted');
 
         log('Subscribing to push...');
-        const vapidPublicKey = 'YOUR_VAPID_PUBLIC_KEY'; // 👈 Replace with your actual public key
+        const vapidPublicKey = 'BIJH9a5uY10Mz-
+
+tfzF9AGOB9JnG7diCfLr_LHM70LUi5h9KsyPOxPg0gK0cG-hz7UlxJERoofGAMimHUEYQbn18'; 
         const sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
