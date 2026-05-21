@@ -6,20 +6,31 @@ export async function POST(request) {
   try {
     await verifyAdminToken(request);
 
-    // Dynamically import web-push only at runtime (avoids build error)
-    const webpush = await import('web-push');
+    // ✅ सही तरीका: डायनामिक इम्पोर्ट + default एक्सपोर्ट
+    const webpush = (await import('web-push')).default;
 
-    if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY && process.env.VAPID_SUBJECT) {
+    if (
+      process.env.VAPID_PUBLIC_KEY &&
+      process.env.VAPID_PRIVATE_KEY &&
+      process.env.VAPID_SUBJECT
+    ) {
       webpush.setVapidDetails(
         process.env.VAPID_SUBJECT,
         process.env.VAPID_PUBLIC_KEY,
         process.env.VAPID_PRIVATE_KEY
       );
+    } else {
+      return NextResponse.json(
+        { error: 'VAPID environment variables are not configured' },
+        { status: 500 }
+      );
     }
 
     const { title, body, url, targetClass } = await request.json();
 
-    let query = supabaseAdmin.from('push_subscriptions').select('subscription');
+    let query = supabaseAdmin
+      .from('push_subscriptions')
+      .select('subscription');
     if (targetClass) {
       query = query.or(`class.eq.${targetClass},class.is.null`);
     }
@@ -34,13 +45,17 @@ export async function POST(request) {
       data: { url: url || '/student-corner' },
     });
 
-    await Promise.allSettled(
+    const results = await Promise.allSettled(
       subscriptions.map(async (row) => {
         try {
           await webpush.sendNotification(row.subscription, payload);
         } catch (err) {
+          // हटाएँ अमान्य सब्सक्रिप्शन
           if (err.statusCode === 410 || err.statusCode === 404) {
-            await supabaseAdmin.from('push_subscriptions').delete().eq('subscription', row.subscription);
+            await supabaseAdmin
+              .from('push_subscriptions')
+              .delete()
+              .eq('subscription', row.subscription);
           }
         }
       })
