@@ -729,15 +729,17 @@ export default function StudentCornerPage() {
         setChecking(false);
         // Fetch student's class from profiles
         const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('class')
-            .eq('id', user.id)
-            .single();
-          if (profile?.class) setStudentClass(profile.class);
-        }
-      }
+   if (user) {
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('full_name, class')   // ✅ यह बदलाव
+    .eq('id', user.id)
+    .single();
+  if (!error && profile) {
+    setStudentName(profile.full_name || '');   // ✅ यह नई लाइन
+    setStudentClass(profile.class || null);
+          }
+       }
     };
     checkSession();
   }, [router]);
