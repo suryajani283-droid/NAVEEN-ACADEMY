@@ -322,7 +322,7 @@ export default function Home() {
             </h2>
             <p className="text-xl text-white/90 mb-8">{admissionCta.subtitle}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/admission" className="bg-white text-primary-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-all shadow-lg text-lg">
+              <Link href="/admissions" className="bg-white text-primary-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-all shadow-lg text-lg">
                 {admissionCta.apply_text}
               </Link>
               <Link href="/contact" className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white/10 transition-all text-lg">
