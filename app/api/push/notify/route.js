@@ -3,11 +3,14 @@ import { supabaseAdmin } from '../../../../lib/supabase';
 import { verifyAdminToken } from '../../../../lib/auth';
 import webpush from 'web-push';
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT,
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
+// Set VAPID details only if the subject is provided
+if (process.env.VAPID_SUBJECT) {
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT,
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+}
 
 export async function POST(request) {
   try {
