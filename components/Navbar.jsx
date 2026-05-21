@@ -28,6 +28,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [user, setUser] = useState(null)
+  const [studentName, setStudentName] = useState('')
   const router = useRouter()
 
   // Scroll effect
@@ -37,11 +38,21 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Check auth state
+  // Check auth state and fetch student name
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single()
+        if (profile?.full_name) {
+          setStudentName(profile.full_name)
+        }
+      }
     }
     fetchUser()
   }, [])
@@ -49,6 +60,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     setUser(null)
+    setStudentName('')
     router.push('/')
   }
 
@@ -71,12 +83,13 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="flex lg:hidden">
+          {/* Mobile menu button – shifted left + subtle blink */}
+          <div className="flex lg:hidden mr-2">
             <button
               type="button"
-              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-600"
+              className="inline-flex items-center justify-center rounded-md p-2.5 text-gray-600 animate-pulse"
               onClick={() => setMobileMenuOpen(true)}
+              style={{ animationDuration: '2s' }}
             >
               <Bars3Icon className="h-6 w-6" aria-hidden="true" />
             </button>
@@ -103,7 +116,9 @@ export default function Navbar() {
           <div className="hidden lg:flex lg:items-center lg:gap-x-6">
             {user ? (
               <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-500">{user.email}</span>
+                <span className="text-sm font-medium text-gray-700">
+                  {studentName || 'Student'}
+                </span>
                 <button
                   onClick={handleLogout}
                   className="text-sm text-red-400 hover:text-red-300 transition-colors"
@@ -166,7 +181,9 @@ export default function Navbar() {
               <div className="py-6 space-y-2">
                 {user ? (
                   <>
-                    <p className="text-sm text-gray-500 text-center">{user.email}</p>
+                    <p className="text-sm text-gray-500 text-center">
+                      {studentName || 'Student'}
+                    </p>
                     <button
                       onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
                       className="block w-full text-center text-red-400 hover:text-red-300 transition-colors py-2"
