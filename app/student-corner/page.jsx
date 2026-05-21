@@ -308,15 +308,22 @@ function VideoLecturesSection({ studentClass }) {
   const [lectures, setLectures] = useState([])
   const [selectedSubject, setSelectedSubject] = useState('')
   const [selectedChapter, setSelectedChapter] = useState('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchLectures = async () => {
+      setLoading(true)
       let query = supabase.from('video_lectures').select('*').order('created_at')
+      // Show lectures that either match the student's class OR are for all classes (class = null)
       if (studentClass) {
         query = query.or(`class.eq.${studentClass},class.is.null`)
+      } else {
+        // If student has no class (profile not complete), show only "All classes" lectures
+        query = query.is('class', null)
       }
       const { data } = await query
       setLectures(data || [])
+      setLoading(false)
     }
     fetchLectures()
   }, [studentClass])
@@ -331,6 +338,14 @@ function VideoLecturesSection({ studentClass }) {
     if (selectedChapter && l.chapter !== selectedChapter) return false
     return true
   })
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Loading lectures...</p>
+      </div>
+    )
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -355,28 +370,33 @@ function VideoLecturesSection({ studentClass }) {
         </div>
       </div>
 
-      {filtered.length === 0 && <p className="text-gray-500 text-center py-8">No video lectures found.</p>}
-      <div className="grid md:grid-cols-2 gap-6">
-        {filtered.map((lec) => {
-          const videoId = lec.youtube_url.includes('youtube.com') ? lec.youtube_url.split('v=')[1]?.split('&')[0] : lec.youtube_url
-          return (
-            <motion.div key={lec.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
-              <h3 className="font-semibold">{lec.subject} – {lec.chapter}</h3>
-              <p className="text-gray-600 text-sm mb-3">{lec.title}</p>
-              {videoId && (
-                <div className="mb-3 rounded overflow-hidden">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${videoId}`}
-                    title={lec.title}
-                    allowFullScreen
-                    className="w-full h-48"
-                  />
-                </div>
-              )}
-            </motion.div>
-          )
-        })}
-      </div>
+      {filtered.length === 0 ? (
+        <p className="text-gray-500 text-center py-8">
+          No video lectures found{studentClass ? ` for Class ${studentClass}` : ''}.
+        </p>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-6">
+          {filtered.map((lec) => {
+            const videoId = lec.youtube_url.includes('youtube.com') ? lec.youtube_url.split('v=')[1]?.split('&')[0] : lec.youtube_url
+            return (
+              <motion.div key={lec.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
+                <h3 className="font-semibold">{lec.subject} – {lec.chapter}</h3>
+                <p className="text-gray-600 text-sm mb-3">{lec.title}</p>
+                {videoId && (
+                  <div className="mb-3 rounded overflow-hidden">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${videoId}`}
+                      title={lec.title}
+                      allowFullScreen
+                      className="w-full h-48"
+                    />
+                  </div>
+                )}
+              </motion.div>
+            )
+          })}
+        </div>
+      )}
     </motion.div>
   )
 }
