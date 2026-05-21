@@ -2,7 +2,7 @@ name: Daily Database Backup
 
 on:
   schedule:
-    - cron: '0 20 * * *'   # 2 AM IST daily
+    - cron: '0 20 * * *'   # 2 AM IST
   workflow_dispatch:
 
 jobs:
@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # शांत करें Node 20 चेतावनी
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,26 +21,15 @@ jobs:
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client dnsutils
 
-      - name: Resolve IPv4 address and dump database
+      - name: Dump database (IPv4)
         env:
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
         run: |
-          # Get IPv4 address (prevents IPv6 failure)
           IP=$(dig +short A $DB_HOST | head -1)
-          if [ -z "$IP" ]; then
-            echo "Could not resolve IPv4, falling back to hostname"
-            IP=$DB_HOST
-          fi
-          echo "Using host: $IP"
-          pg_dump \
-            -h $IP \
-            -U postgres \
-            -d postgres \
-            --no-owner \
-            --clean \
-            --if-exists \
-            > backup-$(date +'%Y-%m-%d').sql
+          if [ -z "$IP" ]; then IP=$DB_HOST; fi
+          echo "Connecting to $IP"
+          pg_dump -h $IP -U postgres -d postgres --no-owner --clean --if-exists > backup-$(date +'%Y-%m-%d').sql
 
       - name: Commit and push backup
         run: |
