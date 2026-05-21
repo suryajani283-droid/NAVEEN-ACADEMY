@@ -577,6 +577,7 @@ function TimetableSection() {
 // ==================== MAIN COMPONENT ====================
 export default function StudentCornerPage() {
   const router = useRouter();
+const [activeTab, setActiveTab] = useState('circulars');
 const [checking, setChecking] = useState(true);
 
 useEffect(() => {
