@@ -304,6 +304,27 @@ function NotesSection({ studentClass }) {
   )
 }
 // ==================== VIDEO LECTURES SECTION ====================
+// Helper: Extract YouTube Video ID from any format
+function getYouTubeVideoId(url) {
+  if (!url) return null
+  // Already a pure ID (e.g., "dQw4w9WgXcQ")
+  if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url
+
+  // youtu.be/VIDEO_ID
+  const shortMatch = url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/)
+  if (shortMatch) return shortMatch[1]
+
+  // youtube.com/watch?v=VIDEO_ID
+  const longMatch = url.match(/[?&]v=([A-Za-z0-9_-]{11})/)
+  if (longMatch) return longMatch[1]
+
+  // youtube.com/embed/VIDEO_ID
+  const embedMatch = url.match(/embed\/([A-Za-z0-9_-]{11})/)
+  if (embedMatch) return embedMatch[1]
+
+  return null
+}
+
 function VideoLecturesSection({ studentClass }) {
   const [lectures, setLectures] = useState([])
   const [selectedSubject, setSelectedSubject] = useState('')
@@ -314,11 +335,10 @@ function VideoLecturesSection({ studentClass }) {
     const fetchLectures = async () => {
       setLoading(true)
       let query = supabase.from('video_lectures').select('*').order('created_at')
-      // Show lectures that either match the student's class OR are for all classes (class = null)
+      // Show lectures matching student's class or for all classes (null)
       if (studentClass) {
         query = query.or(`class.eq.${studentClass},class.is.null`)
       } else {
-        // If student has no class (profile not complete), show only "All classes" lectures
         query = query.is('class', null)
       }
       const { data } = await query
@@ -356,14 +376,22 @@ function VideoLecturesSection({ studentClass }) {
       <div className="grid md:grid-cols-2 gap-4 bg-white p-4 rounded-lg shadow">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-          <select value={selectedSubject} onChange={(e) => { setSelectedSubject(e.target.value); setSelectedChapter(''); }} className="w-full px-4 py-2 border rounded">
+          <select
+            value={selectedSubject}
+            onChange={(e) => { setSelectedSubject(e.target.value); setSelectedChapter(''); }}
+            className="w-full px-4 py-2 border rounded"
+          >
             <option value="">All Subjects</option>
             {subjects.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Chapter</label>
-          <select value={selectedChapter} onChange={(e) => setSelectedChapter(e.target.value)} className="w-full px-4 py-2 border rounded">
+          <select
+            value={selectedChapter}
+            onChange={(e) => setSelectedChapter(e.target.value)}
+            className="w-full px-4 py-2 border rounded"
+          >
             <option value="">All Chapters</option>
             {chapters.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
@@ -377,20 +405,28 @@ function VideoLecturesSection({ studentClass }) {
       ) : (
         <div className="grid md:grid-cols-2 gap-6">
           {filtered.map((lec) => {
-            const videoId = lec.youtube_url.includes('youtube.com') ? lec.youtube_url.split('v=')[1]?.split('&')[0] : lec.youtube_url
+            const videoId = getYouTubeVideoId(lec.youtube_url)
             return (
-              <motion.div key={lec.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
+              <motion.div
+                key={lec.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="card"
+              >
                 <h3 className="font-semibold">{lec.subject} – {lec.chapter}</h3>
                 <p className="text-gray-600 text-sm mb-3">{lec.title}</p>
-                {videoId && (
-                  <div className="mb-3 rounded overflow-hidden">
+                {videoId ? (
+                  <div className="mb-3 rounded overflow-hidden aspect-video">
                     <iframe
                       src={`https://www.youtube.com/embed/${videoId}`}
                       title={lec.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
-                      className="w-full h-48"
+                      className="w-full h-full"
                     />
                   </div>
+                ) : (
+                  <p className="text-red-500 text-sm">Invalid video URL</p>
                 )}
               </motion.div>
             )
