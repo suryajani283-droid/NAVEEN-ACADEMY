@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '../../../lib/supabase';
-import { verifyAdminToken } from '../../../lib/auth';
+import { supabaseAdmin } from '../../../../lib/supabase';
+import { verifyAdminToken } from '../../../../lib/auth';
 
 export async function POST(request) {
   try {
@@ -34,7 +34,7 @@ export async function POST(request) {
       data: { url: url || '/student-corner' },
     });
 
-    const results = await Promise.allSettled(
+    await Promise.allSettled(
       subscriptions.map(async (row) => {
         try {
           await webpush.sendNotification(row.subscription, payload);
