@@ -26,6 +26,19 @@ const tabs = [
   { id: 'timetable', name: 'Time Table', icon: ClockIcon },
 ]
 
+// Helper: Extract YouTube Video ID from any format
+function getYouTubeVideoId(url) {
+  if (!url) return null
+  if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url
+  const shortMatch = url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/)
+  if (shortMatch) return shortMatch[1]
+  const longMatch = url.match(/[?&]v=([A-Za-z0-9_-]{11})/)
+  if (longMatch) return longMatch[1]
+  const embedMatch = url.match(/embed\/([A-Za-z0-9_-]{11})/)
+  if (embedMatch) return embedMatch[1]
+  return null
+}
+
 // ==================== HOMEWORK SECTION ====================
 function HomeworkSection({ studentClass }) {
   const [homeworks, setHomeworks] = useState([])
@@ -303,28 +316,8 @@ function NotesSection({ studentClass }) {
     </motion.div>
   )
 }
+
 // ==================== VIDEO LECTURES SECTION ====================
-// Helper: Extract YouTube Video ID from any format
-function getYouTubeVideoId(url) {
-  if (!url) return null
-  // Already a pure ID (e.g., "dQw4w9WgXcQ")
-  if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url
-
-  // youtu.be/VIDEO_ID
-  const shortMatch = url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/)
-  if (shortMatch) return shortMatch[1]
-
-  // youtube.com/watch?v=VIDEO_ID
-  const longMatch = url.match(/[?&]v=([A-Za-z0-9_-]{11})/)
-  if (longMatch) return longMatch[1]
-
-  // youtube.com/embed/VIDEO_ID
-  const embedMatch = url.match(/embed\/([A-Za-z0-9_-]{11})/)
-  if (embedMatch) return embedMatch[1]
-
-  return null
-}
-
 function VideoLecturesSection({ studentClass }) {
   const [lectures, setLectures] = useState([])
   const [selectedSubject, setSelectedSubject] = useState('')
@@ -335,7 +328,6 @@ function VideoLecturesSection({ studentClass }) {
     const fetchLectures = async () => {
       setLoading(true)
       let query = supabase.from('video_lectures').select('*').order('created_at')
-      // Show lectures matching student's class or for all classes (null)
       if (studentClass) {
         query = query.or(`class.eq.${studentClass},class.is.null`)
       } else {
@@ -376,22 +368,14 @@ function VideoLecturesSection({ studentClass }) {
       <div className="grid md:grid-cols-2 gap-4 bg-white p-4 rounded-lg shadow">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-          <select
-            value={selectedSubject}
-            onChange={(e) => { setSelectedSubject(e.target.value); setSelectedChapter(''); }}
-            className="w-full px-4 py-2 border rounded"
-          >
+          <select value={selectedSubject} onChange={(e) => { setSelectedSubject(e.target.value); setSelectedChapter(''); }} className="w-full px-4 py-2 border rounded">
             <option value="">All Subjects</option>
             {subjects.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Chapter</label>
-          <select
-            value={selectedChapter}
-            onChange={(e) => setSelectedChapter(e.target.value)}
-            className="w-full px-4 py-2 border rounded"
-          >
+          <select value={selectedChapter} onChange={(e) => setSelectedChapter(e.target.value)} className="w-full px-4 py-2 border rounded">
             <option value="">All Chapters</option>
             {chapters.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
@@ -399,20 +383,13 @@ function VideoLecturesSection({ studentClass }) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-gray-500 text-center py-8">
-          No video lectures found{studentClass ? ` for Class ${studentClass}` : ''}.
-        </p>
+        <p className="text-gray-500 text-center py-8">No video lectures found{studentClass ? ` for Class ${studentClass}` : ''}.</p>
       ) : (
         <div className="grid md:grid-cols-2 gap-6">
           {filtered.map((lec) => {
             const videoId = getYouTubeVideoId(lec.youtube_url)
             return (
-              <motion.div
-                key={lec.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="card"
-              >
+              <motion.div key={lec.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
                 <h3 className="font-semibold">{lec.subject} – {lec.chapter}</h3>
                 <p className="text-gray-600 text-sm mb-3">{lec.title}</p>
                 {videoId ? (
@@ -446,7 +423,7 @@ function DownloadsSection({ studentClass }) {
     const fetchDownloads = async () => {
       let query = supabase.from('downloads').select('*').order('created_at', { ascending: false })
       if (studentClass) {
-        // Downloads may have a class field; if you want to filter by class, uncomment next line
+        // If you want to filter downloads by class, you can add a class column to the downloads table and uncomment next line
         // query = query.eq('class', studentClass)
       }
       const { data } = await query
@@ -514,9 +491,9 @@ function DownloadsSection({ studentClass }) {
     </motion.div>
   )
 }
+
 // ==================== RESULTS SECTION (DOB‑based + rank) ====================
 function ResultsSection() {
-  // (unchanged – results are not class-specific)
   const [cls, setCls] = useState('')
   const [roll, setRoll] = useState('')
   const [dob, setDob] = useState('')
@@ -718,28 +695,29 @@ export default function StudentCornerPage() {
   const [studentClass, setStudentClass] = useState(null);
   const [studentName, setStudentName] = useState('');
 
-  // Session check
+  // Session check + fetch profile
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
         router.push(`/login?redirect=${returnUrl}`);
-      } else {
-        setChecking(false);
-        // Fetch student's class from profiles
-        const { data: { user } } = await supabase.auth.getUser();
-   if (user) {
-  const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('full_name, class')   // ✅ यह बदलाव
-    .eq('id', user.id)
-    .single();
-  if (!error && profile) {
-    setStudentName(profile.full_name || '');   // ✅ यह नई लाइन
-    setStudentClass(profile.class || null);
-          }
-       }
+        return;
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('full_name, class')
+          .eq('id', user.id)
+          .single();
+        if (!error && profile) {
+          setStudentName(profile.full_name || '');
+          setStudentClass(profile.class || null);
+        }
+      }
+      setChecking(false);
     };
     checkSession();
   }, [router]);
@@ -760,7 +738,7 @@ export default function StudentCornerPage() {
 
   return (
     <div className="pt-20">
-      {/* Hero Section */}
+      {/* Hero Section – personalised */}
       <section className="bg-gradient-to-r from-primary-500 to-primary-700 text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <motion.h1
@@ -768,9 +746,21 @@ export default function StudentCornerPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-5xl font-bold mb-4"
           >
-            Student Corner 📚
+            {studentName ? `Welcome, ${studentName}!` : 'Student Corner 📚'}
           </motion.h1>
-          <p className="text-xl">All Study Materials, Homework & Resources in One Place</p>
+          {studentClass && (
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-xl text-white/90 font-medium"
+            >
+              Class {studentClass}
+            </motion.p>
+          )}
+          <p className="text-lg text-white/70 mt-2">
+            All Study Materials, Homework & Resources in One Place
+          </p>
         </div>
       </section>
 
