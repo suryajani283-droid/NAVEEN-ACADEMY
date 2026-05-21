@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import WhatsAppButton from '../components/WhatsAppButton'
 import AdBanner from '../components/AdBanner'
-import ServiceWorkerRegister from '../components/ServiceWorkerRegister'
+//import ServiceWorkerRegister from '../components/ServiceWorkerRegister';
 
 export const metadata = {
   title: 'Naveen Academy Senior Secondary School | Best School in Chohtan, Barmer',
