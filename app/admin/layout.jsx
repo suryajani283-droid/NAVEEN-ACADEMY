@@ -8,7 +8,8 @@ import {
   ChevronDownIcon, BookOpenIcon, DocumentTextIcon,
   ArrowDownTrayIcon, TrophyIcon, ClockIcon,
   CalendarDaysIcon, ChatBubbleLeftRightIcon, PhoneIcon,
-  TagIcon, ArrowRightOnRectangleIcon
+  TagIcon, ArrowRightOnRectangleIcon, PlayCircleIcon,
+  DevicePhoneMobileIcon
 } from '@heroicons/react/24/outline'
 
 const sidebarSections = [
@@ -31,6 +32,7 @@ const sidebarSections = [
       { href: '/admin/downloads', label: 'Downloads', icon: ArrowDownTrayIcon },
       { href: '/admin/results', label: 'Results', icon: TrophyIcon },
       { href: '/admin/timetable', label: 'Timetable', icon: ClockIcon },
+      { href: '/admin/video-lectures', label: 'Video Lectures', icon: PlayCircleIcon },
     ],
   },
   {
@@ -62,6 +64,15 @@ const sidebarSections = [
       { href: '/admin/faculty', label: 'Faculty', icon: UserGroupIcon },
       { href: '/admin/advertisements', label: 'Advertisements', icon: TagIcon },
       { href: '/admin/homepage', label: 'Homepage', icon: DocumentTextIcon },
+    ],
+  },
+  {
+    id: 'access',
+    label: 'Access Control',
+    icon: DevicePhoneMobileIcon,
+    links: [
+      { href: '/admin/allowed-users', label: 'Allowed Emails', icon: AcademicCapIcon },
+      { href: '/admin/allowed-mobiles', label: 'Allowed Mobiles', icon: DevicePhoneMobileIcon },
     ],
   },
 ]
@@ -100,7 +111,6 @@ export default function AdminLayout({ children }) {
 
   return (
     <div className="min-h-screen">
-      {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
@@ -108,7 +118,6 @@ export default function AdminLayout({ children }) {
         />
       )}
 
-      {/* Sidebar */}
       <aside className={`fixed top-20 left-0 z-40 h-[calc(100vh-5rem)] w-64 bg-slate-900 text-white transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } overflow-y-auto flex flex-col`}>
@@ -171,7 +180,6 @@ export default function AdminLayout({ children }) {
         </div>
       </aside>
 
-      {/* Main Content */}
       <div className="lg:ml-64">
         <div className="lg:hidden fixed top-20 left-0 right-0 z-30 bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3">
           <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg text-gray-600 hover:bg-gray-100">
