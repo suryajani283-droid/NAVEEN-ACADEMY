@@ -17,14 +17,22 @@ jobs:
           ref: db-backups
 
       - name: Install PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client dnsutils
 
-      - name: Dump database
+      - name: Resolve IPv4 address and dump database
         env:
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
         run: |
+          # Get IPv4 address (prevents IPv6 failure)
+          IP=$(dig +short A $DB_HOST | head -1)
+          if [ -z "$IP" ]; then
+            echo "Could not resolve IPv4, falling back to hostname"
+            IP=$DB_HOST
+          fi
+          echo "Using host: $IP"
           pg_dump \
-            -h ${{ secrets.SUPABASE_DB_HOST }} \
+            -h $IP \
             -U postgres \
             -d postgres \
             --no-owner \
