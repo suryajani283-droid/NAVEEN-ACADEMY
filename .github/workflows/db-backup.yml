@@ -2,8 +2,8 @@ name: Daily Database Backup
 
 on:
   schedule:
-    - cron: '0 20 * * *'    # रोज़ 8 PM UTC (IST 2 AM)
-  workflow_dispatch:         # मैन्युअली चलाने के लिए
+    - cron: '0 20 * * *'    # 2 AM IST every day
+  workflow_dispatch:
 
 jobs:
   backup:
@@ -16,19 +16,21 @@ jobs:
         with:
           ref: db-backups
 
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Backup roles
-        run: supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" -f roles.sql --role-only
-
-      - name: Backup schema
-        run: supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" -f schema.sql
-
-      - name: Backup data
-        run: supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" -f data.sql --data-only --use-copy
+      - name: Dump database
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          pg_dump \
+            -h ${{ secrets.SUPABASE_DB_HOST }} \
+            -U postgres \
+            -d postgres \
+            --no-owner \
+            --clean \
+            --if-exists \
+            > backup-$(date +'%Y-%m-%d').sql
 
       - name: Commit and push backup
         run: |
