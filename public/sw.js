@@ -11,7 +11,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Push notification listener
+// ✅ यही वो जगह है जहाँ पुश मैसेज मिलने पर नोटिफिकेशन बनता है
 self.addEventListener('push', (event) => {
   if (!event.data) return;
   const data = event.data.json();
@@ -24,7 +24,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-// Notification click -> open URL
+// ✅ नोटिफिकेशन पर क्लिक करने पर URL खुलता है
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const urlToOpen = event.notification.data?.url || '/student-corner';
