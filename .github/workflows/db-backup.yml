@@ -2,41 +2,38 @@ name: Daily Database Backup
 
 on:
   schedule:
-    - cron: '0 20 * * *'
-  workflow_dispatch:
+    - cron: '0 20 * * *'    # रोज़ 8 PM UTC (IST 2 AM)
+  workflow_dispatch:         # मैन्युअली चलाने के लिए
 
 jobs:
   backup:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: db-backups
 
-      - name: Setup PostgreSQL client
-        run: sudo apt-get install -y postgresql-client
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
-      - name: Create backups directory
-        run: mkdir -p backups
+      - name: Backup roles
+        run: supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" -f roles.sql --role-only
 
-      - name: Dump database
-        env:
-          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: |
-          pg_dump \
-            -h ${{ secrets.SUPABASE_DB_HOST }} \
-            -U postgres \
-            -d postgres \
-            --no-owner \
-            --clean \
-            --if-exists \
-            > backups/db-backup-$(date +'%Y-%m-%d').sql
+      - name: Backup schema
+        run: supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" -f schema.sql
+
+      - name: Backup data
+        run: supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" -f data.sql --data-only --use-copy
 
       - name: Commit and push backup
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add backups/
+          git add *.sql
           git commit -m "Database backup $(date +'%Y-%m-%d')" || echo "No changes to commit"
           git push origin db-backups --force
