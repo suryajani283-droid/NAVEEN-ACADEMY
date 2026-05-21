@@ -1,4 +1,3 @@
-
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
@@ -10,6 +9,7 @@ import {
   ClockIcon,
   AcademicCapIcon,
   ArrowDownTrayIcon,
+  PlayCircleIcon,
 } from '@heroicons/react/24/outline'
 
 const supabase = createClient(
@@ -20,15 +20,16 @@ const supabase = createClient(
 const tabs = [
   { id: 'homework', name: 'Homework', icon: BookOpenIcon },
   { id: 'notes', name: 'Notes', icon: DocumentTextIcon },
+  { id: 'video', name: 'Video Lectures', icon: PlayCircleIcon },
   { id: 'results', name: 'Results', icon: AcademicCapIcon },
   { id: 'downloads', name: 'Downloads', icon: ArrowDownTrayIcon },
   { id: 'timetable', name: 'Time Table', icon: ClockIcon },
 ]
 
 // ==================== HOMEWORK SECTION ====================
-function HomeworkSection() {
+function HomeworkSection({ studentClass }) {
   const [homeworks, setHomeworks] = useState([])
-  const [selectedClass, setSelectedClass] = useState('')
+  const [selectedClass, setSelectedClass] = useState(studentClass || '')
   const [subjects, setSubjects] = useState([])
   const [selectedSubject, setSelectedSubject] = useState('')
   const [showSubjects, setShowSubjects] = useState(false)
@@ -171,9 +172,9 @@ function HomeworkSection() {
 }
 
 // ==================== NOTES SECTION ====================
-function NotesSection() {
+function NotesSection({ studentClass }) {
   const [notes, setNotes] = useState([])
-  const [selectedClass, setSelectedClass] = useState('')
+  const [selectedClass, setSelectedClass] = useState(studentClass || '')
   const [selectedSubject, setSelectedSubject] = useState('')
   const [showNotes, setShowNotes] = useState(false)
 
@@ -302,22 +303,101 @@ function NotesSection() {
     </motion.div>
   )
 }
+// ==================== VIDEO LECTURES SECTION ====================
+function VideoLecturesSection({ studentClass }) {
+  const [lectures, setLectures] = useState([])
+  const [selectedSubject, setSelectedSubject] = useState('')
+  const [selectedChapter, setSelectedChapter] = useState('')
+
+  useEffect(() => {
+    const fetchLectures = async () => {
+      let query = supabase.from('video_lectures').select('*').order('created_at')
+      if (studentClass) {
+        query = query.or(`class.eq.${studentClass},class.is.null`)
+      }
+      const { data } = await query
+      setLectures(data || [])
+    }
+    fetchLectures()
+  }, [studentClass])
+
+  const subjects = [...new Set(lectures.map(l => l.subject))]
+  const chapters = selectedSubject
+    ? [...new Set(lectures.filter(l => l.subject === selectedSubject).map(l => l.chapter))]
+    : []
+
+  const filtered = lectures.filter(l => {
+    if (selectedSubject && l.subject !== selectedSubject) return false
+    if (selectedChapter && l.chapter !== selectedChapter) return false
+    return true
+  })
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
+        <PlayCircleIcon className="h-8 w-8 mr-2" />
+        Video Lectures
+      </h2>
+      <div className="grid md:grid-cols-2 gap-4 bg-white p-4 rounded-lg shadow">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+          <select value={selectedSubject} onChange={(e) => { setSelectedSubject(e.target.value); setSelectedChapter(''); }} className="w-full px-4 py-2 border rounded">
+            <option value="">All Subjects</option>
+            {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Chapter</label>
+          <select value={selectedChapter} onChange={(e) => setSelectedChapter(e.target.value)} className="w-full px-4 py-2 border rounded">
+            <option value="">All Chapters</option>
+            {chapters.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {filtered.length === 0 && <p className="text-gray-500 text-center py-8">No video lectures found.</p>}
+      <div className="grid md:grid-cols-2 gap-6">
+        {filtered.map((lec) => {
+          const videoId = lec.youtube_url.includes('youtube.com') ? lec.youtube_url.split('v=')[1]?.split('&')[0] : lec.youtube_url
+          return (
+            <motion.div key={lec.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
+              <h3 className="font-semibold">{lec.subject} – {lec.chapter}</h3>
+              <p className="text-gray-600 text-sm mb-3">{lec.title}</p>
+              {videoId && (
+                <div className="mb-3 rounded overflow-hidden">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${videoId}`}
+                    title={lec.title}
+                    allowFullScreen
+                    className="w-full h-48"
+                  />
+                </div>
+              )}
+            </motion.div>
+          )
+        })}
+      </div>
+    </motion.div>
+  )
+}
 
 // ==================== DOWNLOADS SECTION ====================
-function DownloadsSection() {
+function DownloadsSection({ studentClass }) {
   const [downloads, setDownloads] = useState([])
   const [selectedCategory, setSelectedCategory] = useState('All')
 
   useEffect(() => {
     const fetchDownloads = async () => {
-      const { data } = await supabase
-        .from('downloads')
-        .select('*')
-        .order('created_at', { ascending: false })
+      let query = supabase.from('downloads').select('*').order('created_at', { ascending: false })
+      if (studentClass) {
+        // Downloads may have a class field; if you want to filter by class, uncomment next line
+        // query = query.eq('class', studentClass)
+      }
+      const { data } = await query
       setDownloads(data || [])
     }
     fetchDownloads()
-  }, [])
+  }, [studentClass])
 
   const categories = ['All', 'Syllabus', 'Prospectus', 'Forms', 'Timetable', 'General', 'Other']
   const filtered = selectedCategory === 'All' ? downloads : downloads.filter(d => d.category === selectedCategory)
@@ -378,9 +458,9 @@ function DownloadsSection() {
     </motion.div>
   )
 }
-
 // ==================== RESULTS SECTION (DOB‑based + rank) ====================
 function ResultsSection() {
+  // (unchanged – results are not class-specific)
   const [cls, setCls] = useState('')
   const [roll, setRoll] = useState('')
   const [dob, setDob] = useState('')
@@ -499,8 +579,8 @@ function ResultsSection() {
 }
 
 // ==================== TIMETABLE SECTION ====================
-function TimetableSection() {
-  const [selectedClass, setSelectedClass] = useState('')
+function TimetableSection({ studentClass }) {
+  const [selectedClass, setSelectedClass] = useState(studentClass || '')
   const [timetable, setTimetable] = useState(null)
 
   useEffect(() => {
@@ -577,37 +657,47 @@ function TimetableSection() {
 // ==================== MAIN COMPONENT ====================
 export default function StudentCornerPage() {
   const router = useRouter();
-const [activeTab, setActiveTab] = useState('circulars');
-const [checking, setChecking] = useState(true);
+  const [activeTab, setActiveTab] = useState('homework');
+  const [checking, setChecking] = useState(true);
+  const [studentClass, setStudentClass] = useState(null);
 
-useEffect(() => {
-  const checkSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      // Redirect to login with the current page as the return destination
-      const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
-      router.push(`/login?redirect=${returnUrl}`);
-    } else {
-      setChecking(false);
-    }
-  };
-  checkSession();
-}, [router]);
+  // Session check
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+        router.push(`/login?redirect=${returnUrl}`);
+      } else {
+        setChecking(false);
+        // Fetch student's class from profiles
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('class')
+            .eq('id', user.id)
+            .single();
+          if (profile?.class) setStudentClass(profile.class);
+        }
+      }
+    };
+    checkSession();
+  }, [router]);
 
-// Show a stylish loading screen while checking
-if (checking) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <svg className="animate-spin h-10 w-10 text-orange-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-        <p className="mt-4 text-slate-500">Checking authentication...</p>
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <svg className="animate-spin h-10 w-10 text-orange-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <p className="mt-4 text-slate-500">Checking authentication...</p>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="pt-20">
@@ -650,11 +740,12 @@ if (checking) {
       {/* Content Sections */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          {activeTab === 'homework' && <HomeworkSection />}
-          {activeTab === 'notes' && <NotesSection />}
+          {activeTab === 'homework' && <HomeworkSection studentClass={studentClass} />}
+          {activeTab === 'notes' && <NotesSection studentClass={studentClass} />}
+          {activeTab === 'video' && <VideoLecturesSection studentClass={studentClass} />}
           {activeTab === 'results' && <ResultsSection />}
-          {activeTab === 'downloads' && <DownloadsSection />}
-          {activeTab === 'timetable' && <TimetableSection />}
+          {activeTab === 'downloads' && <DownloadsSection studentClass={studentClass} />}
+          {activeTab === 'timetable' && <TimetableSection studentClass={studentClass} />}
         </div>
       </section>
     </div>
