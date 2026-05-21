@@ -1,40 +1,64 @@
 'use client'
 import { useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
+const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
 
 export default function PushSubscribe() {
   useEffect(() => {
+    if (!VAPID_PUBLIC) {
+      console.warn('VAPID public key missing')
+      return
+    }
+
     const register = async () => {
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
-      const sw = await navigator.serviceWorker.ready
-      const existing = await sw.pushManager.getSubscription()
-      if (existing) {
-        // Already subscribed – store it
+      try {
+        const reg = await navigator.serviceWorker.ready
+        const existing = await reg.pushManager.getSubscription()
+        if (existing) {
+          // Already subscribed – store it in Supabase
+          await fetch('/api/push/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscription: existing.toJSON() }),
+          })
+          return
+        }
+
+        // Request permission if not already granted
+        if (Notification.permission !== 'granted') {
+          const permission = await Notification.requestPermission()
+          if (permission !== 'granted') return
+        }
+
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC),
+        })
+
         await fetch('/api/push/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subscription: existing.toJSON() }),
+          body: JSON.stringify({ subscription: subscription.toJSON() }),
         })
-        return
+      } catch (err) {
+        console.error('Push subscription failed', err)
       }
-      const permission = await Notification.requestPermission()
-      if (permission !== 'granted') return
-      const subscription = await sw.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-      })
-      await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscription: subscription.toJSON() }),
-      })
     }
-    register().catch(console.error)
+
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      navigator.serviceWorker.ready.then(() => register())
+    }
   }, [])
 
   return null
