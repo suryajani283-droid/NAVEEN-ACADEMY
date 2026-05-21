@@ -23,7 +23,7 @@ export default function Dashboard() {
           <h3 className="font-semibold mt-3 text-gray-700">Post Notice</h3>
           <p className="text-sm text-gray-500 mt-1">Add new announcements</p>
         </Link>
-        <Link href="/admin/admission" className="card bg-white border border-slate-100 shadow-md hover:shadow-lg transition p-6 text-center">
+        <Link href="/admin/admissions" className="card bg-white border border-slate-100 shadow-md hover:shadow-lg transition p-6 text-center">
           <span className="text-4xl">🎓</span>
           <h3 className="font-semibold mt-3 text-gray-700">Admissions</h3>
           <p className="text-sm text-gray-500 mt-1">View applications</p>
