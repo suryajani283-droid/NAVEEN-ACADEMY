@@ -374,6 +374,7 @@ function FeeInfoSection() {
 // ---------- Main ParentCornerPage (with session protection) ----------
 export default function ParentCornerPage() {
   const router = useRouter();
+const [activeTab,setActiveTab]=useState('circulars');
 const [checking, setChecking] = useState(true);
 
 useEffect(() => {
