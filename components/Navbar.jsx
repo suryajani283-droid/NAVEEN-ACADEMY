@@ -19,7 +19,7 @@ const navigation = [
   { name: 'Student Corner', href: '/student-corner', color: true },
   { name: 'Parent Corner', href: '/parent-corner', color: true },
   { name: 'Gallery', href: '/gallery' },
-  { name: 'Admission', href: '/admission' },
+  { name: 'Admission', href: '/admissions' },
   { name: 'Notices', href: '/notices' },
   { name: 'Contact', href: '/contact' },
 ]
