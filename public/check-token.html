@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check Admin Token</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f4ff; }
+    pre { background: white; padding: 10px; border-radius: 8px; white-space: pre-wrap; word-break: break-word; }
+    .err { color: red; }
+  </style>
+</head>
+<body>
+  <h2>🔐 Admin Token Payload</h2>
+  <pre id="output">Loading...</pre>
+  <script>
+    const token = document.cookie.split('; ').find(row => row.startsWith('adminToken='))?.split('=')[1];
+    if (!token) {
+      document.getElementById('output').textContent = '❌ No adminToken cookie found. You are not logged in.';
+    } else {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        document.getElementById('output').textContent = JSON.stringify(payload, null, 2);
+      } catch (e) {
+        document.getElementById('output').textContent = '❌ Failed to decode token: ' + e.message;
+      }
+    }
+  </script>
+</body>
+</html>
