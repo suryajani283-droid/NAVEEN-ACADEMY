@@ -4,9 +4,10 @@ import { supabaseAdmin } from '../../../../lib/supabase';
 
 export async function POST(request) {
   try {
-    const { email, password, role, class: teacherClass, name, userId } = await request.json();
+    const body = await request.json();
+    const { email, password, role, class: teacherClass, name, userId } = body;
 
-    // Teacher login path
+    // ---- Teacher login ----
     if (role === 'teacher' && userId) {
       // Verify teacher exists in teachers table
       const { data: teacher, error: teacherError } = await supabaseAdmin
@@ -20,6 +21,10 @@ export async function POST(request) {
       }
 
       // Generate teacher JWT
+      if (!process.env.JWT_SECRET) {
+        return NextResponse.json({ error: 'JWT_SECRET not configured' }, { status: 500 });
+      }
+
       const secret = new TextEncoder().encode(process.env.JWT_SECRET);
       const token = await new SignJWT({
         role: 'teacher',
@@ -42,9 +47,13 @@ export async function POST(request) {
       return response;
     }
 
-    // Admin login path
+    // ---- Admin login ----
     if (password !== process.env.ADMIN_PASSWORD) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      return NextResponse.json({ error: 'JWT_SECRET not configured' }, { status: 500 });
     }
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
