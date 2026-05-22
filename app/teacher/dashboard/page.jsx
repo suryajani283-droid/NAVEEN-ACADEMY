@@ -12,58 +12,51 @@ const supabase = createClient(
 export default function TeacherDashboard() {
   const [teacherClass, setTeacherClass] = useState(null)
   const [teacherName, setTeacherName] = useState('')
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
     const fetchTeacher = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/teacher-login')
-        return
-      }
-
+      if (!user) { router.push('/teacher-login'); return }
       const { data: teacher, error } = await supabase
         .from('teachers')
         .select('class, name')
-        .eq('id', user.id)        // ✅ सही यूज़र के लिए
+        .eq('id', user.id)
         .single()
-
-      if (error || !teacher) {
-        router.push('/teacher-login')
-        return
-      }
-
+      if (error || !teacher) { router.push('/teacher-login'); return }
       setTeacherClass(teacher.class)
       setTeacherName(teacher.name)
+      setLoading(false)
     }
     fetchTeacher()
   }, [router])
 
-  if (!teacherClass) return <div className="pt-20 text-center">लोड हो रहा है...</div>
+  if (loading) return <div className="pt-20 text-center">Loading...</div>
 
   return (
     <div className="pt-20 container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold text-primary-500 mb-2">
-        नमस्ते, {teacherName}
+        Welcome, {teacherName}
       </h2>
-      <p className="text-gray-500 mb-8">कक्षा {teacherClass} का प्रबंधन</p>
+      <p className="text-gray-500 mb-8">Managing Class {teacherClass}</p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Link href="/teacher/homework" className="card text-center hover:shadow-lg">
           <span className="text-4xl">📝</span>
-          <h3 className="font-semibold mt-2">होमवर्क</h3>
+          <h3 className="font-semibold mt-2">Homework</h3>
         </Link>
         <Link href="/teacher/notes" className="card text-center hover:shadow-lg">
           <span className="text-4xl">📚</span>
-          <h3 className="font-semibold mt-2">नोट्स</h3>
+          <h3 className="font-semibold mt-2">Notes</h3>
         </Link>
         <Link href="/teacher/results" className="card text-center hover:shadow-lg">
           <span className="text-4xl">🏆</span>
-          <h3 className="font-semibold mt-2">रिजल्ट</h3>
+          <h3 className="font-semibold mt-2">Results</h3>
         </Link>
         <Link href="/teacher/video-lectures" className="card text-center hover:shadow-lg">
           <span className="text-4xl">🎬</span>
-          <h3 className="font-semibold mt-2">वीडियो लेक्चर</h3>
+          <h3 className="font-semibold mt-2">Video Lectures</h3>
         </Link>
       </div>
     </div>
