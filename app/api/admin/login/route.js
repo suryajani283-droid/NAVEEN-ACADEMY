@@ -8,18 +8,18 @@ export async function POST(request) {
 
     // Teacher login path
     if (role === 'teacher' && userId) {
-      // Validate that the teacher exists in teachers table (already checked client-side, but double-check)
-      const { data: teacher } = await supabaseAdmin
+      // Verify teacher exists in teachers table
+      const { data: teacher, error: teacherError } = await supabaseAdmin
         .from('teachers')
         .select('id')
         .eq('id', userId)
         .single();
 
-      if (!teacher) {
-        return NextResponse.json({ error: 'Invalid teacher' }, { status: 401 });
+      if (teacherError || !teacher) {
+        return NextResponse.json({ error: 'Invalid teacher record' }, { status: 401 });
       }
 
-      // Create teacher JWT
+      // Generate teacher JWT
       const secret = new TextEncoder().encode(process.env.JWT_SECRET);
       const token = await new SignJWT({
         role: 'teacher',
@@ -42,7 +42,7 @@ export async function POST(request) {
       return response;
     }
 
-    // Admin login path (existing logic)
+    // Admin login path
     if (password !== process.env.ADMIN_PASSWORD) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
