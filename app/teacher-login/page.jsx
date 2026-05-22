@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -12,6 +12,15 @@ export default function TeacherLoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [debug, setDebug] = useState('')
+
+  // Always show the current cookie value
+  useEffect(() => {
+    const token = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('adminToken='))
+      ?.split('=')[1];
+    setDebug(prev => prev + '\n[Page load] adminToken = ' + (token ? token.substring(0, 20) + '...' : 'NOT SET'));
+  }, [])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -61,20 +70,30 @@ export default function TeacherLoginPage() {
     })
 
     const raw = await res.text()
-    setDebug(prev => prev + '\nAPI response status: ' + res.status + '\nRaw: ' + raw)
+    setDebug(prev => prev + '\nAPI status: ' + res.status + ', response: ' + raw)
 
     if (!res.ok) {
       try {
         const errData = JSON.parse(raw)
         setError('API error: ' + (errData.error || raw))
       } catch {
-        setError('API error (non‑JSON): ' + raw)
+        setError('API error: ' + raw)
       }
       return
     }
 
-    // 4. Redirect to admin dashboard
-    window.location.href = '/admin/dashboard'
+    const data = JSON.parse(raw)
+    if (data.token) {
+      // Manually set the cookie for the whole site
+      document.cookie = 'adminToken=' + data.token + '; path=/; max-age=86400; secure; samesite=strict';
+      setDebug(prev => prev + '\n✅ Token set manually. Redirecting...');
+      // Redirect to admin dashboard
+      setTimeout(() => {
+        window.location.href = '/admin/dashboard';
+      }, 1000);
+    } else {
+      setError('No token in API response');
+    }
   }
 
   return (
@@ -93,11 +112,11 @@ export default function TeacherLoginPage() {
             Log In
           </button>
         </form>
-        {debug && (
-          <pre className="mt-4 text-xs text-gray-500 bg-gray-100 p-3 rounded whitespace-pre-wrap">
-            {debug}
-          </pre>
-        )}
+        {/* Permanent debug area – always visible */}
+        <div className="mt-4 p-3 bg-gray-100 rounded text-xs text-gray-600 whitespace-pre-wrap">
+          <strong>Debug info:</strong>
+          <pre className="mt-1">{debug || 'No debug yet'}</pre>
+        </div>
       </div>
     </div>
   )
