@@ -29,6 +29,8 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [user, setUser] = useState(null)
   const [studentName, setStudentName] = useState('')
+  const [isTeacher, setIsTeacher] = useState(false)   // ✅ new state
+  const [teacherName, setTeacherName] = useState('')   // ✅ teacher name
   const router = useRouter()
 
   // Scroll effect
@@ -38,12 +40,13 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Check auth state and fetch student name
+  // Check auth state, student profile and teacher role
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
       if (user) {
+        // Check student profile
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name')
@@ -52,6 +55,24 @@ export default function Navbar() {
         if (profile?.full_name) {
           setStudentName(profile.full_name)
         }
+
+        // ✅ Check if teacher
+        const { data: teacher } = await supabase
+          .from('teachers')
+          .select('name')
+          .eq('id', user.id)
+          .single()
+        if (teacher) {
+          setIsTeacher(true)
+          setTeacherName(teacher.name)
+        } else {
+          setIsTeacher(false)
+          setTeacherName('')
+        }
+      } else {
+        setIsTeacher(false)
+        setTeacherName('')
+        setStudentName('')
       }
     }
     fetchUser()
@@ -61,6 +82,8 @@ export default function Navbar() {
     await supabase.auth.signOut()
     setUser(null)
     setStudentName('')
+    setIsTeacher(false)
+    setTeacherName('')
     router.push('/')
   }
 
@@ -112,10 +135,28 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Auth + Admission button (desktop) */}
-          <div className="hidden lg:flex lg:items-center lg:gap-x-6">
-            {user ? (
-              <div className="flex items-center gap-4">
+          {/* Auth + Teacher + Admission button (desktop) */}
+          <div className="hidden lg:flex lg:items-center lg:gap-x-4">
+            {/* ✅ Teacher link / name */}
+            {isTeacher ? (
+              <Link
+                href="/teacher/dashboard"
+                className="text-sm font-semibold text-[#B4542C] hover:text-[#8B3A3A] transition-colors"
+              >
+                👨‍🏫 {teacherName || 'Teacher Panel'}
+              </Link>
+            ) : (
+              <Link
+                href="/teacher-login"
+                className="text-sm font-semibold text-gray-500 hover:text-[#B4542C] transition-colors"
+              >
+                Teacher Login
+              </Link>
+            )}
+
+            {/* Student / Parent login */}
+            {user && !isTeacher ? (
+              <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-700">
                   {studentName || 'Student'}
                 </span>
@@ -126,7 +167,16 @@ export default function Navbar() {
                   Logout
                 </button>
               </div>
+            ) : user && isTeacher ? (
+              /* Teacher is already logged in, show logout only (no student name) */
+              <button
+                onClick={handleLogout}
+                className="text-sm text-red-400 hover:text-red-300 transition-colors"
+              >
+                Logout
+              </button>
             ) : (
+              /* No user logged in at all */
               <Link
                 href="/login"
                 className="text-sm font-semibold text-gray-700 hover:text-[#B4542C] transition-colors"
@@ -134,6 +184,7 @@ export default function Navbar() {
                 Login
               </Link>
             )}
+
             <Link
               href="/admission"
               className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white px-5 py-2.5 rounded-full font-semibold text-sm transition-all shadow-md"
@@ -177,12 +228,24 @@ export default function Navbar() {
                     {item.name}
                   </Link>
                 ))}
+                {/* ✅ Teacher link in mobile menu */}
+                <Link
+                  href={isTeacher ? '/teacher/dashboard' : '/teacher-login'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold transition-colors ${
+                    isTeacher
+                      ? 'text-[#B4542C] hover:bg-orange-50'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {isTeacher ? `👨‍🏫 ${teacherName || 'Teacher Panel'}` : 'Teacher Login'}
+                </Link>
               </div>
               <div className="py-6 space-y-2">
                 {user ? (
                   <>
                     <p className="text-sm text-gray-500 text-center">
-                      {studentName || 'Student'}
+                      {isTeacher ? teacherName : studentName || 'Student'}
                     </p>
                     <button
                       onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
