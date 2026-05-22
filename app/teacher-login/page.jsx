@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const supabase = createClient(
@@ -14,13 +13,13 @@ export default function TeacherLoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const router = useRouter()
 
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
     setSuccess(false)
 
+    // 1. Supabase Auth से login
     const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -30,6 +29,7 @@ export default function TeacherLoginPage() {
       return
     }
 
+    // 2. teachers table में check करें
     const userId = data.user?.id
     const { data: teacher, error: teacherError } = await supabase
       .from('teachers')
@@ -43,9 +43,9 @@ export default function TeacherLoginPage() {
       return
     }
 
+    // 3. सफलता दिखाएँ और हार्ड रीडायरेक्ट करें
     setSuccess(true)
-    // Redirect to teacher dashboard
-    router.push('/teacher/dashboard')
+    window.location.href = '/teacher/dashboard'   // ✅ hard redirect – हमेशा काम करेगा
   }
 
   return (
@@ -84,14 +84,12 @@ export default function TeacherLoginPage() {
         ) : (
           <div className="text-center space-y-4">
             <p className="text-green-600 font-semibold">✅ Login successful!</p>
-            <p className="text-gray-600">
-              Redirecting to your dashboard...
-            </p>
+            <p className="text-gray-600">Redirecting to your dashboard...</p>
             <Link
               href="/teacher/dashboard"
               className="inline-block bg-primary-500 text-white px-6 py-2 rounded-lg hover:bg-primary-600"
             >
-              Go to Dashboard
+              Go to Dashboard (manual)
             </Link>
           </div>
         )}
