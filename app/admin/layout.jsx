@@ -35,6 +35,7 @@ const sidebarSections = [
       { href: '/admin/video-lectures', label: 'Video Lectures', icon: PlayCircleIcon },
     ],
   },
+  // other sections unchanged...
   {
     id: 'parent',
     label: 'Parent Management',
@@ -105,8 +106,31 @@ export default function AdminLayout({ children }) {
     }
   }, [])
 
+  // ----- Redirect teachers away from non‑allowed pages -----
+  useEffect(() => {
+    if (role !== 'teacher') return
+
+    // Allowed paths for teachers
+    const allowed = [
+      '/admin/dashboard',
+      '/admin/statistics',   // optional – can remove if you don't want teachers to see stats
+      '/admin/homework',
+      '/admin/notes',
+      '/admin/downloads',
+      '/admin/results',
+      '/admin/timetable',
+      '/admin/video-lectures',
+    ]
+
+    const isAllowed = allowed.some(p => pathname === p || pathname.startsWith(p + '/'))
+    if (!isAllowed) {
+      router.replace('/admin/dashboard')
+    }
+  }, [pathname, role, router])
+
+  // Filter sidebar sections for teachers
   const filteredSections = role === 'teacher'
-    ? sidebarSections.filter(section => section.id === 'student')
+    ? sidebarSections.filter(section => section.id === 'student' || section.id === 'home')
     : sidebarSections
 
   useEffect(() => {
