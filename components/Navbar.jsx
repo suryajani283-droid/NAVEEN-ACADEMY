@@ -264,7 +264,7 @@ export default function Navbar() {
                   </Link>
                 )}
                 <Link
-                  href="/admission"
+                  href="/admissions"
                   onClick={() => setMobileMenuOpen(false)}
                   className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white block text-center w-full rounded-full px-3 py-2.5 font-semibold transition-colors shadow-md"
                 >
