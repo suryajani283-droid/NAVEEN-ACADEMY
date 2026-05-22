@@ -18,17 +18,39 @@ export default function AdminNotes() {
   })
   const [editingId, setEditingId] = useState(null)
   const [uploading, setUploading] = useState(false)
-  const [inputMode, setInputMode] = useState('upload') // 'upload' or 'link'
+  const [inputMode, setInputMode] = useState('upload')
+
+  // ✅ TEACHER CLASS DETECTION
+  const [teacherClass, setTeacherClass] = useState(null)
+
+  useEffect(() => {
+    const token = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('adminToken='))
+      ?.split('=')[1]
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        if (payload.role === 'teacher' && payload.class) {
+          setTeacherClass(payload.class)
+        }
+      } catch {}
+    }
+  }, [])
 
   const fetchNotes = async () => {
-    const { data } = await supabase
+    let query = supabase
       .from('notes')
       .select('*')
       .order('created_at', { ascending: false })
+    if (teacherClass) query = query.eq('class', teacherClass)
+    const { data } = await query
     setNotes(data || [])
   }
 
-  useEffect(() => { fetchNotes() }, [])
+  useEffect(() => {
+    fetchNotes()
+  }, [teacherClass])
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0]
@@ -60,16 +82,17 @@ export default function AdminNotes() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const payload = { ...form, class: teacherClass || form.class }
     const url = editingId ? `/api/admin/notes/${editingId}` : '/api/admin/notes'
     const method = editingId ? 'PUT' : 'POST'
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
       credentials: 'include',
     })
     if (res.ok) {
-      setForm({ subject: '', class: '', title: '', file_url: '', type: 'PDF' })
+      setForm({ subject: '', class: teacherClass || '', title: '', file_url: '', type: 'PDF' })
       setEditingId(null)
       setInputMode('upload')
       fetchNotes()
@@ -103,9 +126,11 @@ export default function AdminNotes() {
           <input type="text" placeholder="Subject *" value={form.subject}
             onChange={(e) => setForm({...form, subject: e.target.value})}
             className="w-full px-4 py-2 border rounded" required />
-          <input type="number" placeholder="Class" value={form.class}
-            onChange={(e) => setForm({...form, class: e.target.value})}
-            className="w-full px-4 py-2 border rounded" />
+          {!teacherClass && (
+            <input type="number" placeholder="Class" value={form.class}
+              onChange={(e) => setForm({...form, class: e.target.value})}
+              className="w-full px-4 py-2 border rounded" />
+          )}
           <input type="text" placeholder="Title / Topic" value={form.title}
             onChange={(e) => setForm({...form, title: e.target.value})}
             className="w-full px-4 py-2 border rounded" />
@@ -117,7 +142,6 @@ export default function AdminNotes() {
           </select>
         </div>
 
-        {/* ---- Toggle ---- */}
         <div className="flex gap-4">
           <label className="flex items-center gap-2">
             <input type="radio" name="inputMode" value="upload"
@@ -135,26 +159,17 @@ export default function AdminNotes() {
 
         {inputMode === 'upload' && (
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Choose File (PDF/Image, max 3MB)
-            </label>
-            <input type="file" accept=".pdf,image/*"
-              onChange={handleFileUpload}
+            <label className="block text-sm font-medium text-gray-700">Choose File (PDF/Image, max 3MB)</label>
+            <input type="file" accept=".pdf,image/*" onChange={handleFileUpload}
               className="w-full px-4 py-2 border rounded" />
             {uploading && <span className="text-sm text-primary-500">Uploading...</span>}
-            {form.file_url && (
-              <p className="text-xs text-green-600">
-                ✅ Uploaded: {form.file_url.substring(0, 50)}...
-              </p>
-            )}
+            {form.file_url && <p className="text-xs text-green-600">✅ Uploaded</p>}
           </div>
         )}
 
         {inputMode === 'link' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Paste Link (PDF/Image URL)
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Paste Link (PDF/Image URL)</label>
             <input type="url" placeholder="https://drive.google.com/..."
               value={form.file_url}
               onChange={(e) => setForm({ ...form, file_url: e.target.value })}
@@ -168,7 +183,7 @@ export default function AdminNotes() {
         {editingId && (
           <button type="button" onClick={() => {
             setEditingId(null)
-            setForm({ subject: '', class: '', title: '', file_url: '', type: 'PDF' })
+            setForm({ subject: '', class: teacherClass || '', title: '', file_url: '', type: 'PDF' })
             setInputMode('upload')
           }} className="btn-secondary ml-2">Cancel</button>
         )}
