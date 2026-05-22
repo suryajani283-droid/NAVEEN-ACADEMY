@@ -7,9 +7,8 @@ export async function POST(request) {
     const body = await request.json();
     const { email, password, role, class: teacherClass, name, userId } = body;
 
-    // ---- Teacher login ----
+    // Teacher login
     if (role === 'teacher' && userId) {
-      // Verify teacher exists in teachers table
       const { data: teacher, error: teacherError } = await supabaseAdmin
         .from('teachers')
         .select('id')
@@ -18,11 +17,6 @@ export async function POST(request) {
 
       if (teacherError || !teacher) {
         return NextResponse.json({ error: 'Invalid teacher record' }, { status: 401 });
-      }
-
-      // Generate teacher JWT
-      if (!process.env.JWT_SECRET) {
-        return NextResponse.json({ error: 'JWT_SECRET not configured' }, { status: 500 });
       }
 
       const secret = new TextEncoder().encode(process.env.JWT_SECRET);
@@ -36,9 +30,9 @@ export async function POST(request) {
         .setExpirationTime('1d')
         .sign(secret);
 
-      const response = NextResponse.json({ success: true });
+      const response = NextResponse.json({ success: true, token });
       response.cookies.set('adminToken', token, {
-        httpOnly: true,
+        httpOnly: false,   // allow JavaScript to read it for debugging
         secure: true,
         sameSite: 'strict',
         maxAge: 86400,
@@ -47,13 +41,9 @@ export async function POST(request) {
       return response;
     }
 
-    // ---- Admin login ----
+    // Admin login
     if (password !== process.env.ADMIN_PASSWORD) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (!process.env.JWT_SECRET) {
-      return NextResponse.json({ error: 'JWT_SECRET not configured' }, { status: 500 });
     }
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
@@ -62,9 +52,9 @@ export async function POST(request) {
       .setExpirationTime('1d')
       .sign(secret);
 
-    const response = NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true, token });
     response.cookies.set('adminToken', token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: true,
       sameSite: 'strict',
       maxAge: 86400,
