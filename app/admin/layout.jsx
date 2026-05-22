@@ -84,8 +84,33 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname()
   const router = useRouter()
 
+  const [role, setRole] = useState(null)
+  const [teacherClass, setTeacherClass] = useState(null)
+
   useEffect(() => {
-    for (const section of sidebarSections) {
+    const token = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('adminToken='))
+      ?.split('=')[1]
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        setRole(payload.role)
+        if (payload.role === 'teacher' && payload.class) {
+          setTeacherClass(payload.class)
+        }
+      } catch (e) {
+        setRole(null)
+      }
+    }
+  }, [])
+
+  const filteredSections = role === 'teacher'
+    ? sidebarSections.filter(section => section.id === 'student')
+    : sidebarSections
+
+  useEffect(() => {
+    for (const section of filteredSections) {
       if (section.links.some(link => pathname.startsWith(link.href))) {
         setExpandedSections(prev =>
           prev.includes(section.id) ? prev : [...prev, section.id]
@@ -93,7 +118,7 @@ export default function AdminLayout({ children }) {
         break
       }
     }
-  }, [pathname])
+  }, [pathname, filteredSections])
 
   const toggleSection = (sectionId) => {
     setExpandedSections(prev =>
@@ -132,7 +157,7 @@ export default function AdminLayout({ children }) {
         </div>
 
         <nav className="p-3 space-y-1 flex-1">
-          {sidebarSections.map((section) => (
+          {filteredSections.map((section) => (
             <div key={section.id}>
               <button
                 onClick={() => toggleSection(section.id)}
