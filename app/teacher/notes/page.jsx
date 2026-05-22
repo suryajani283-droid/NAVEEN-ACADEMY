@@ -32,25 +32,20 @@ export default function TeacherNotes() {
 
   const fetchNotes = async () => {
     if (!teacherClass) return
-    const { data } = await supabase
-      .from('notes')
-      .select('*')
-      .eq('class', teacherClass)
-      .order('created_at', { ascending: false })
-    setNotes(data || [])
+    const res = await fetch('/api/teacher/notes', { credentials: 'include' })
+    if (res.ok) setNotes(await res.json())
   }
 
   useEffect(() => { if (teacherClass) fetchNotes() }, [teacherClass])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const payload = { ...form, class: teacherClass }
-    const url = editingId ? `/api/admin/notes/${editingId}` : '/api/admin/notes'
+    const url = editingId ? `/api/teacher/notes/${editingId}` : '/api/teacher/notes'
     const method = editingId ? 'PUT' : 'POST'
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(form),
       credentials: 'include',
     })
     if (res.ok) {
@@ -69,7 +64,7 @@ export default function TeacherNotes() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete?')) return
-    await fetch(`/api/admin/notes/${id}`, { method: 'DELETE', credentials: 'include' })
+    await fetch(`/api/teacher/notes/${id}`, { method: 'DELETE', credentials: 'include' })
     fetchNotes()
   }
 
