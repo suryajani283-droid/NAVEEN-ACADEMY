@@ -73,6 +73,7 @@ const sidebarSections = [
     links: [
       { href: '/admin/allowed-users', label: 'Allowed Emails', icon: AcademicCapIcon },
       { href: '/admin/allowed-mobiles', label: 'Allowed Mobiles', icon: DevicePhoneMobileIcon },
+      { href: '/admin/teachers', label: 'Teachers', icon: AcademicCapIcon },
     ],
   },
 ]
