@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -11,21 +11,10 @@ export default function TeacherLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [debug, setDebug] = useState('')
-
-  // Always show the current cookie value
-  useEffect(() => {
-    const token = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('adminToken='))
-      ?.split('=')[1];
-    setDebug(prev => prev + '\n[Page load] adminToken = ' + (token ? token.substring(0, 20) + '...' : 'NOT SET'));
-  }, [])
 
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
-    setDebug('')
 
     // 1. Sign in with Supabase
     const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -33,12 +22,11 @@ export default function TeacherLoginPage() {
       password,
     })
     if (signInError) {
-      setError('Sign in failed: ' + signInError.message)
+      setError(signInError.message)
       return
     }
 
     const userId = data.user?.id
-    setDebug('User ID: ' + userId)
 
     // 2. Verify teacher record
     const { data: teacher, error: teacherError } = await supabase
@@ -52,8 +40,6 @@ export default function TeacherLoginPage() {
       await supabase.auth.signOut()
       return
     }
-
-    setDebug(prev => prev + '\nTeacher class: ' + teacher.class)
 
     // 3. Get teacher JWT from admin login API
     const res = await fetch('/api/admin/login', {
@@ -69,30 +55,27 @@ export default function TeacherLoginPage() {
       }),
     })
 
-    const raw = await res.text()
-    setDebug(prev => prev + '\nAPI status: ' + res.status + ', response: ' + raw)
-
     if (!res.ok) {
+      const raw = await res.text()
       try {
         const errData = JSON.parse(raw)
-        setError('API error: ' + (errData.error || raw))
+        setError('Login failed: ' + (errData.error || raw))
       } catch {
-        setError('API error: ' + raw)
+        setError('Login failed. Please try again.')
       }
       return
     }
 
-    const data = JSON.parse(raw)
+    const data = await res.json()
     if (data.token) {
-      // Manually set the cookie for the whole site
+      // Clear any previous admin cookie
+      document.cookie = 'adminToken=; path=/; max-age=0';
+      // Set the new teacher token cookie
       document.cookie = 'adminToken=' + data.token + '; path=/; max-age=86400; secure; samesite=strict';
-      setDebug(prev => prev + '\n✅ Token set manually. Redirecting...');
       // Redirect to admin dashboard
-      setTimeout(() => {
-        window.location.href = '/admin/dashboard';
-      }, 1000);
+      window.location.href = '/admin/dashboard';
     } else {
-      setError('No token in API response');
+      setError('No token received. Please contact admin.')
     }
   }
 
@@ -101,22 +84,30 @@ export default function TeacherLoginPage() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
         <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Teacher Login</h2>
         <form onSubmit={handleLogin} className="space-y-4">
-          <input type="email" placeholder="Email" value={email}
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg" required />
-          <input type="password" placeholder="Password" value={password}
+            className="w-full px-4 py-3 border rounded-lg"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg" required />
-          {error && <p className="text-red-500 text-sm whitespace-pre-wrap">{error}</p>}
-          <button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl">
+            className="w-full px-4 py-3 border rounded-lg"
+            required
+          />
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <button
+            type="submit"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl"
+          >
             Log In
           </button>
         </form>
-        {/* Permanent debug area – always visible */}
-        <div className="mt-4 p-3 bg-gray-100 rounded text-xs text-gray-600 whitespace-pre-wrap">
-          <strong>Debug info:</strong>
-          <pre className="mt-1">{debug || 'No debug yet'}</pre>
-        </div>
       </div>
     </div>
   )
