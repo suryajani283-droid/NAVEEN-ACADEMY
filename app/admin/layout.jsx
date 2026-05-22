@@ -35,7 +35,6 @@ const sidebarSections = [
       { href: '/admin/video-lectures', label: 'Video Lectures', icon: PlayCircleIcon },
     ],
   },
-  // other sections unchanged...
   {
     id: 'parent',
     label: 'Parent Management',
@@ -87,7 +86,9 @@ export default function AdminLayout({ children }) {
 
   const [role, setRole] = useState(null)
   const [teacherClass, setTeacherClass] = useState(null)
+  const [loading, setLoading] = useState(true)   // ✅ prevent flash
 
+  // Detect role from cookie
   useEffect(() => {
     const token = document.cookie
       .split('; ')
@@ -104,16 +105,16 @@ export default function AdminLayout({ children }) {
         setRole(null)
       }
     }
+    setLoading(false)   // done checking
   }, [])
 
-  // ----- Redirect teachers away from non‑allowed pages -----
+  // Redirect teachers away from forbidden pages
   useEffect(() => {
-    if (role !== 'teacher') return
+    if (role !== 'teacher' || loading) return
 
-    // Allowed paths for teachers
     const allowed = [
       '/admin/dashboard',
-      '/admin/statistics',   // optional – can remove if you don't want teachers to see stats
+      '/admin/statistics',
       '/admin/homework',
       '/admin/notes',
       '/admin/downloads',
@@ -121,12 +122,11 @@ export default function AdminLayout({ children }) {
       '/admin/timetable',
       '/admin/video-lectures',
     ]
-
     const isAllowed = allowed.some(p => pathname === p || pathname.startsWith(p + '/'))
     if (!isAllowed) {
       router.replace('/admin/dashboard')
     }
-  }, [pathname, role, router])
+  }, [pathname, role, loading, router])
 
   // Filter sidebar sections for teachers
   const filteredSections = role === 'teacher'
@@ -153,11 +153,23 @@ export default function AdminLayout({ children }) {
   }
 
   const handleLogout = () => {
-    document.cookie = 'adminToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;'
+    document.cookie = 'adminToken=; path=/; max-age=0'
     router.push('/admin')
   }
 
   const isActive = (href) => pathname === href || pathname.startsWith(href + '/')
+
+  // Show nothing until role is known (prevents full sidebar flash)
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <div className="animate-spin h-10 w-10 border-4 border-orange-500 border-t-transparent rounded-full mx-auto"></div>
+          <p className="mt-4 text-slate-500">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen">
