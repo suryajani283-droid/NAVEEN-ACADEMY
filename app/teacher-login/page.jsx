@@ -11,10 +11,12 @@ export default function TeacherLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [debug, setDebug] = useState('')
 
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
+    setDebug('')
 
     // 1. Sign in with Supabase
     const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -22,11 +24,12 @@ export default function TeacherLoginPage() {
       password,
     })
     if (signInError) {
-      setError(signInError.message)
+      setError('Sign in failed: ' + signInError.message)
       return
     }
 
     const userId = data.user?.id
+    setDebug('User ID: ' + userId)
 
     // 2. Verify teacher record
     const { data: teacher, error: teacherError } = await supabase
@@ -36,10 +39,12 @@ export default function TeacherLoginPage() {
       .single()
 
     if (teacherError || !teacher) {
-      setError('You are not a registered teacher.')
+      setError('You are not registered as a teacher.')
       await supabase.auth.signOut()
       return
     }
+
+    setDebug(prev => prev + '\nTeacher class: ' + teacher.class)
 
     // 3. Get teacher JWT from admin login API
     const res = await fetch('/api/admin/login', {
@@ -47,7 +52,7 @@ export default function TeacherLoginPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email,
-        password: '',          // not used for teacher
+        password: '',
         role: 'teacher',
         class: teacher.class,
         name: teacher.name,
@@ -55,9 +60,16 @@ export default function TeacherLoginPage() {
       }),
     })
 
+    const raw = await res.text()
+    setDebug(prev => prev + '\nAPI response status: ' + res.status + '\nRaw: ' + raw)
+
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      setError('Failed to get teacher token: ' + (data.error || res.statusText))
+      try {
+        const errData = JSON.parse(raw)
+        setError('API error: ' + (errData.error || raw))
+      } catch {
+        setError('API error (non‑JSON): ' + raw)
+      }
       return
     }
 
@@ -70,27 +82,22 @@ export default function TeacherLoginPage() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
         <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Teacher Login</h2>
         <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
+          <input type="email" placeholder="Email" value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
+            className="w-full px-4 py-3 border rounded-lg" required />
+          <input type="password" placeholder="Password" value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
-            required
-          />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+            className="w-full px-4 py-3 border rounded-lg" required />
+          {error && <p className="text-red-500 text-sm whitespace-pre-wrap">{error}</p>}
           <button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl">
             Log In
           </button>
         </form>
+        {debug && (
+          <pre className="mt-4 text-xs text-gray-500 bg-gray-100 p-3 rounded whitespace-pre-wrap">
+            {debug}
+          </pre>
+        )}
       </div>
     </div>
   )
