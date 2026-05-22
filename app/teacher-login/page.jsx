@@ -66,12 +66,12 @@ export default function TeacherLoginPage() {
       return
     }
 
-    const data = await res.json()
-    if (data.token) {
+    const result = await res.json()   // ✅ renamed from `data` to `result`
+    if (result.token) {
       // Clear any previous admin cookie
       document.cookie = 'adminToken=; path=/; max-age=0';
       // Set the new teacher token cookie
-      document.cookie = 'adminToken=' + data.token + '; path=/; max-age=86400; secure; samesite=strict';
+      document.cookie = 'adminToken=' + result.token + '; path=/; max-age=86400; secure; samesite=strict';
       // Redirect to admin dashboard
       window.location.href = '/admin/dashboard';
     } else {
