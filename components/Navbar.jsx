@@ -19,7 +19,7 @@ const navigation = [
   { name: 'Student Corner', href: '/student-corner', color: true },
   { name: 'Parent Corner', href: '/parent-corner', color: true },
   { name: 'Gallery', href: '/gallery' },
-  { name: 'Admission', href: '/admission' },
+  { name: 'Admission', href: '/admissions' },
   { name: 'Notices', href: '/notices' },
   { name: 'Contact', href: '/contact' },
 ]
@@ -181,7 +181,7 @@ export default function Navbar() {
                   <Link href="/login" onClick={() => setMobileMenuOpen(false)}
                     className="block text-center text-gray-700 hover:text-[#B4542C] py-2">Login</Link>
                 )}
-                <Link href="/admission" onClick={() => setMobileMenuOpen(false)}
+                <Link href="/admissions" onClick={() => setMobileMenuOpen(false)}
                   className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white block text-center w-full rounded-full px-3 py-2.5 font-semibold">
                   Admission Open 2026-27
                 </Link>
