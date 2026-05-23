@@ -16,10 +16,8 @@ const navigation = [
   { name: 'About', href: '/about' },
   { name: 'Academics', href: '/academics' },
   { name: 'Faculty', href: '/faculty' },
-  { name: 'Student Corner', href: '/student-corner', color: true },
-  { name: 'Parent Corner', href: '/parent-corner', color: true },
   { name: 'Gallery', href: '/gallery' },
-  { name: 'Admission', href: '/admissions' },
+  { name: 'Admission', href: '/admission' },
   { name: 'Notices', href: '/notices' },
   { name: 'Contact', href: '/contact' },
 ]
@@ -29,34 +27,28 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [user, setUser] = useState(null)
   const [studentName, setStudentName] = useState('')
-  const [isTeacher, setIsTeacher] = useState(false)   // ✅ new state
-  const [teacherName, setTeacherName] = useState('')   // ✅ teacher name
+  const [isTeacher, setIsTeacher] = useState(false)
+  const [teacherName, setTeacherName] = useState('')
   const router = useRouter()
 
-  // Scroll effect
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Check auth state, student profile and teacher role
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
       if (user) {
-        // Check student profile
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name')
           .eq('id', user.id)
           .single()
-        if (profile?.full_name) {
-          setStudentName(profile.full_name)
-        }
+        if (profile?.full_name) setStudentName(profile.full_name)
 
-        // ✅ Check if teacher
         const { data: teacher } = await supabase
           .from('teachers')
           .select('name')
@@ -65,14 +57,7 @@ export default function Navbar() {
         if (teacher) {
           setIsTeacher(true)
           setTeacherName(teacher.name)
-        } else {
-          setIsTeacher(false)
-          setTeacherName('')
         }
-      } else {
-        setIsTeacher(false)
-        setTeacherName('')
-        setStudentName('')
       }
     }
     fetchUser()
@@ -88,114 +73,79 @@ export default function Navbar() {
   }
 
   return (
-    <header
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white shadow-lg' : 'bg-white/95'
-      }`}
-    >
-      <nav className="container mx-auto px-4 sm:px-6 lg:px-8" aria-label="Global">
-        <div className="flex items-center justify-between h-20">
+    <header className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-white/95'}`}>
+      <nav className="container mx-auto px-2 sm:px-4 lg:px-6" aria-label="Global">
+        <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo + Name */}
-          <div className="flex lg:flex-1">
-            <Link href="/" className="flex items-center space-x-3">
-              <img src="/images/logo.png" alt="Logo" className="h-12 w-auto" />
-              <div>
-                <span className="text-xl font-bold text-[#8B3A3A]">Naveen Academy</span>
-                <p className="text-xs text-[#B4542C] font-medium">Sr. Sec. School, Chohtan</p>
-              </div>
-            </Link>
-          </div>
+          <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
+            <img src="/images/logo.png" alt="Logo" className="h-10 lg:h-12 w-auto" />
+            <div className="hidden sm:block">
+              <span className="text-base lg:text-xl font-bold text-[#8B3A3A]">Naveen Academy</span>
+              <p className="text-[10px] lg:text-xs text-[#B4542C] font-medium">Sr. Sec. School, Chohtan</p>
+            </div>
+          </Link>
 
-          {/* Mobile menu button – shifted left + subtle blink */}
-          <div className="flex lg:hidden mr-2">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-md p-2.5 text-gray-600 animate-pulse"
-              onClick={() => setMobileMenuOpen(true)}
-              style={{ animationDuration: '2s' }}
-            >
-              <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-            </button>
-          </div>
-
-          {/* Desktop links */}
-          <div className="hidden lg:flex lg:gap-x-1">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`relative px-3 py-2 text-sm font-medium transition-colors rounded-lg ${
-                  item.color
-                    ? 'text-[#A52A2A] hover:text-[#8B3A3A] hover:bg-red-50'
-                    : 'text-gray-700 hover:text-[#B4542C] hover:bg-orange-50'
-                }`}
+                className="px-2 py-1.5 text-xs xl:text-sm font-medium text-gray-700 hover:text-[#B4542C] hover:bg-orange-50 rounded transition-colors whitespace-nowrap"
               >
                 {item.name}
               </Link>
             ))}
+            {/* Student/Parent Corner links */}
+            <Link href="/student-corner" className="px-2 py-1.5 text-xs xl:text-sm font-medium text-[#A52A2A] hover:text-[#8B3A3A] hover:bg-red-50 rounded transition-colors whitespace-nowrap">
+              Student Corner
+            </Link>
+            <Link href="/parent-corner" className="px-2 py-1.5 text-xs xl:text-sm font-medium text-[#A52A2A] hover:text-[#8B3A3A] hover:bg-red-50 rounded transition-colors whitespace-nowrap">
+              Parent Corner
+            </Link>
           </div>
 
-          {/* Auth + Teacher + Admission button (desktop) */}
-          <div className="hidden lg:flex lg:items-center lg:gap-x-4">
-            {/* ✅ Teacher link / name */}
+          {/* Auth Section */}
+          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {isTeacher ? (
-              <Link
-                href="/teacher/dashboard"
-                className="text-sm font-semibold text-[#B4542C] hover:text-[#8B3A3A] transition-colors"
-              >
-                👨‍🏫 {teacherName || 'Teacher Panel'}
+              <Link href="/teacher/dashboard" className="text-xs xl:text-sm font-medium text-[#B4542C] hover:text-[#8B3A3A] whitespace-nowrap">
+                👨‍🏫 {teacherName}
               </Link>
             ) : (
-              <Link
-                href="/teacher-login"
-                className="text-sm font-semibold text-gray-500 hover:text-[#B4542C] transition-colors"
-              >
+              <Link href="/teacher-login" className="text-xs xl:text-sm font-medium text-gray-500 hover:text-[#B4542C] whitespace-nowrap">
                 Teacher Login
               </Link>
             )}
 
-            {/* Student / Parent login */}
             {user && !isTeacher ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-700">
-                  {studentName || 'Student'}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm text-red-400 hover:text-red-300 transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : user && isTeacher ? (
-              /* Teacher is already logged in, show logout only (no student name) */
-              <button
-                onClick={handleLogout}
-                className="text-sm text-red-400 hover:text-red-300 transition-colors"
-              >
-                Logout
-              </button>
-            ) : (
-              /* No user logged in at all */
-              <Link
-                href="/login"
-                className="text-sm font-semibold text-gray-700 hover:text-[#B4542C] transition-colors"
-              >
-                Login
-              </Link>
-            )}
+              <>
+                <span className="text-xs xl:text-sm text-gray-700 whitespace-nowrap">{studentName || 'Student'}</span>
+                <button onClick={handleLogout} className="text-xs xl:text-sm text-red-400 hover:text-red-300 whitespace-nowrap">Logout</button>
+              </>
+            ) : !user && !isTeacher ? (
+              <Link href="/login" className="text-xs xl:text-sm font-semibold text-gray-700 hover:text-[#B4542C] whitespace-nowrap">Login</Link>
+            ) : null}
 
-            <Link
-              href="/admission"
-              className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white px-5 py-2.5 rounded-full font-semibold text-sm transition-all shadow-md"
-            >
-              Admission Open 2026-27
+            <Link href="/admission" className="ml-1 bg-[#B4542C] hover:bg-[#8B3A3A] text-white px-3 py-1.5 rounded-full text-xs xl:text-sm font-semibold shadow-md whitespace-nowrap">
+              Admission 2026-27
             </Link>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="flex lg:hidden mr-1">
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 animate-pulse"
+              onClick={() => setMobileMenuOpen(true)}
+              style={{ animationDuration: '2s' }}
+            >
+              <Bars3Icon className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile menu */}
+      {/* Mobile Menu – unchanged */}
       <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
         <div className="fixed inset-0 z-50" />
         <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm">
@@ -203,71 +153,45 @@ export default function Navbar() {
             <Link href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
               <span className="text-xl font-bold text-[#8B3A3A]">Naveen Academy</span>
             </Link>
-            <button
-              type="button"
-              className="-m-2.5 rounded-md p-2.5 text-gray-600"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+            <button onClick={() => setMobileMenuOpen(false)} className="-m-2.5 rounded-md p-2.5 text-gray-600">
+              <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-200">
               <div className="space-y-1 py-6">
                 {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold transition-colors ${
-                      item.color
-                        ? 'text-[#A52A2A] hover:bg-red-50'
-                        : 'text-gray-700 hover:bg-orange-50'
-                    }`}
-                  >
+                  <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}
+                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-gray-700 hover:bg-orange-50">
                     {item.name}
                   </Link>
                 ))}
-                {/* ✅ Teacher link in mobile menu */}
-                <Link
-                  href={isTeacher ? '/teacher/dashboard' : '/teacher-login'}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold transition-colors ${
-                    isTeacher
-                      ? 'text-[#B4542C] hover:bg-orange-50'
-                      : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  {isTeacher ? `👨‍🏫 ${teacherName || 'Teacher Panel'}` : 'Teacher Login'}
+                <Link href="/student-corner" onClick={() => setMobileMenuOpen(false)}
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-[#A52A2A] hover:bg-red-50">
+                  Student Corner
+                </Link>
+                <Link href="/parent-corner" onClick={() => setMobileMenuOpen(false)}
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-[#A52A2A] hover:bg-red-50">
+                  Parent Corner
+                </Link>
+                <Link href={isTeacher ? '/teacher/dashboard' : '/teacher-login'} onClick={() => setMobileMenuOpen(false)}
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-[#B4542C] hover:bg-orange-50">
+                  {isTeacher ? `👨‍🏫 ${teacherName}` : 'Teacher Login'}
                 </Link>
               </div>
               <div className="py-6 space-y-2">
                 {user ? (
                   <>
-                    <p className="text-sm text-gray-500 text-center">
-                      {isTeacher ? teacherName : studentName || 'Student'}
-                    </p>
-                    <button
-                      onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                      className="block w-full text-center text-red-400 hover:text-red-300 transition-colors py-2"
-                    >
-                      Logout
-                    </button>
+                    <p className="text-sm text-gray-500 text-center">{isTeacher ? teacherName : studentName || 'Student'}</p>
+                    <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                      className="block w-full text-center text-red-400 hover:text-red-300 py-2">Logout</button>
                   </>
                 ) : (
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-center text-gray-700 hover:text-[#B4542C] transition-colors py-2"
-                  >
-                    Login
-                  </Link>
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}
+                    className="block text-center text-gray-700 hover:text-[#B4542C] py-2">Login</Link>
                 )}
-                <Link
-                  href="/admissions"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white block text-center w-full rounded-full px-3 py-2.5 font-semibold transition-colors shadow-md"
-                >
+                <Link href="/admission" onClick={() => setMobileMenuOpen(false)}
+                  className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white block text-center w-full rounded-full px-3 py-2.5 font-semibold">
                   Admission Open 2026-27
                 </Link>
               </div>
