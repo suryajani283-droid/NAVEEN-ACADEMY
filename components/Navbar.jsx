@@ -78,10 +78,10 @@ export default function Navbar() {
     <header className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-white/95'}`}>
       <nav className="container mx-auto px-2 sm:px-4 lg:px-6" aria-label="Global">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo + Name */}
+          {/* Logo + Name – always visible on mobile */}
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
             <img src="/images/logo.png" alt="Logo" className="h-10 lg:h-12 w-auto" />
-            <div className="hidden sm:block">
+            <div>
               <span className="text-base lg:text-xl font-bold text-[#8B3A3A]">Naveen Academy</span>
               <p className="text-[10px] lg:text-xs text-[#B4542C] font-medium">Sr. Sec. School, Chohtan</p>
             </div>
@@ -104,7 +104,7 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Auth Section */}
+          {/* Auth Section – Desktop */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {isTeacher ? (
               <Link href="/teacher/dashboard" className="text-xs xl:text-sm font-medium text-[#B4542C] hover:text-[#8B3A3A] whitespace-nowrap">
@@ -124,21 +124,17 @@ export default function Navbar() {
             ) : !user && !isTeacher ? (
               <Link href="/login" className="text-xs xl:text-sm font-semibold text-gray-700 hover:text-[#B4542C] whitespace-nowrap">Login</Link>
             ) : null}
-
-            <Link href="/admission" className="ml-1 bg-[#B4542C] hover:bg-[#8B3A3A] text-white px-3 py-1.5 rounded-full text-xs xl:text-sm font-semibold shadow-md whitespace-nowrap">
-              Admission 2026-27
-            </Link>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile menu button – larger icon */}
           <div className="flex lg:hidden mr-1">
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 animate-pulse"
+              className="inline-flex items-center justify-center rounded-md p-2.5 text-gray-600 animate-pulse"
               onClick={() => setMobileMenuOpen(true)}
               style={{ animationDuration: '2s' }}
             >
-              <Bars3Icon className="h-5 w-5" />
+              <Bars3Icon className="h-8 w-8" />
             </button>
           </div>
         </div>
@@ -153,7 +149,7 @@ export default function Navbar() {
               <span className="text-xl font-bold text-[#8B3A3A]">Naveen Academy</span>
             </Link>
             <button onClick={() => setMobileMenuOpen(false)} className="-m-2.5 rounded-md p-2.5 text-gray-600">
-              <XMarkIcon className="h-6 w-6" />
+              <XMarkIcon className="h-7 w-7" />
             </button>
           </div>
           <div className="mt-6 flow-root">
