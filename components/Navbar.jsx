@@ -16,6 +16,8 @@ const navigation = [
   { name: 'About', href: '/about' },
   { name: 'Academics', href: '/academics' },
   { name: 'Faculty', href: '/faculty' },
+  { name: 'Student Corner', href: '/student-corner', color: true },
+  { name: 'Parent Corner', href: '/parent-corner', color: true },
   { name: 'Gallery', href: '/gallery' },
   { name: 'Admission', href: '/admission' },
   { name: 'Notices', href: '/notices' },
@@ -91,18 +93,15 @@ export default function Navbar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-2 py-1.5 text-xs xl:text-sm font-medium text-gray-700 hover:text-[#B4542C] hover:bg-orange-50 rounded transition-colors whitespace-nowrap"
+                className={`px-2 py-1.5 text-xs xl:text-sm font-medium rounded transition-colors whitespace-nowrap ${
+                  item.color
+                    ? 'text-[#A52A2A] hover:text-[#8B3A3A] hover:bg-red-50'
+                    : 'text-gray-700 hover:text-[#B4542C] hover:bg-orange-50'
+                }`}
               >
                 {item.name}
               </Link>
             ))}
-            {/* Student/Parent Corner links */}
-            <Link href="/student-corner" className="px-2 py-1.5 text-xs xl:text-sm font-medium text-[#A52A2A] hover:text-[#8B3A3A] hover:bg-red-50 rounded transition-colors whitespace-nowrap">
-              Student Corner
-            </Link>
-            <Link href="/parent-corner" className="px-2 py-1.5 text-xs xl:text-sm font-medium text-[#A52A2A] hover:text-[#8B3A3A] hover:bg-red-50 rounded transition-colors whitespace-nowrap">
-              Parent Corner
-            </Link>
           </div>
 
           {/* Auth Section */}
@@ -145,7 +144,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Menu – unchanged */}
+      {/* Mobile Menu */}
       <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
         <div className="fixed inset-0 z-50" />
         <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm">
@@ -162,18 +161,14 @@ export default function Navbar() {
               <div className="space-y-1 py-6">
                 {navigation.map((item) => (
                   <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}
-                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-gray-700 hover:bg-orange-50">
+                    className={`-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold ${
+                      item.color
+                        ? 'text-[#A52A2A] hover:bg-red-50'
+                        : 'text-gray-700 hover:bg-orange-50'
+                    }`}>
                     {item.name}
                   </Link>
                 ))}
-                <Link href="/student-corner" onClick={() => setMobileMenuOpen(false)}
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-[#A52A2A] hover:bg-red-50">
-                  Student Corner
-                </Link>
-                <Link href="/parent-corner" onClick={() => setMobileMenuOpen(false)}
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-[#A52A2A] hover:bg-red-50">
-                  Parent Corner
-                </Link>
                 <Link href={isTeacher ? '/teacher/dashboard' : '/teacher-login'} onClick={() => setMobileMenuOpen(false)}
                   className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-[#B4542C] hover:bg-orange-50">
                   {isTeacher ? `👨‍🏫 ${teacherName}` : 'Teacher Login'}
