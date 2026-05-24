@@ -29,6 +29,7 @@ export default function RootLayout({ children }) {
       >
         <AdmissionMarquee/>
         <ServiceWorkerRegister />
+        <ScrollToTop />
         <Navbar />
         <main className="flex-1 flex flex-col">
           <div className="flex-1">{children}</div>
