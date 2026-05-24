@@ -32,7 +32,7 @@ export default function AdmissionMarquee() {
         {[...Array(10)].map((_, i) => (
           <Link
             key={i}
-            href="/admission"
+            href="/admissions"
             className="inline-block px-8 text-sm md:text-base font-bold tracking-wider hover:text-orange-100 transition-colors"
           >
             🎓 Admission Open 2026-27 – Apply Now! 🎓
