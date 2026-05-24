@@ -75,6 +75,7 @@ const sidebarSections = [
       { href: '/admin/allowed-users', label: 'Allowed Emails', icon: AcademicCapIcon },
       { href: '/admin/allowed-mobiles', label: 'Allowed Mobiles', icon: DevicePhoneMobileIcon },
       { href: '/admin/teachers', label: 'Teachers', icon: AcademicCapIcon },
+      {href: '/admin/teacher-assignments', label: 'TEACHER SUBJECT', icon: AcademicCapIcon },
     ],
   },
 ]
