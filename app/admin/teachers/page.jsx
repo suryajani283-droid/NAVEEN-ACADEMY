@@ -14,7 +14,11 @@ export default function AdminTeachers() {
 
   const fetchTeachers = async () => {
     const { data, error } = await supabase.from('teachers').select('id, name, email')
-    if (!error) setTeachers(data || [])
+    if (error) {
+      alert('Failed to load teachers: ' + error.message)
+      return
+    }
+    setTeachers(data || [])
   }
 
   useEffect(() => { fetchTeachers() }, [])
