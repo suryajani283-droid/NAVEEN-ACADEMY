@@ -30,8 +30,9 @@ export default function AdminResults() {
     roll_number: '',
     dob: '',
     exam_type: 'Half Yearly',
+    custom_exam: '',   // ✅ new field for custom exam name
     email: '',
-    subjects: [],   // array of { name, obtained, max }
+    subjects: [],
   })
   const [newSubject, setNewSubject] = useState({ name: '', obtained: '', max: '' })
 
@@ -75,6 +76,7 @@ export default function AdminResults() {
       roll_number: '',
       dob: '',
       exam_type: 'Half Yearly',
+      custom_exam: '',
       email: '',
       subjects: [],
     })
@@ -84,22 +86,24 @@ export default function AdminResults() {
   const handleEdit = (result) => {
     const subjectsArray = result.subjects
       ? Object.entries(result.subjects).map(([name, marks]) => {
-          // handle both old and new format
           if (typeof marks === 'object' && marks !== null && 'obtained' in marks) {
             return { name, obtained: marks.obtained, max: marks.max }
           } else {
-            // old format: plain number -> assume max=100
             return { name, obtained: marks, max: 100 }
           }
         })
       : []
+
+    // Determine if exam_type is custom (not Half Yearly/Yearly)
+    const isCustom = result.exam_type !== 'Half Yearly' && result.exam_type !== 'Yearly'
 
     setForm({
       student_name: result.student_name,
       father_name: result.father_name || '',
       roll_number: result.roll_number,
       dob: result.dob || '',
-      exam_type: result.exam_type,
+      exam_type: isCustom ? 'Custom' : result.exam_type,
+      custom_exam: isCustom ? result.exam_type : '',
       email: result.email || '',
       subjects: subjectsArray,
     })
@@ -110,7 +114,9 @@ export default function AdminResults() {
     e.preventDefault()
     if (!selectedClass) return
 
-    // Build subjects object with { obtained, max }
+    // Use custom exam name if "Custom" is selected
+    const finalExamType = form.exam_type === 'Custom' ? form.custom_exam : form.exam_type
+
     const subjectsObj = {}
     form.subjects.forEach(s => {
       subjectsObj[s.name] = { obtained: s.obtained, max: s.max }
@@ -127,7 +133,7 @@ export default function AdminResults() {
       class: Number(selectedClass),
       roll_number: form.roll_number,
       dob: form.dob,
-      exam_type: form.exam_type,
+      exam_type: finalExamType,
       email: form.email,
       subjects: subjectsObj,
       total: totalObtained,
@@ -198,13 +204,23 @@ export default function AdminResults() {
             <input type="date" placeholder="Date of Birth *" value={form.dob}
               onChange={(e) => setForm({ ...form, dob: e.target.value })}
               className="w-full px-4 py-2 border rounded" required />
+
+            {/* Exam Type: Half Yearly, Yearly, or Custom */}
             <select value={form.exam_type}
               onChange={(e) => setForm({ ...form, exam_type: e.target.value })}
               className="w-full px-4 py-2 border rounded">
-              <option>Half Yearly</option>
-              <option>Yearly</option>
-              <option>Test</option>
+              <option value="Half Yearly">Half Yearly</option>
+              <option value="Yearly">Yearly</option>
+              <option value="Custom">Custom (Type below)</option>
             </select>
+
+            {/* Custom exam name input – only visible when "Custom" is selected */}
+            {form.exam_type === 'Custom' && (
+              <input type="text" placeholder="Enter custom exam name" value={form.custom_exam}
+                onChange={(e) => setForm({ ...form, custom_exam: e.target.value })}
+                className="w-full px-4 py-2 border rounded" required />
+            )}
+
             <input type="email" placeholder="Student Email (optional)" value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               className="w-full px-4 py-2 border rounded" />
@@ -282,4 +298,4 @@ export default function AdminResults() {
       )}
     </div>
   )
-                                       }
+}
