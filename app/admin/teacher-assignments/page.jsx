@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,14 +9,17 @@ const supabase = createClient(
 )
 
 export default function AdminTeacherAssignments() {
+  const searchParams = useSearchParams()
+  const preselected = searchParams.get('teacherId') || ''
+  
   const [teachers, setTeachers] = useState([])
-  const [selectedTeacher, setSelectedTeacher] = useState('')
+  const [selectedTeacher, setSelectedTeacher] = useState(preselected)
   const [assignments, setAssignments] = useState([])
   const [form, setForm] = useState({ class: '', subject: '' })
 
   useEffect(() => {
     const fetchTeachers = async () => {
-      const { data } = await supabase.from('teachers').select('id, name, class')
+      const { data } = await supabase.from('teachers').select('id, name')
       setTeachers(data || [])
     }
     fetchTeachers()
@@ -57,13 +61,13 @@ export default function AdminTeacherAssignments() {
   return (
     <div className="pt-20 container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold text-primary-500 mb-8">Manage Teacher Assignments</h2>
-      
+
       <div className="card mb-8">
         <label className="block text-sm font-medium text-gray-700 mb-2">Select Teacher</label>
         <select value={selectedTeacher} onChange={(e) => setSelectedTeacher(e.target.value)} className="w-full px-4 py-2 border rounded">
           <option value="">-- Choose Teacher --</option>
           {teachers.map((t) => (
-            <option key={t.id} value={t.id}>{t.name} (Current Class: {t.class})</option>
+            <option key={t.id} value={t.id}>{t.name}</option>
           ))}
         </select>
       </div>
