@@ -19,7 +19,7 @@ export default function AdminBoardResults() {
   })
   const [editingId, setEditingId] = useState(null)
   const [uploading, setUploading] = useState(false)
-  const [inputMode, setInputMode] = useState('upload')   // 'upload' or 'link'
+  const [inputMode, setInputMode] = useState('upload')
 
   const fetchStudents = async () => {
     const { data, error } = await supabase
@@ -31,7 +31,6 @@ export default function AdminBoardResults() {
 
   useEffect(() => { fetchStudents() }, [])
 
-  // Upload handler (uses your existing /api/admin/upload route)
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -50,7 +49,7 @@ export default function AdminBoardResults() {
       })
       const data = await res.json()
       if (res.ok) {
-        setForm({ ...form, img: data.url })   // sets the uploaded URL
+        setForm({ ...form, img: data.url })
       } else {
         alert('Upload failed: ' + data.error)
       }
@@ -126,7 +125,6 @@ export default function AdminBoardResults() {
           </select>
         </div>
 
-        {/* Image mode toggle */}
         <div className="flex gap-4">
           <label className="flex items-center gap-2">
             <input type="radio" name="inputMode" value="upload"
@@ -136,7 +134,7 @@ export default function AdminBoardResults() {
           <label className="flex items-center gap-2">
             <input type="radio" name="inputMode" value="link"
               checked={inputMode === 'link'}
-              onChange={() => setInputMode('link')} /> Paste Link (e.g., /images/...)
+              onChange={() => setInputMode('link')} /> Paste Link
           </label>
         </div>
 
@@ -155,10 +153,13 @@ export default function AdminBoardResults() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Paste Image URL (e.g., /images/topper1.jpg)
             </label>
-            <input type="url" placeholder="/images/topper1.jpg"
+            <input
+              type="text"   // ✅ changed from "url" to "text"
+              placeholder="/images/topper1.jpg"
               value={form.img}
               onChange={(e) => setForm({ ...form, img: e.target.value })}
-              className="w-full px-4 py-2 border rounded" />
+              className="w-full px-4 py-2 border rounded"
+            />
           </div>
         )}
 
@@ -174,7 +175,6 @@ export default function AdminBoardResults() {
         )}
       </form>
 
-      {/* Student List */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {students.map((s) => (
           <div key={s.id} className="card text-center">
