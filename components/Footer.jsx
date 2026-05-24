@@ -40,13 +40,13 @@ export default function Footer() {
                 'Student Corner',
                 'Parent Corner',
                 'Notices',
-                'Results',
+                'Board Results',
                 'Fee Structure',
                 'Transport'
               ].map((item) => {
-                const href = item === 'Results'
-                  ? '/student-corner?tab=results'
-                  : `/${item.toLowerCase().replace(' ', '-')}`
+                const href = item === 'Board Results'
+  ? '/board-results'
+  : `/${item.toLowerCase().replace(' ', '-')}`
 
                 return (
                   <li key={item}>
