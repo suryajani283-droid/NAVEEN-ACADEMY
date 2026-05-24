@@ -1,39 +1,39 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '../../../../lib/supabase';
-import { verifyAdminToken } from '../../../../lib/auth';
-
-export async function GET(request) {
-  try {
-    await verifyAdminToken(request);
-    const { data, error } = await supabaseAdmin
-      .from('video_lectures')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    return NextResponse.json(data);
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
-}
 
 export async function POST(request) {
   try {
-    await verifyAdminToken(request);
-    const body = await request.json();
+    const { class: cls, roll, dob, exam_type } = await request.json();
 
-    const { data, error } = await supabaseAdmin
-      .from('video_lectures')
-      .insert({
-        subject: body.subject,
-        chapter: body.chapter,
-        title: body.title,
-        youtube_url: body.youtube_url,
-        class: body.class ? Number(body.class) : null,
-      })
-      .single();
+    // Find result matching all criteria
+    let query = supabaseAdmin
+      .from('results')
+      .select('*')
+      .eq('class', Number(cls))
+      .eq('roll_number', roll)
+      .eq('dob', dob);
 
-    if (error) throw error;
-    return NextResponse.json(data, { status: 201 });
+    if (exam_type) {
+      query = query.eq('exam_type', exam_type);
+    }
+
+    const { data: result, error } = await query.single();
+
+    if (error || !result) {
+      return NextResponse.json({ error: 'No result found. Check your details.' }, { status: 404 });
+    }
+
+    // Calculate rank
+    const { count } = await supabaseAdmin
+      .from('results')
+      .select('*', { count: 'exact', head: true })
+      .eq('class', result.class)
+      .eq('exam_type', result.exam_type)
+      .gt('percentage', result.percentage);
+
+    const rank = count !== null ? count + 1 : null;
+
+    return NextResponse.json({ result, rank });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
