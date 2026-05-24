@@ -7,7 +7,6 @@ export async function POST(request) {
     await verifyAdminToken(request);
     const { name, email, password } = await request.json();
 
-    // Create the user in Supabase Auth
     const { data: user, error: userError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -16,7 +15,6 @@ export async function POST(request) {
     });
     if (userError) throw userError;
 
-    // Insert into teachers table (no class anymore – assignments are separate)
     const { error: teacherError } = await supabaseAdmin
       .from('teachers')
       .insert({ id: user.user.id, name });
