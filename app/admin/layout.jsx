@@ -64,6 +64,7 @@ const sidebarSections = [
       { href: '/admin/faculty', label: 'Faculty', icon: UserGroupIcon },
       { href: '/admin/advertisements', label: 'Advertisements', icon: TagIcon },
       { href: '/admin/homepage', label: 'Homepage', icon: DocumentTextIcon },
+      { href: '/admin/board-results', label: 'Board Results', icon: TrophyIcon },
     ],
   },
   {
