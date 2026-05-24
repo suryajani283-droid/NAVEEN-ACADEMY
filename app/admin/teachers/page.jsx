@@ -13,8 +13,8 @@ export default function AdminTeachers() {
   const [form, setForm] = useState({ name: '', email: '', password: '' })
 
   const fetchTeachers = async () => {
-    const { data } = await supabase.from('teachers').select('*').order('created_at')
-    setTeachers(data || [])
+    const { data, error } = await supabase.from('teachers').select('id, name, email')
+    if (!error) setTeachers(data || [])
   }
 
   useEffect(() => { fetchTeachers() }, [])
@@ -28,11 +28,10 @@ export default function AdminTeachers() {
       credentials: 'include',
     })
     if (res.ok) {
-      const { teacherId } = await res.json()
+      const data = await res.json()
+      alert('Teacher added successfully!')
       setForm({ name: '', email: '', password: '' })
       fetchTeachers()
-      // Optionally redirect to assignments page for this teacher
-      // window.location.href = `/admin/teacher-assignments?teacherId=${teacherId}`
     } else {
       const err = await res.json()
       alert('Error: ' + err.error)
@@ -51,9 +50,6 @@ export default function AdminTeachers() {
 
       <form onSubmit={handleAdd} className="card mb-8 space-y-4">
         <h3 className="text-lg font-semibold text-gray-700">Add New Teacher</h3>
-        <p className="text-sm text-gray-500">
-          Only email and password are required. Classes and subjects can be assigned separately.
-        </p>
         <div className="grid md:grid-cols-2 gap-4">
           <input type="text" placeholder="Full Name" value={form.name}
             onChange={(e) => setForm({...form, name: e.target.value})}
@@ -69,6 +65,7 @@ export default function AdminTeachers() {
       </form>
 
       <div className="space-y-2">
+        {teachers.length === 0 && <p className="text-gray-500">No teachers added yet.</p>}
         {teachers.map((t) => (
           <div key={t.id} className="card flex justify-between items-center">
             <div>
