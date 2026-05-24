@@ -8,18 +8,22 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-const students = [
-  { name: 'Rahul Sharma', achievement: 'RBSE 10th – 98.6%', img: '/images/topper1.jpg', class: '10' },
-  { name: 'Priya Patel', achievement: 'RBSE 12th (Science) – 96.4%', img: '/images/topper2.jpg', class: '12' },
-  { name: 'Arjun Singh', achievement: 'State Level Cricket', img: '/images/player1.jpg', class: '10' },
-  { name: 'Sakshi Joshi', achievement: 'RBSE 12th (Arts) – 95.2%', img: '/images/topper3.jpg', class: '12' },
-  { name: 'Vikram Rathore', achievement: 'National Athletics', img: '/images/player2.jpg', class: '11' },
-]
-
 const classes = ['All', '10', '11', '12']
 
 export default function BoardResultsPage() {
+  const [students, setStudents] = useState([])
   const [activeClass, setActiveClass] = useState('All')
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      const { data } = await supabase
+        .from('board_results')
+        .select('*')
+        .order('created_at', { ascending: false })
+      setStudents(data || [])
+    }
+    fetchStudents()
+  }, [])
 
   const filtered = activeClass === 'All'
     ? students
@@ -66,12 +70,12 @@ export default function BoardResultsPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {filtered.map((student, index) => (
+            {filtered.map((student) => (
               <motion.div
-                key={index}
+                key={student.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: 0.1 }}
                 className="card text-center"
               >
                 <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary-500 shadow-lg">
