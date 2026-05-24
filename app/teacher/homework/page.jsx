@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -9,10 +9,14 @@ const supabase = createClient(
 )
 
 export default function TeacherHomework() {
-  const [teacherClass, setTeacherClass] = useState(null)
+  const searchParams = useSearchParams()
+  const teacherClass = searchParams.get('class') || ''
+  const subject = searchParams.get('subject') || ''
+  const router = useRouter()
+
   const [homeworks, setHomeworks] = useState([])
   const [form, setForm] = useState({
-    subject: '',
+    subject: subject || '',
     topic: '',
     due_date: '',
     description: '',
@@ -20,36 +24,32 @@ export default function TeacherHomework() {
     type: 'PDF',
   })
   const [editingId, setEditingId] = useState(null)
-  const router = useRouter()
 
+  // Redirect to class selection if no class is provided
   useEffect(() => {
-    const fetchTeacher = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/teacher-login'); return }
-      const { data: teacher } = await supabase
-        .from('teachers')
-        .select('class')
-        .eq('id', user.id)
-        .single()
-      if (!teacher) { router.push('/teacher-login'); return }
-      setTeacherClass(teacher.class)
+    if (!teacherClass) {
+      router.push('/teacher/select-class')
     }
-    fetchTeacher()
-  }, [router])
+  }, [teacherClass, router])
 
   const fetchHomeworks = async () => {
     if (!teacherClass) return
-    const { data } = await supabase
+    let query = supabase
       .from('homework')
       .select('*')
       .eq('class', teacherClass)
       .order('created_at', { ascending: false })
+
+    if (subject) {
+      query = query.eq('subject', subject)
+    }
+    const { data } = await query
     setHomeworks(data || [])
   }
 
   useEffect(() => {
-    if (teacherClass) fetchHomeworks()
-  }, [teacherClass])
+    fetchHomeworks()
+  }, [teacherClass, subject])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -68,7 +68,7 @@ export default function TeacherHomework() {
       credentials: 'include',
     })
     if (res.ok) {
-      setForm({ subject: '', topic: '', due_date: '', description: '', file_url: '', type: 'PDF' })
+      setForm({ subject: subject || '', topic: '', due_date: '', description: '', file_url: '', type: 'PDF' })
       setEditingId(null)
       fetchHomeworks()
     } else {
@@ -94,19 +94,20 @@ export default function TeacherHomework() {
     fetchHomeworks()
   }
 
-  if (!teacherClass) return <div className="pt-20 text-center">Loading...</div>
-
   return (
     <div className="pt-20 container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold text-primary-500 mb-2">
-        Homework for Class {teacherClass}
+        Homework – Class {teacherClass}
+        {subject ? ` (${subject})` : ''}
       </h2>
 
       <form onSubmit={handleSubmit} className="card mb-8 space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
-          <input type="text" placeholder="Subject" value={form.subject}
-            onChange={(e) => setForm({ ...form, subject: e.target.value })}
-            className="w-full px-4 py-2 border rounded" required />
+          {!subject && (
+            <input type="text" placeholder="Subject" value={form.subject}
+              onChange={(e) => setForm({ ...form, subject: e.target.value })}
+              className="w-full px-4 py-2 border rounded" required />
+          )}
           <input type="text" placeholder="Topic (optional)" value={form.topic}
             onChange={(e) => setForm({ ...form, topic: e.target.value })}
             className="w-full px-4 py-2 border rounded" />
@@ -126,6 +127,12 @@ export default function TeacherHomework() {
         <button type="submit" className="btn-primary">
           {editingId ? 'Update' : 'Add'} Homework
         </button>
+        {editingId && (
+          <button type="button" onClick={() => {
+            setEditingId(null)
+            setForm({ subject: subject || '', topic: '', due_date: '', description: '', file_url: '', type: 'PDF' })
+          }} className="btn-secondary ml-2">Cancel</button>
+        )}
       </form>
 
       <div className="space-y-4">
@@ -142,6 +149,9 @@ export default function TeacherHomework() {
             </div>
           </div>
         ))}
+        {homeworks.length === 0 && (
+          <p className="text-gray-500 text-center py-8">No homework for this class yet.</p>
+        )}
       </div>
     </div>
   )
