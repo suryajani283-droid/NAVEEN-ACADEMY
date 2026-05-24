@@ -66,7 +66,7 @@ export default function TeacherLoginPage() {
       // Clear any old admin cookie and set the new one
       document.cookie = 'adminToken=; path=/; max-age=0'
       document.cookie = 'adminToken=' + result.token + '; path=/; max-age=86400; secure; samesite=strict'
-      // ✅ Redirect to the class selection page
+      // ✅ Redirect to class selection
       window.location.href = '/teacher/select-class'
     } else {
       setError('No token received.')
