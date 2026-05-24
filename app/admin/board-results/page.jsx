@@ -19,18 +19,19 @@ export default function AdminBoardResults() {
   })
   const [editingId, setEditingId] = useState(null)
   const [uploading, setUploading] = useState(false)
-  const [inputMode, setInputMode] = useState('upload')
+  const [inputMode, setInputMode] = useState('upload')   // 'upload' or 'link'
 
   const fetchStudents = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('board_results')
       .select('*')
       .order('created_at', { ascending: false })
-    setStudents(data || [])
+    if (!error) setStudents(data || [])
   }
 
   useEffect(() => { fetchStudents() }, [])
 
+  // Upload handler (uses your existing /api/admin/upload route)
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -48,8 +49,11 @@ export default function AdminBoardResults() {
         credentials: 'include',
       })
       const data = await res.json()
-      if (res.ok) setForm({ ...form, img: data.url })
-      else alert('Upload failed: ' + data.error)
+      if (res.ok) {
+        setForm({ ...form, img: data.url })   // sets the uploaded URL
+      } else {
+        alert('Upload failed: ' + data.error)
+      }
     } catch (err) {
       alert('Upload error')
     }
@@ -73,6 +77,7 @@ export default function AdminBoardResults() {
       setEditingId(null)
       setInputMode('upload')
       fetchStudents()
+      alert('Saved!')
     } else {
       const err = await res.json()
       alert('Error: ' + err.error)
@@ -84,7 +89,7 @@ export default function AdminBoardResults() {
       name: student.name,
       achievement: student.achievement,
       class: student.class,
-      img: student.img,
+      img: student.img || '/images/default-avatar.png',
     })
     setEditingId(student.id)
     setInputMode('link')
@@ -121,7 +126,7 @@ export default function AdminBoardResults() {
           </select>
         </div>
 
-        {/* Image upload / link toggle */}
+        {/* Image mode toggle */}
         <div className="flex gap-4">
           <label className="flex items-center gap-2">
             <input type="radio" name="inputMode" value="upload"
@@ -131,7 +136,7 @@ export default function AdminBoardResults() {
           <label className="flex items-center gap-2">
             <input type="radio" name="inputMode" value="link"
               checked={inputMode === 'link'}
-              onChange={() => setInputMode('link')} /> Paste Link
+              onChange={() => setInputMode('link')} /> Paste Link (e.g., /images/...)
           </label>
         </div>
 
@@ -141,14 +146,16 @@ export default function AdminBoardResults() {
             <input type="file" accept="image/*" onChange={handleFileUpload}
               className="w-full px-4 py-2 border rounded" />
             {uploading && <span className="text-sm text-primary-500">Uploading...</span>}
-            {form.img && <p className="text-xs text-green-600">✅ Uploaded</p>}
+            {form.img && <p className="text-xs text-green-600">✅ Current: {form.img.substring(0, 60)}...</p>}
           </div>
         )}
 
         {inputMode === 'link' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Paste Image URL</label>
-            <input type="url" placeholder="https://..."
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Paste Image URL (e.g., /images/topper1.jpg)
+            </label>
+            <input type="url" placeholder="/images/topper1.jpg"
               value={form.img}
               onChange={(e) => setForm({ ...form, img: e.target.value })}
               className="w-full px-4 py-2 border rounded" />
@@ -167,10 +174,16 @@ export default function AdminBoardResults() {
         )}
       </form>
 
+      {/* Student List */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {students.map((s) => (
           <div key={s.id} className="card text-center">
-            <img src={s.img} alt={s.name} className="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-primary-200" />
+            <img
+              src={s.img || '/images/default-avatar.png'}
+              alt={s.name}
+              className="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-primary-200"
+              onError={(e) => { e.target.src = '/images/default-avatar.png' }}
+            />
             <h3 className="font-semibold">{s.name}</h3>
             <p className="text-sm text-gray-600">{s.achievement}</p>
             <p className="text-xs text-primary-500 mt-1">Class {s.class}</p>
