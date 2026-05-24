@@ -33,23 +33,33 @@ export default function AdminVideoLectures() {
       ...form,
       class: form.class ? Number(form.class) : null,
     }
-    await fetch('/api/admin/video-lectures', {
+    const res = await fetch('/api/admin/video-lectures', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
       credentials: 'include',
     })
-    setForm({ subject: '', chapter: '', title: '', youtube_url: '', class: '' })
-    fetchLectures()
+    if (res.ok) {
+      setForm({ subject: '', chapter: '', title: '', youtube_url: '', class: '' })
+      fetchLectures()
+    } else {
+      const errData = await res.json().catch(() => ({ error: 'Unknown error' }))
+      alert('Error: ' + (errData.error || res.statusText))
+    }
   }
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this lecture?')) return
-    await fetch(`/api/admin/video-lectures/${id}`, {
+    const res = await fetch(`/api/admin/video-lectures/${id}`, {
       method: 'DELETE',
       credentials: 'include',
     })
-    fetchLectures()
+    if (res.ok) {
+      fetchLectures()
+    } else {
+      const errData = await res.json().catch(() => ({ error: 'Unknown error' }))
+      alert('Delete failed: ' + (errData.error || res.statusText))
+    }
   }
 
   return (
