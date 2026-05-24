@@ -492,33 +492,40 @@ function DownloadsSection({ studentClass }) {
   )
 }
 
-// ==================== RESULTS SECTION (DOB‑based + rank) ====================
+// ==================== RESULTS SECTION (Multiple Exams Support) ====================
 function ResultsSection() {
   const [cls, setCls] = useState('')
   const [roll, setRoll] = useState('')
   const [dob, setDob] = useState('')
+  const [examType, setExamType] = useState('all')
   const [result, setResult] = useState(null)
   const [rank, setRank] = useState(null)
+  const [availableExams, setAvailableExams] = useState([])
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleCheck = async (e) => {
     e.preventDefault()
     setError('')
     setResult(null)
     setRank(null)
+    setAvailableExams([])
+    setLoading(true)
 
     const res = await fetch('/api/results/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ class: cls, roll, dob }),
+      body: JSON.stringify({ class: cls, roll, dob, exam_type: examType }),
     })
     const data = await res.json()
     if (res.ok) {
       setResult(data.result)
       if (data.rank) setRank(data.rank)
+      if (data.availableExams) setAvailableExams(data.availableExams)
     } else {
-      setError(data.error || 'Something went wrong')
+      setError(data.error || 'No results found')
     }
+    setLoading(false)
   }
 
   return (
@@ -548,7 +555,27 @@ function ResultsSection() {
           <input type="date" required value={dob} onChange={(e) => setDob(e.target.value)}
             className="w-full px-4 py-2 border rounded" />
         </div>
-        <button type="submit" className="btn-primary w-full">View Result</button>
+        
+        {/* Exam Type Dropdown */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Exam Type</label>
+          <select value={examType} onChange={(e) => setExamType(e.target.value)} className="w-full px-4 py-2 border rounded">
+            <option value="all">All Exams (Show Latest)</option>
+            <option value="Half Yearly">Half Yearly</option>
+            <option value="Yearly">Yearly</option>
+            {/* Custom exam options will appear after first search */}
+            {availableExams
+              .filter(exam => exam !== 'Half Yearly' && exam !== 'Yearly')
+              .map(exam => (
+                <option key={exam} value={exam}>{exam}</option>
+              ))
+            }
+          </select>
+        </div>
+
+        <button type="submit" disabled={loading} className="btn-primary w-full">
+          {loading ? 'Searching...' : 'View Result'}
+        </button>
       </form>
 
       {error && <p className="text-red-500 text-center">{error}</p>}
