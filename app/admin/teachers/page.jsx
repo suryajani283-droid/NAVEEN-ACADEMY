@@ -28,7 +28,6 @@ export default function AdminTeachers() {
       credentials: 'include',
     })
     if (res.ok) {
-      const data = await res.json()
       alert('Teacher added successfully!')
       setForm({ name: '', email: '', password: '' })
       fetchTeachers()
