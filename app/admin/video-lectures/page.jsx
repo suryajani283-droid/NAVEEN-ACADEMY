@@ -485,7 +485,8 @@ function DownloadsSection({ studentClass }) {
   )
 }
 
-// ==================== RESULTS SECTION (DOB‑based + rank) ====================
+
+ // ==================== RESULTS SECTION (DOB‑based + rank) ====================
 function ResultsSection() {
   const [cls, setCls] = useState('')
   const [roll, setRoll] = useState('')
@@ -534,4 +535,257 @@ function ResultsSection() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Roll Number *</label>
           <input type="text" required value={roll} onChange={(e) => setRoll(e.target.value)}
-            className="
+            className="w-full px-4 py-2 border rounded" placeholder="Enter roll number" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
+          <input type="date" required value={dob} onChange={(e) => setDob(e.target.value)}
+            className="w-full px-4 py-2 border rounded" />
+        </div>
+        <button type="submit" className="btn-primary w-full">View Result</button>
+      </form>
+
+      {error && <p className="text-red-500 text-center">{error}</p>}
+
+      {result && (
+        <div className="card bg-gray-50">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="text-xl font-bold">{result.student_name}</h3>
+              <p className="text-gray-600">
+                Father: {result.father_name} | Class {result.class} | Roll: {result.roll_number}
+              </p>
+            </div>
+            {rank && (
+              <div className="bg-primary-500 text-white px-4 py-2 rounded-full text-center">
+                <span className="text-sm block">Class Rank</span>
+                <span className="text-2xl font-bold">{rank}</span>
+              </div>
+            )}
+          </div>
+          <p className="text-center text-sm text-gray-500 mb-4">Exam: {result.exam_type}</p>
+
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left py-2">Subject</th>
+                <th className="text-right py-2">Marks (O / M)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.subjects && Object.entries(result.subjects).map(([sub, marks]) => {
+                const obtained = typeof marks === 'object' ? marks.obtained : marks
+                const max = typeof marks === 'object' ? marks.max : 100
+                return (
+                  <tr key={sub} className="border-b">
+                    <td className="py-2">{sub}</td>
+                    <td className="text-right">{obtained} / {max}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="font-bold border-t">
+                <td className="py-2">Total</td>
+                <td className="text-right">{result.total} / {result.total_max || '?'}</td>
+              </tr>
+              <tr className="font-bold text-primary-500">
+                <td className="py-2">Percentage</td>
+                <td className="text-right">{result.percentage}%</td>
+              </tr>
+              <tr>
+                <td className="py-2 font-semibold">Grade</td>
+                <td className="text-right font-semibold">{result.grade}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
+// ==================== TIMETABLE SECTION ====================
+function TimetableSection({ studentClass }) {
+  const [selectedClass, setSelectedClass] = useState(studentClass || '')
+  const [timetable, setTimetable] = useState(null)
+
+  useEffect(() => {
+    if (!selectedClass) return
+    const fetchTimetable = async () => {
+      const { data } = await supabase
+        .from('timetables')
+        .select('*')
+        .eq('class', selectedClass)
+        .single()
+      setTimetable(data || null)
+    }
+    fetchTimetable()
+  }, [selectedClass])
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <h2 className="text-2xl font-bold text-primary-500 mb-6 flex items-center">
+        <ClockIcon className="h-8 w-8 mr-2" />
+        Class Timetable
+      </h2>
+
+      <div className="bg-white p-4 rounded-lg shadow">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Select Class</label>
+        <select
+          value={selectedClass}
+          onChange={(e) => setSelectedClass(e.target.value)}
+          className="w-full px-4 py-2 border rounded"
+        >
+          <option value="">-- Choose Class --</option>
+          {[1,2,3,4,5,6,7,8,9,10,11,12].map(c => (
+            <option key={c} value={c}>Class {c}</option>
+          ))}
+        </select>
+      </div>
+
+      {timetable && (
+        <div className="card">
+          <div className="mb-4 space-y-1">
+            {timetable.description && (
+              <p className="text-gray-700 font-medium">{timetable.description}</p>
+            )}
+            <div className="flex flex-wrap gap-3 text-sm text-gray-500">
+              {timetable.start_date && (
+                <span className="flex items-center gap-1">📅 Effective from: {new Date(timetable.start_date).toLocaleDateString('en-IN')}</span>
+              )}
+              {timetable.time_details && (
+                <span className="flex items-center gap-1">🕒 {timetable.time_details}</span>
+              )}
+            </div>
+          </div>
+          <img
+            src={timetable.file_url}
+            alt={`Class ${selectedClass} Timetable`}
+            className="max-w-full h-auto rounded mx-auto"
+          />
+          <a
+            href={timetable.file_url}
+            target="_blank"
+            className="btn-primary mt-4 inline-block"
+          >
+            Download / View Full Size
+          </a>
+        </div>
+      )}
+
+      {selectedClass && !timetable && (
+        <p className="text-gray-500 text-center">Timetable not available for this class.</p>
+      )}
+    </motion.div>
+  )
+}
+
+// ==================== MAIN COMPONENT ====================
+export default function StudentCornerPage() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState('homework');
+  const [checking, setChecking] = useState(true);
+  const [studentClass, setStudentClass] = useState(null);
+  const [studentName, setStudentName] = useState('');
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+        router.push(`/login?redirect=${returnUrl}`);
+        return;
+      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('full_name, class')
+          .eq('id', user.id)
+          .single();
+        if (!error && profile) {
+          setStudentName(profile.full_name || '');
+          setStudentClass(profile.class || null);
+        }
+      }
+      setChecking(false);
+    };
+    checkSession();
+  }, [router]);
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <svg className="animate-spin h-10 w-10 text-orange-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <p className="mt-4 text-slate-500">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pt-20">
+      <section className="bg-gradient-to-r from-primary-500 to-primary-700 text-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-5xl font-bold mb-4"
+          >
+            {studentName ? `Welcome, ${studentName}!` : 'Student Corner 📚'}
+          </motion.h1>
+          {studentClass && (
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-xl text-white/90 font-medium"
+            >
+              Class {studentClass}
+            </motion.p>
+          )}
+          <p className="text-lg text-white/70 mt-2">
+            All Study Materials, Homework & Resources in One Place
+          </p>
+        </div>
+      </section>
+
+      <section className="bg-white shadow-md sticky top-20 z-30">
+        <div className="container mx-auto px-4">
+          <div className="flex overflow-x-auto gap-1 py-3">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-primary-500 text-white'
+                    : 'text-gray-600 hover:bg-primary-50'
+                }`}
+              >
+                <tab.icon className="h-5 w-5" />
+                <span className="font-medium">{tab.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          {activeTab === 'homework' && <HomeworkSection studentClass={studentClass} />}
+          {activeTab === 'notes' && <NotesSection studentClass={studentClass} />}
+          {activeTab === 'video' && <VideoLecturesSection studentClass={studentClass} />}
+          {activeTab === 'results' && <ResultsSection />}
+          {activeTab === 'downloads' && <DownloadsSection studentClass={studentClass} />}
+          {activeTab === 'timetable' && <TimetableSection studentClass={studentClass} />}
+        </div>
+      </section>
+    </div>
+  )
+}
