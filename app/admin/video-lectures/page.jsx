@@ -485,12 +485,12 @@ function DownloadsSection({ studentClass }) {
   )
 }
 
-
- // ==================== RESULTS SECTION (DOB‑based + rank) ====================
+// ==================== RESULTS SECTION (DOB‑based + rank + exam type) ====================
 function ResultsSection() {
   const [cls, setCls] = useState('')
   const [roll, setRoll] = useState('')
   const [dob, setDob] = useState('')
+  const [examType, setExamType] = useState('Half Yearly')   // ✅ new state
   const [result, setResult] = useState(null)
   const [rank, setRank] = useState(null)
   const [error, setError] = useState('')
@@ -504,7 +504,7 @@ function ResultsSection() {
     const res = await fetch('/api/results/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ class: cls, roll, dob }),
+      body: JSON.stringify({ class: cls, roll, dob, exam_type: examType }),   // ✅ include exam type
     })
     const data = await res.json()
     if (res.ok) {
@@ -541,6 +541,15 @@ function ResultsSection() {
           <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
           <input type="date" required value={dob} onChange={(e) => setDob(e.target.value)}
             className="w-full px-4 py-2 border rounded" />
+        </div>
+        {/* ✅ Exam Type Dropdown */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Exam Type *</label>
+          <select value={examType} onChange={(e) => setExamType(e.target.value)} className="w-full px-4 py-2 border rounded" required>
+            <option value="Half Yearly">Half Yearly</option>
+            <option value="Yearly">Yearly</option>
+            <option value="Test">Test</option>
+          </select>
         </div>
         <button type="submit" className="btn-primary w-full">View Result</button>
       </form>
