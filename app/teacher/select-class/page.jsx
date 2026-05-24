@@ -11,7 +11,6 @@ const supabase = createClient(
 export default function SelectClassPage() {
   const [assignments, setAssignments] = useState([])
   const [selected, setSelected] = useState('')
-  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -23,7 +22,6 @@ export default function SelectClassPage() {
         .select('class, subject')
         .eq('teacher_id', user.id)
       setAssignments(data || [])
-      setLoading(false)
     }
     fetchAssignments()
   }, [router])
@@ -35,8 +33,6 @@ export default function SelectClassPage() {
     const sub = parts[1] || ''
     router.push(`/teacher/dashboard?class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(sub)}`)
   }
-
-  if (loading) return <div className="pt-20 text-center">Loading...</div>
 
   return (
     <div className="pt-20 container mx-auto px-4 py-8 max-w-md">
