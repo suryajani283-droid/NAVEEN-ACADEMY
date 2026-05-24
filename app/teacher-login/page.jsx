@@ -41,15 +41,15 @@ export default function TeacherLoginPage() {
       return
     }
 
-    // 3. Get the teacher token from the admin API
+    // 3. Get teacher token from admin API
     const res = await fetch('/api/admin/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email,
-        password: '',   // not needed for teacher token
+        password: '',
         role: 'teacher',
-        class: '',       // will be set from assignments later
+        class: '',
         name: teacher.name,
         userId,
       }),
@@ -63,11 +63,11 @@ export default function TeacherLoginPage() {
 
     const result = await res.json()
     if (result.token) {
-      // Clear any previous admin cookie and set the new one
+      // Clear any old admin cookie and set the new one
       document.cookie = 'adminToken=; path=/; max-age=0'
       document.cookie = 'adminToken=' + result.token + '; path=/; max-age=86400; secure; samesite=strict'
-      // Redirect to teacher dashboard
-      window.location.href = '/teacher/dashboard'
+      // ✅ Redirect to the class selection page
+      window.location.href = '/teacher/select-class'
     } else {
       setError('No token received.')
     }
