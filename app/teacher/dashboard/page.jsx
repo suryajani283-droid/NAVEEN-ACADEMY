@@ -1,19 +1,38 @@
 'use client'
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 
 export default function TeacherDashboard() {
-  const router = useRouter()
+  const params = useSearchParams()
+  const cls = params.get('class') || ''
+  const sub = params.get('subject') || ''
 
-  useEffect(() => {
-    router.push('/teacher/select-class')
-  }, [router])
+  if (!cls) {
+    return (
+      <div className="pt-20 text-center">
+        <p className="text-gray-500">No class selected. Please go to <a href="/teacher/select-class" className="text-primary-500 underline">class selection</a>.</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <div className="animate-spin h-10 w-10 border-4 border-primary-500 border-t-transparent rounded-full mx-auto"></div>
-        <p className="mt-4 text-slate-500">Redirecting to class selection...</p>
+    <div className="pt-20 container mx-auto px-4 py-8">
+      <h2 className="text-3xl font-bold text-primary-500 mb-2">
+        Class {cls}{sub ? ` – ${sub}` : ''}
+      </h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+        <Link href={`/teacher/homework?class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(sub)}`} className="card text-center hover:shadow-lg">
+          <span className="text-4xl">📝</span><h3 className="font-semibold mt-2">Homework</h3>
+        </Link>
+        <Link href={`/teacher/notes?class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(sub)}`} className="card text-center hover:shadow-lg">
+          <span className="text-4xl">📚</span><h3 className="font-semibold mt-2">Notes</h3>
+        </Link>
+        <Link href={`/teacher/results?class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(sub)}`} className="card text-center hover:shadow-lg">
+          <span className="text-4xl">🏆</span><h3 className="font-semibold mt-2">Results</h3>
+        </Link>
+        <Link href={`/teacher/video-lectures?class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(sub)}`} className="card text-center hover:shadow-lg">
+          <span className="text-4xl">🎬</span><h3 className="font-semibold mt-2">Video Lectures</h3>
+        </Link>
       </div>
     </div>
   )
