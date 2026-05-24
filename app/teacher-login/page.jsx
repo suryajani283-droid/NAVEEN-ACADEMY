@@ -16,7 +16,7 @@ export default function TeacherLoginPage() {
     e.preventDefault()
     setError('')
 
-    // 1. Sign in with Supabase
+    // 1. Sign in with Supabase Auth
     const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -31,7 +31,7 @@ export default function TeacherLoginPage() {
     // 2. Verify teacher record
     const { data: teacher, error: teacherError } = await supabase
       .from('teachers')
-      .select('class, name')
+      .select('id, name')
       .eq('id', userId)
       .single()
 
@@ -41,41 +41,35 @@ export default function TeacherLoginPage() {
       return
     }
 
-    // 3. Get teacher JWT from admin login API
+    // 3. Get the teacher token from the admin API
     const res = await fetch('/api/admin/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email,
-        password: '',
+        password: '',   // not needed for teacher token
         role: 'teacher',
-        class: teacher.class,
+        class: '',       // will be set from assignments later
         name: teacher.name,
         userId,
       }),
     })
 
     if (!res.ok) {
-      const raw = await res.text()
-      try {
-        const errData = JSON.parse(raw)
-        setError('Login failed: ' + (errData.error || raw))
-      } catch {
-        setError('Login failed. Please try again.')
-      }
+      const errData = await res.json().catch(() => ({ error: 'Failed' }))
+      setError(errData.error || 'Failed to get teacher token')
       return
     }
 
-    const result = await res.json()   // ✅ renamed from `data` to `result`
+    const result = await res.json()
     if (result.token) {
-      // Clear any previous admin cookie
-      document.cookie = 'adminToken=; path=/; max-age=0';
-      // Set the new teacher token cookie
-      document.cookie = 'adminToken=' + result.token + '; path=/; max-age=86400; secure; samesite=strict';
-      // Redirect to admin dashboard
-      window.location.href = '/admin/dashboard';
+      // Clear any previous admin cookie and set the new one
+      document.cookie = 'adminToken=; path=/; max-age=0'
+      document.cookie = 'adminToken=' + result.token + '; path=/; max-age=86400; secure; samesite=strict'
+      // Redirect to teacher dashboard
+      window.location.href = '/teacher/dashboard'
     } else {
-      setError('No token received. Please contact admin.')
+      setError('No token received.')
     }
   }
 
@@ -84,27 +78,14 @@ export default function TeacherLoginPage() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
         <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Teacher Login</h2>
         <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
+          <input type="email" placeholder="Email" value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
+            className="w-full px-4 py-3 border rounded-lg" required />
+          <input type="password" placeholder="Password" value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
-            required
-          />
+            className="w-full px-4 py-3 border rounded-lg" required />
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button
-            type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl"
-          >
+          <button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl">
             Log In
           </button>
         </form>
