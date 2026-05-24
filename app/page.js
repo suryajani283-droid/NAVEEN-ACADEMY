@@ -13,7 +13,6 @@ import {
   BeakerIcon,
   TrophyIcon,
 } from '@heroicons/react/24/outline'
-import ResultsMarquee from '../components/ResultsMarquee'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -81,9 +80,6 @@ export default function Home() {
         style={{ backgroundImage: `url('${hero.background_image}')` }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-dark-900/70 to-dark-800/60" />
-        <div className="absolute top-20 left-0 right-0 z-20">
-          <ResultsMarquee />
-        </div>
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -102,7 +98,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/admissions"
+                href="/admission"
                 className="bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-lg font-bold transition-all shadow-lg hover:shadow-xl text-lg"
               >
                 {hero.admission_text}
@@ -322,7 +318,7 @@ export default function Home() {
             </h2>
             <p className="text-xl text-white/90 mb-8">{admissionCta.subtitle}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/admissions" className="bg-white text-primary-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-all shadow-lg text-lg">
+              <Link href="/admission" className="bg-white text-primary-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-all shadow-lg text-lg">
                 {admissionCta.apply_text}
               </Link>
               <Link href="/contact" className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white/10 transition-all text-lg">
