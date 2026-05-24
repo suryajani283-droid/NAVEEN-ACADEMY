@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import Link from 'next/link'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -9,7 +10,7 @@ const supabase = createClient(
 
 export default function AdminTeachers() {
   const [teachers, setTeachers] = useState([])
-  const [form, setForm] = useState({ name: '', email: '', class: '', password: '' })
+  const [form, setForm] = useState({ name: '', email: '', password: '' })
 
   const fetchTeachers = async () => {
     const { data } = await supabase.from('teachers').select('*').order('created_at')
@@ -27,8 +28,11 @@ export default function AdminTeachers() {
       credentials: 'include',
     })
     if (res.ok) {
-      setForm({ name: '', email: '', class: '', password: '' })
+      const { teacherId } = await res.json()
+      setForm({ name: '', email: '', password: '' })
       fetchTeachers()
+      // Optionally redirect to assignments page for this teacher
+      // window.location.href = `/admin/teacher-assignments?teacherId=${teacherId}`
     } else {
       const err = await res.json()
       alert('Error: ' + err.error)
@@ -44,11 +48,23 @@ export default function AdminTeachers() {
   return (
     <div className="pt-20 container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold text-primary-500 mb-8">Manage Teachers</h2>
+
       <form onSubmit={handleAdd} className="card mb-8 space-y-4">
-        <input type="text" placeholder="Full Name" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="w-full px-4 py-2 border rounded" required />
-        <input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} className="w-full px-4 py-2 border rounded" required />
-        <input type="text" placeholder="Class (e.g., 10, XI Arts)" value={form.class} onChange={(e) => setForm({...form, class: e.target.value})} className="w-full px-4 py-2 border rounded" required />
-        <input type="password" placeholder="Temporary password" value={form.password} onChange={(e) => setForm({...form, password: e.target.value})} className="w-full px-4 py-2 border rounded" required />
+        <h3 className="text-lg font-semibold text-gray-700">Add New Teacher</h3>
+        <p className="text-sm text-gray-500">
+          Only email and password are required. Classes and subjects can be assigned separately.
+        </p>
+        <div className="grid md:grid-cols-2 gap-4">
+          <input type="text" placeholder="Full Name" value={form.name}
+            onChange={(e) => setForm({...form, name: e.target.value})}
+            className="w-full px-4 py-2 border rounded" required />
+          <input type="email" placeholder="Email" value={form.email}
+            onChange={(e) => setForm({...form, email: e.target.value})}
+            className="w-full px-4 py-2 border rounded" required />
+          <input type="password" placeholder="Temporary password" value={form.password}
+            onChange={(e) => setForm({...form, password: e.target.value})}
+            className="w-full px-4 py-2 border rounded" required />
+        </div>
         <button type="submit" className="btn-primary">Add Teacher</button>
       </form>
 
@@ -56,9 +72,15 @@ export default function AdminTeachers() {
         {teachers.map((t) => (
           <div key={t.id} className="card flex justify-between items-center">
             <div>
-              <strong>{t.name}</strong> ({t.email}) – Class {t.class}
+              <strong>{t.name}</strong> ({t.email})
             </div>
-            <button onClick={() => handleDelete(t.id)} className="text-red-600 text-sm">Remove</button>
+            <div className="flex gap-2">
+              <Link href={`/admin/teacher-assignments?teacherId=${t.id}`}
+                className="text-sm text-blue-600 hover:text-blue-800">
+                Assign Classes
+              </Link>
+              <button onClick={() => handleDelete(t.id)} className="text-sm text-red-600">Remove</button>
+            </div>
           </div>
         ))}
       </div>
