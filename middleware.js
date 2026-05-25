@@ -4,23 +4,24 @@ import { jwtVerify } from 'jose';
 export async function middleware(request) {
   const pathname = request.nextUrl.pathname
 
-  // Allow these paths always
+  // Always allow these
   if (
     pathname === '/admin' ||
     pathname === '/maintenance' ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
-    pathname.startsWith('/images')
+    pathname.startsWith('/images') ||
+    pathname === '/favicon.ico'
   ) {
     return NextResponse.next()
   }
 
-  // Check maintenance cookie (set by admin panel)
+  // Check maintenance cookie
   const maintenanceCookie = request.cookies.get('maintenance_mode')?.value
 
   if (maintenanceCookie === 'true') {
-    // If user is admin, allow access
+    // Allow admin users (with valid adminToken)
     const token = request.cookies.get('adminToken')?.value
     if (token) {
       try {
@@ -33,7 +34,7 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL('/maintenance', request.url))
   }
 
-  // Admin routes protection
+  // Admin routes protection (normal mode)
   if (pathname.startsWith('/admin')) {
     const token = request.cookies.get('adminToken')?.value
     if (!token) return NextResponse.redirect(new URL('/admin', request.url))
@@ -58,5 +59,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/((?!_next|static|favicon.ico|images).*)'],
+  matcher: '/((?!_next|static|favicon.ico|images|api).*)',
 }
