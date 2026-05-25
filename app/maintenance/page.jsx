@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 export default function MaintenancePage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="text-center max-w-lg">
         <div className="text-8xl mb-8">🚧</div>
         <h1 className="text-5xl font-extrabold text-slate-800 mb-4">
@@ -18,7 +18,7 @@ export default function MaintenancePage() {
           <span className="text-amber-700 font-medium">Estimated time: 30 minutes</span>
         </div>
         <p className="mt-10 text-slate-400 text-sm">
-          For urgent inquiries, please contact us at<br />
+          For urgent inquiries:<br />
           <a href="tel:+917665212779" className="text-primary-500 font-medium">
             +91 76652 12779
           </a>
