@@ -1,28 +1,75 @@
-export const dynamic = 'force-dynamic'
+'use client'
+import { useState, useEffect } from 'react'
 
-export default function MaintenancePage() {
+export default function AdminMaintenance() {
+  const [enabled, setEnabled] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      const res = await fetch('/api/admin/maintenance', { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        setEnabled(data.maintenance_mode)
+      }
+      setLoading(false)
+    }
+    fetchStatus()
+  }, [])
+
+  const toggleMaintenance = async () => {
+    const newState = !enabled
+
+    // Update Supabase
+    const res = await fetch('/api/admin/maintenance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: newState }),
+      credentials: 'include',
+    })
+
+    if (res.ok) {
+      setEnabled(newState)
+
+      if (newState) {
+        // Set cookie to TRUE
+        document.cookie = 'maintenance_mode=true; path=/; max-age=86400; samesite=strict'
+        alert('✅ Maintenance mode ON')
+      } else {
+        // Force‑clear the cookie by setting max‑age=0
+        document.cookie = 'maintenance_mode=; path=/; max-age=0'
+        alert('✅ Maintenance mode OFF – Site is live now')
+      }
+    }
+  }
+
+  if (loading) return <div className="pt-20 text-center">Loading...</div>
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="text-center max-w-lg">
-        <div className="text-8xl mb-8">🚧</div>
-        <h1 className="text-5xl font-extrabold text-slate-800 mb-4">
-          Under Maintenance
-        </h1>
-        <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-          We're currently performing scheduled maintenance to improve your experience.
-          <br />
-          The website will be back online shortly.
+    <div className="pt-20 container mx-auto px-4 py-8 text-center">
+      <h2 className="text-3xl font-bold text-primary-500 mb-8">Maintenance Mode</h2>
+      
+      <div className="card max-w-md mx-auto">
+        <p className="text-gray-600 mb-6">
+          When ON, all visitors see "Under Maintenance". Admins can still access everything.
         </p>
-        <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-6 py-3">
-          <span className="animate-pulse w-3 h-3 bg-amber-500 rounded-full"></span>
-          <span className="text-amber-700 font-medium">Estimated time: 30 minutes</span>
-        </div>
-        <p className="mt-10 text-slate-400 text-sm">
-          For urgent inquiries:<br />
-          <a href="tel:+917665212779" className="text-primary-500 font-medium">
-            +91 76652 12779
-          </a>
-        </p>
+        
+        <button
+          onClick={toggleMaintenance}
+          className={`px-8 py-4 rounded-full text-xl font-bold text-white transition-all ${
+            enabled 
+              ? 'bg-green-500 hover:bg-green-600' 
+              : 'bg-red-500 hover:bg-red-600'
+          }`}
+        >
+          {enabled ? '🟢 Turn OFF (Site is Live)' : '🔴 Turn ON Maintenance'}
+        </button>
+
+        {enabled && (
+          <p className="mt-4 text-red-500 font-semibold animate-pulse">
+            ⚠️ Maintenance mode is ACTIVE
+          </p>
+        )}
       </div>
     </div>
   )
