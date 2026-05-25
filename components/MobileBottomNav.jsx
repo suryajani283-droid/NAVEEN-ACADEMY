@@ -15,6 +15,7 @@ import {
   ArrowRightOnRectangleIcon,
   BellAlertIcon,
   PhoneIcon,
+  BriefcaseIcon,
 } from '@heroicons/react/24/outline'
 
 const supabase = createClient(
@@ -71,24 +72,38 @@ export default function MobileBottomNav() {
     }
   }
 
-  const buttons = !user
+  // Open the desktop navbar's mobile menu by clicking the hamburger button
+  const openTopMenu = () => {
+    const menuBtn = document.querySelector('header button[aria-label="Open menu"]')
+    if (menuBtn) menuBtn.click()
+  }
+
+  // Now 3 buttons on each side (6 total + center = 7)
+  const leftButtons = !user
     ? [
         { name: 'Home', href: '/', icon: HomeIcon },
-        { name: 'Admission', href: '/admissions', icon: AcademicCapIcon },
-        { name: 'Login', action: centerAction, icon: UserCircleIcon, isCenter: true },
-        { name: 'Gallery', href: '/gallery', icon: CameraIcon },
-        { name: 'Menu', action: () => setShowMenu(!showMenu), icon: Bars3Icon },
+        { name: 'Admission', href: '/admission', icon: AcademicCapIcon },
+        { name: 'Teacher', href: '/teacher-login', icon: BriefcaseIcon },
       ]
     : [
         { name: 'Lectures', href: '/student-corner?tab=video', icon: PlayCircleIcon },
         { name: 'Homework', href: '/student-corner?tab=homework', icon: BookOpenIcon },
-        { name: 'Profile', action: centerAction, icon: UserCircleIcon, isCenter: true },
+        { name: 'Teacher', href: '/teacher-login', icon: BriefcaseIcon },
+      ]
+
+  const rightButtons = !user
+    ? [
+        { name: 'Gallery', href: '/gallery', icon: CameraIcon },
+        { name: 'Notices', href: '/notices', icon: BellAlertIcon },
+        { name: 'Menu', action: openTopMenu, icon: Bars3Icon },
+      ]
+    : [
         { name: 'Notes', href: '/student-corner?tab=notes', icon: DocumentTextIcon },
-        { name: 'Menu', action: () => setShowMenu(!showMenu), icon: Bars3Icon },
+        { name: 'Notices', href: '/notices', icon: BellAlertIcon },
+        { name: 'Menu', action: openTopMenu, icon: Bars3Icon },
       ]
 
   const isActive = (btn) => {
-    if (btn.isCenter) return false
     if (!btn.href) return false
     return pathname === btn.href || pathname.startsWith(btn.href + '?')
   }
@@ -128,34 +143,36 @@ export default function MobileBottomNav() {
         </div>
       )}
 
-      {/* Bottom Navigation Bar – always visible, anchored at the true bottom */}
+      {/* Bottom Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden pb-safe">
-        <div className="bg-orange-500 rounded-t-2xl shadow-[0_-4px_15px_rgba(0,0,0,0.15)] pt-2 pb-1 px-2">
+        <div className="bg-orange-500 rounded-t-2xl shadow-[0_-4px_15px_rgba(0,0,0,0.15)] pt-2 pb-1 px-1">
           <div className="flex items-center justify-between relative">
-            {/* Left two buttons */}
-            <div className="flex items-center space-x-1">
-              {buttons.slice(0, 2).map((btn, idx) => (
-                <div key={idx} className="flex flex-col items-center">
+            {/* Left three buttons */}
+            <div className="flex items-center space-x-0.5">
+              {leftButtons.map((btn, idx) => (
+                <div key={idx} className="flex flex-col items-center w-12">
                   {btn.href ? (
                     <Link
                       href={btn.href}
-                      className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
+                      className={`flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all ${
                         isActive(btn)
                           ? 'bg-orange-600 border-white text-white shadow-inner'
                           : 'bg-white border-orange-500 text-orange-500 shadow-md'
                       }`}
                     >
-                      <btn.icon className="h-5 w-5" />
+                      <btn.icon className="h-4 w-4" />
                     </Link>
                   ) : (
                     <button
                       onClick={btn.action}
-                      className="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white border-orange-500 text-orange-500 shadow-md"
+                      className="flex items-center justify-center w-9 h-9 rounded-full border-2 bg-white border-orange-500 text-orange-500 shadow-md"
                     >
-                      <btn.icon className="h-5 w-5" />
+                      <btn.icon className="h-4 w-4" />
                     </button>
                   )}
-                  <span className="text-[9px] text-white mt-0.5 font-medium">{btn.name}</span>
+                  <span className="text-[8px] text-white mt-0.5 font-medium truncate w-full text-center">
+                    {btn.name}
+                  </span>
                 </div>
               ))}
             </div>
@@ -176,54 +193,38 @@ export default function MobileBottomNav() {
               </button>
             </div>
 
-            {/* Right two buttons */}
-            <div className="flex items-center space-x-1">
-              {buttons.slice(3, 5).map((btn, idx) => (
-                <div key={idx} className="flex flex-col items-center">
+            {/* Right three buttons */}
+            <div className="flex items-center space-x-0.5">
+              {rightButtons.map((btn, idx) => (
+                <div key={idx} className="flex flex-col items-center w-12">
                   {btn.href ? (
                     <Link
                       href={btn.href}
-                      className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
+                      className={`flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all ${
                         isActive(btn)
                           ? 'bg-orange-600 border-white text-white shadow-inner'
                           : 'bg-white border-orange-500 text-orange-500 shadow-md'
                       }`}
                     >
-                      <btn.icon className="h-5 w-5" />
+                      <btn.icon className="h-4 w-4" />
                     </Link>
                   ) : (
                     <button
                       onClick={btn.action}
-                      className="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white border-orange-500 text-orange-500 shadow-md"
+                      className="flex items-center justify-center w-9 h-9 rounded-full border-2 bg-white border-orange-500 text-orange-500 shadow-md"
                     >
-                      <btn.icon className="h-5 w-5" />
+                      <btn.icon className="h-4 w-4" />
                     </button>
                   )}
-                  <span className="text-[9px] text-white mt-0.5 font-medium">{btn.name}</span>
+                  <span className="text-[8px] text-white mt-0.5 font-medium truncate w-full text-center">
+                    {btn.name}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </div>
-
-      {/* Menu Popover */}
-      {showMenu && (
-        <div className="fixed bottom-20 right-2 z-50 bg-white rounded-xl shadow-2xl p-3 w-48 border border-gray-200 md:hidden">
-          <Link href="/" onClick={() => setShowMenu(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100">
-            <HomeIcon className="h-5 w-5" /> Home
-          </Link>
-          <Link href="/notices" onClick={() => setShowMenu(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100">
-            <BellAlertIcon className="h-5 w-5" /> Notices
-          </Link>
-          <Link href="/contact" onClick={() => setShowMenu(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100">
-            <PhoneIcon className="h-5 w-5" /> Contact
-          </Link>
-          <Link href="/gallery" onClick={() => setShowMenu(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100">
-            <CameraIcon className="h-5 w-5" /> Gallery
-          </Link>
-        </div>
-      )}
     </>
   )
 }
