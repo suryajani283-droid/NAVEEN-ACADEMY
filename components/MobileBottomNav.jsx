@@ -71,8 +71,6 @@ export default function MobileBottomNav() {
     }
   }
 
-  // Define the five buttons: two left, center, two right
-  // All buttons use the same circular style with active state detection
   const buttons = !user
     ? [
         { name: 'Home', href: '/', icon: HomeIcon },
@@ -90,7 +88,7 @@ export default function MobileBottomNav() {
       ]
 
   const isActive = (btn) => {
-    if (btn.isCenter) return false   // center button active style is handled separately
+    if (btn.isCenter) return false
     if (!btn.href) return false
     return pathname === btn.href || pathname.startsWith(btn.href + '?')
   }
@@ -130,43 +128,82 @@ export default function MobileBottomNav() {
         </div>
       )}
 
-      {/* Bottom Dock – visible only on mobile */}
-      <div className="fixed bottom-3 left-0 right-0 z-40 flex justify-center md:hidden">
-        <div className="relative flex items-center space-x-2 bg-orange-500 rounded-full px-3 py-2 shadow-lg">
-          {buttons.map((btn, index) => (
-            <div key={index} className="relative">
-              {btn.href ? (
-                <Link
-                  href={btn.href}
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
-                    isActive(btn)
-                      ? 'bg-orange-600 border-white text-white shadow-inner'
-                      : 'bg-white border-orange-500 text-orange-500 shadow-md hover:shadow-lg'
-                  }`}
-                >
-                  <btn.icon className="h-5 w-5" />
-                </Link>
-              ) : (
-                <button
-                  onClick={btn.action}
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
-                    btn.isCenter
-                      ? 'w-12 h-12 -mt-4 bg-white border-orange-500 text-orange-500 shadow-xl hover:shadow-2xl'
-                      : isActive(btn)
-                      ? 'bg-orange-600 border-white text-white shadow-inner'
-                      : 'bg-white border-orange-500 text-orange-500 shadow-md hover:shadow-lg'
-                  }`}
-                >
-                  <btn.icon className={`${btn.isCenter ? 'h-6 w-6' : 'h-5 w-5'}`} />
-                </button>
-              )}
-              {btn.name && !btn.isCenter && (
-                <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] text-white font-medium whitespace-nowrap">
-                  {btn.name}
-                </span>
-              )}
+      {/* Bottom Navigation Bar – always visible, anchored at the true bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden pb-safe">
+        <div className="bg-orange-500 rounded-t-2xl shadow-[0_-4px_15px_rgba(0,0,0,0.15)] pt-2 pb-1 px-2">
+          <div className="flex items-center justify-between relative">
+            {/* Left two buttons */}
+            <div className="flex items-center space-x-1">
+              {buttons.slice(0, 2).map((btn, idx) => (
+                <div key={idx} className="flex flex-col items-center">
+                  {btn.href ? (
+                    <Link
+                      href={btn.href}
+                      className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
+                        isActive(btn)
+                          ? 'bg-orange-600 border-white text-white shadow-inner'
+                          : 'bg-white border-orange-500 text-orange-500 shadow-md'
+                      }`}
+                    >
+                      <btn.icon className="h-5 w-5" />
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={btn.action}
+                      className="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white border-orange-500 text-orange-500 shadow-md"
+                    >
+                      <btn.icon className="h-5 w-5" />
+                    </button>
+                  )}
+                  <span className="text-[9px] text-white mt-0.5 font-medium">{btn.name}</span>
+                </div>
+              ))}
             </div>
-          ))}
+
+            {/* Center elevated button */}
+            <div className="absolute left-1/2 -translate-x-1/2 -top-5">
+              <button
+                onClick={centerAction}
+                className="w-14 h-14 rounded-full bg-white shadow-xl border-4 border-orange-500 flex items-center justify-center text-orange-500"
+              >
+                {!user ? (
+                  <UserCircleIcon className="h-7 w-7" />
+                ) : (
+                  <span className="text-xl font-bold">
+                    {userName ? userName.charAt(0).toUpperCase() : 'U'}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Right two buttons */}
+            <div className="flex items-center space-x-1">
+              {buttons.slice(3, 5).map((btn, idx) => (
+                <div key={idx} className="flex flex-col items-center">
+                  {btn.href ? (
+                    <Link
+                      href={btn.href}
+                      className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
+                        isActive(btn)
+                          ? 'bg-orange-600 border-white text-white shadow-inner'
+                          : 'bg-white border-orange-500 text-orange-500 shadow-md'
+                      }`}
+                    >
+                      <btn.icon className="h-5 w-5" />
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={btn.action}
+                      className="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white border-orange-500 text-orange-500 shadow-md"
+                    >
+                      <btn.icon className="h-5 w-5" />
+                    </button>
+                  )}
+                  <span className="text-[9px] text-white mt-0.5 font-medium">{btn.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
