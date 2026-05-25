@@ -10,12 +10,18 @@ const supabase = createClient(
 
 const classes = ['All', '10', '11', '12']
 
+// Extract percentage number from achievement string (e.g., "98.6%")
+function extractPercentage(achievement) {
+  const match = String(achievement).match(/(\d+(\.\d+)?)%/)
+  return match ? parseFloat(match[1]) : 0
+}
+
 export default function BoardResultsPage() {
   const [students, setStudents] = useState([])
   const [activeClass, setActiveClass] = useState('All')
-  const [year, setYear] = useState('2025-26')   // ✅ year state (default)
+  const [year, setYear] = useState('2025-26')
 
-  // Fetch the dynamic year from homepage_content
+  // Fetch dynamic year
   useEffect(() => {
     const fetchYear = async () => {
       const { data, error } = await supabase
@@ -24,21 +30,40 @@ export default function BoardResultsPage() {
         .eq('section', 'board_results_year')
         .single()
       if (!error && data?.content) {
-        // content is stored as a JSON string, e.g. "2025-26"
         setYear(JSON.parse(data.content))
       }
     }
     fetchYear()
   }, [])
 
-  // Fetch students
+  // Fetch students, sort by percentage, assign rank
   useEffect(() => {
     const fetchStudents = async () => {
       const { data } = await supabase
         .from('board_results')
         .select('*')
         .order('created_at', { ascending: false })
-      setStudents(data || [])
+      
+      if (data) {
+        // Calculate percentage and sort
+        const withPercentage = data.map(s => ({
+          ...s,
+          percentage: extractPercentage(s.achievement),
+        }))
+        withPercentage.sort((a, b) => b.percentage - a.percentage)
+
+        // Assign rank (1-based, same percentage gets same rank)
+        let rank = 1
+        const ranked = withPercentage.map((s, index) => {
+          if (index > 0 && s.percentage < withPercentage[index - 1].percentage) {
+            rank = index + 1
+          }
+          return { ...s, rank }
+        })
+        setStudents(ranked)
+      } else {
+        setStudents([])
+      }
     }
     fetchStudents()
   }, [])
@@ -94,15 +119,21 @@ export default function BoardResultsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="card text-center relative overflow-visible"   // ✅ relative + overflow-visible
+                className="card text-center relative overflow-visible"
               >
-                {/* ✅ Dynamic Year Ribbon */}
-                <div className="absolute -top-1 -right-1 w-20 h-20 overflow-hidden">
-                  <div className="absolute top-2 -right-3 z-10">
-  <div className="bg-amber-500 text-white text-xs font-bold px-6 py-1 transform rotate-45 translate-x-1/3 -translate-y-1/3 shadow-md whitespace-nowrap">
-    {year}
-  </div>
-</div>
+                {/* 🥇 Rank Badge – top left */}
+                <div className="absolute top-2 -left-3 z-10">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 text-white flex items-center justify-center text-sm font-extrabold shadow-lg border-2 border-white">
+                    {student.rank}
+                  </div>
+                </div>
+
+                {/* 📅 Year Ribbon – top right */}
+                <div className="absolute top-2 -right-3 z-10">
+                  <div className="bg-amber-500 text-white text-xs font-bold px-6 py-1 transform rotate-45 translate-x-1/3 -translate-y-1/3 shadow-md whitespace-nowrap">
+                    {year}
+                  </div>
+                </div>
 
                 <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary-500 shadow-lg">
                   <img
