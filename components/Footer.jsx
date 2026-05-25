@@ -77,7 +77,7 @@ export default function Footer() {
               <div className="flex items-center space-x-3">
                 <PhoneIcon className="h-5 w-5 text-primary-400" />
                 <a href="tel:+919414123456" className="text-gray-400 hover:text-primary-400 transition-colors">
-                  +91 94141 23456
+                  +917665212779
                 </a>
               </div>
               <div className="flex items-center space-x-3">
