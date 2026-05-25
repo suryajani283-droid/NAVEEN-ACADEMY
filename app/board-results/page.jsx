@@ -124,8 +124,8 @@ export default function BoardResultsPage() {
                   </div>
                 </div>
 
-                {/* Year Badge – top right, auto‑sized, non‑rotated */}
-                <div className="absolute top-3 right-3 z-10">
+                {/* Year Badge – top right, nicely away from top edge */}
+                <div className="absolute top-4 right-4 z-10">
                   <div className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md whitespace-nowrap">
                     {year}
                   </div>
