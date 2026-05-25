@@ -45,8 +45,8 @@ export default function Footer() {
                 'Transport'
               ].map((item) => {
                 const href = item === 'Board Results'
-  ? '/board-results'
-  : `/${item.toLowerCase().replace(' ', '-')}`
+                  ? '/board-results'
+                  : `/${item.toLowerCase().replace(' ', '-')}`
 
                 return (
                   <li key={item}>
@@ -76,8 +76,8 @@ export default function Footer() {
               </div>
               <div className="flex items-center space-x-3">
                 <PhoneIcon className="h-5 w-5 text-primary-400" />
-                <a href="tel:+917665212779 className="text-gray-400 hover:text-primary-400 transition-colors">
-                  +91 94141 23456
+                <a href="tel:+917665212779" className="text-gray-400 hover:text-primary-400 transition-colors">
+                  +91 76652 12779
                 </a>
               </div>
               <div className="flex items-center space-x-3">
