@@ -98,10 +98,11 @@ export default function BoardResultsPage() {
               >
                 {/* ✅ Dynamic Year Ribbon */}
                 <div className="absolute -top-1 -right-1 w-20 h-20 overflow-hidden">
-                  <div className="absolute top-0 right-0 w-28 bg-amber-500 text-white text-xs font-bold text-center py-1 transform rotate-45 translate-x-6 -translate-y-2 shadow-md">
-                    {year}
-                  </div>
-                </div>
+                  <div className="absolute top-2 -right-3 z-10">
+  <div className="bg-amber-500 text-white text-xs font-bold px-6 py-1 transform rotate-45 translate-x-1/3 -translate-y-1/3 shadow-md whitespace-nowrap">
+    {year}
+  </div>
+</div>
 
                 <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary-500 shadow-lg">
                   <img
