@@ -14,7 +14,32 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
-  return (
+ // Add this state and useEffect inside RootLayout (before return)
+const [maintenance, setMaintenance] = useState(false);
+const [checking, setChecking] = useState(true);
+
+useEffect(() => {
+  const checkMaintenance = async () => {
+    try {
+      const res = await fetch('/api/maintenance');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.maintenance_mode && !window.location.pathname.startsWith('/admin') && window.location.pathname !== '/maintenance') {
+          window.location.href = '/maintenance';
+          return;
+        }
+      }
+    } catch {}
+    setChecking(false);
+  };
+  checkMaintenance();
+}, []); 
+
+
+
+
+
+return (
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
