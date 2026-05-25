@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import {
   HomeIcon,
@@ -28,6 +28,7 @@ export default function MobileBottomNav() {
   const [isTeacher, setIsTeacher] = useState(false)
   const [showProfilePopup, setShowProfilePopup] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
+  const pathname = usePathname()
   const router = useRouter()
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export default function MobileBottomNav() {
     router.push('/')
   }
 
-  const centerButtonAction = () => {
+  const centerAction = () => {
     if (!user) {
       router.push('/login')
     } else {
@@ -70,26 +71,29 @@ export default function MobileBottomNav() {
     }
   }
 
-  // Define buttons based on login state
-  const leftButtons = !user
+  // Define the five buttons: two left, center, two right
+  // All buttons use the same circular style with active state detection
+  const buttons = !user
     ? [
         { name: 'Home', href: '/', icon: HomeIcon },
         { name: 'Admission', href: '/admission', icon: AcademicCapIcon },
+        { name: 'Login', action: centerAction, icon: UserCircleIcon, isCenter: true },
+        { name: 'Gallery', href: '/gallery', icon: CameraIcon },
+        { name: 'Menu', action: () => setShowMenu(!showMenu), icon: Bars3Icon },
       ]
     : [
         { name: 'Lectures', href: '/student-corner?tab=video', icon: PlayCircleIcon },
         { name: 'Homework', href: '/student-corner?tab=homework', icon: BookOpenIcon },
+        { name: 'Profile', action: centerAction, icon: UserCircleIcon, isCenter: true },
+        { name: 'Notes', href: '/student-corner?tab=notes', icon: DocumentTextIcon },
+        { name: 'Menu', action: () => setShowMenu(!showMenu), icon: Bars3Icon },
       ]
 
-  const rightButtons = !user
-    ? [
-        { name: 'Gallery', href: '/gallery', icon: CameraIcon },
-        { name: 'Menu', icon: Bars3Icon, action: () => setShowMenu(!showMenu) },
-      ]
-    : [
-        { name: 'Notes', href: '/student-corner?tab=notes', icon: DocumentTextIcon },
-        { name: 'Menu', icon: Bars3Icon, action: () => setShowMenu(!showMenu) },
-      ]
+  const isActive = (btn) => {
+    if (btn.isCenter) return false   // center button active style is handled separately
+    if (!btn.href) return false
+    return pathname === btn.href || pathname.startsWith(btn.href + '?')
+  }
 
   return (
     <>
@@ -126,66 +130,44 @@ export default function MobileBottomNav() {
         </div>
       )}
 
-      {/* Bottom Navigation – visible only on mobile */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
-        {/* Orange bar with rounded top corners */}
-        <div className="relative bg-orange-500 rounded-t-2xl shadow-[0_-4px_15px_rgba(0,0,0,0.15)] pt-2 pb-1 px-1">
-          {/* Flex container for left, center, right */}
-          <div className="flex items-end justify-between">
-            {/* Left buttons */}
-            <div className="flex items-end gap-1 pb-1">
-              {leftButtons.map((btn) => (
+      {/* Bottom Dock – visible only on mobile */}
+      <div className="fixed bottom-3 left-0 right-0 z-40 flex justify-center md:hidden">
+        <div className="relative flex items-center space-x-2 bg-orange-500 rounded-full px-3 py-2 shadow-lg">
+          {buttons.map((btn, index) => (
+            <div key={index} className="relative">
+              {btn.href ? (
                 <Link
-                  key={btn.name}
-                  href={btn.href || '#'}
-                  className="flex flex-col items-center px-1 text-white hover:text-orange-100 transition-colors -translate-y-1"
+                  href={btn.href}
+                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
+                    isActive(btn)
+                      ? 'bg-orange-600 border-white text-white shadow-inner'
+                      : 'bg-white border-orange-500 text-orange-500 shadow-md hover:shadow-lg'
+                  }`}
                 >
-                  <btn.icon className="h-6 w-6" />
-                  <span className="text-[10px] font-medium mt-0.5">{btn.name}</span>
+                  <btn.icon className="h-5 w-5" />
                 </Link>
-              ))}
-            </div>
-
-            {/* Right buttons */}
-            <div className="flex items-end gap-1 pb-1">
-              {rightButtons.map((btn) =>
-                btn.href ? (
-                  <Link
-                    key={btn.name}
-                    href={btn.href}
-                    className="flex flex-col items-center px-1 text-white hover:text-orange-100 transition-colors -translate-y-1"
-                  >
-                    <btn.icon className="h-6 w-6" />
-                    <span className="text-[10px] font-medium mt-0.5">{btn.name}</span>
-                  </Link>
-                ) : (
-                  <button
-                    key={btn.name}
-                    onClick={btn.action}
-                    className="flex flex-col items-center px-1 text-white hover:text-orange-100 transition-colors -translate-y-1"
-                  >
-                    <btn.icon className="h-6 w-6" />
-                    <span className="text-[10px] font-medium mt-0.5">{btn.name}</span>
-                  </button>
-                )
+              ) : (
+                <button
+                  onClick={btn.action}
+                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
+                    btn.isCenter
+                      ? 'w-12 h-12 -mt-4 bg-white border-orange-500 text-orange-500 shadow-xl hover:shadow-2xl'
+                      : isActive(btn)
+                      ? 'bg-orange-600 border-white text-white shadow-inner'
+                      : 'bg-white border-orange-500 text-orange-500 shadow-md hover:shadow-lg'
+                  }`}
+                >
+                  <btn.icon className={`${btn.isCenter ? 'h-6 w-6' : 'h-5 w-5'}`} />
+                </button>
+              )}
+              {btn.name && !btn.isCenter && (
+                <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] text-white font-medium whitespace-nowrap">
+                  {btn.name}
+                </span>
               )}
             </div>
-          </div>
+          ))}
         </div>
-
-        {/* Center Elevated Button */}
-        <button
-          onClick={centerButtonAction}
-          className="absolute left-1/2 -translate-x-1/2 -top-5 w-14 h-14 rounded-full bg-white shadow-xl border-4 border-orange-500 flex items-center justify-center active:scale-95 transition-transform"
-        >
-          {!user ? (
-            <UserCircleIcon className="h-7 w-7 text-orange-500" />
-          ) : (
-            <span className="text-xl font-bold text-orange-500">
-              {userName ? userName.charAt(0).toUpperCase() : 'U'}
-            </span>
-          )}
-        </button>
       </div>
 
       {/* Menu Popover */}
