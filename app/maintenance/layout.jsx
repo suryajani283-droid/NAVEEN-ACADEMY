@@ -6,7 +6,7 @@ export const metadata = {
 export default function MaintenanceLayout({ children }) {
   return (
     <html lang="en">
-      <body className="bg-slate-50">
+      <body className="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
         {children}
       </body>
     </html>
