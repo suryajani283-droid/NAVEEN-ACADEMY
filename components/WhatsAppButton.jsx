@@ -12,7 +12,7 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       className="fixed z-50 bg-green-500 text-white rounded-full shadow-2xl hover:bg-green-600 transition-all
-                 bottom-4 right-4 md:bottom-6 md:right-6 p-4 md:p-5"
+           bottom-16 right-4 md:bottom-6 md:right-6 p-4 md:p-5"
       whileHover={{ scale: 1.15 }}
       whileTap={{ scale: 0.9 }}
       animate={{
