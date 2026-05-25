@@ -13,7 +13,25 @@ const classes = ['All', '10', '11', '12']
 export default function BoardResultsPage() {
   const [students, setStudents] = useState([])
   const [activeClass, setActiveClass] = useState('All')
+  const [year, setYear] = useState('2025-26')   // ✅ year state (default)
 
+  // Fetch the dynamic year from homepage_content
+  useEffect(() => {
+    const fetchYear = async () => {
+      const { data, error } = await supabase
+        .from('homepage_content')
+        .select('content')
+        .eq('section', 'board_results_year')
+        .single()
+      if (!error && data?.content) {
+        // content is stored as a JSON string, e.g. "2025-26"
+        setYear(JSON.parse(data.content))
+      }
+    }
+    fetchYear()
+  }, [])
+
+  // Fetch students
   useEffect(() => {
     const fetchStudents = async () => {
       const { data } = await supabase
@@ -76,13 +94,21 @@ export default function BoardResultsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="card text-center"
+                className="card text-center relative overflow-visible"   // ✅ relative + overflow-visible
               >
+                {/* ✅ Dynamic Year Ribbon */}
+                <div className="absolute -top-1 -right-1 w-20 h-20 overflow-hidden">
+                  <div className="absolute top-0 right-0 w-28 bg-amber-500 text-white text-xs font-bold text-center py-1 transform rotate-45 translate-x-6 -translate-y-2 shadow-md">
+                    {year}
+                  </div>
+                </div>
+
                 <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary-500 shadow-lg">
                   <img
                     src={student.img}
                     alt={student.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => { e.target.src = '/images/default-avatar.png' }}
                   />
                 </div>
                 <h3 className="text-xl font-bold text-primary-500">{student.name}</h3>
