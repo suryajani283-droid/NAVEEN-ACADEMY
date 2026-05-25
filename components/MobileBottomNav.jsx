@@ -74,7 +74,7 @@ export default function MobileBottomNav() {
   const buttons = !user
     ? [
         { name: 'Home', href: '/', icon: HomeIcon },
-        { name: 'Admission', href: '/admission', icon: AcademicCapIcon },
+        { name: 'Admission', href: '/admissions', icon: AcademicCapIcon },
         { name: 'Login', action: centerAction, icon: UserCircleIcon, isCenter: true },
         { name: 'Gallery', href: '/gallery', icon: CameraIcon },
         { name: 'Menu', action: () => setShowMenu(!showMenu), icon: Bars3Icon },
