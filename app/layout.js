@@ -1,5 +1,4 @@
 import './globals.css'
-import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import WhatsAppButton from '../components/WhatsAppButton'
@@ -8,6 +7,7 @@ import ServiceWorkerRegister from '../components/ServiceWorkerRegister'
 import ScrollToTop from '../components/ScrollToTop'
 import MobileBottomNav from '../components/MobileBottomNav'
 import AdmissionMarquee from '../components/AdmissionMarquee'
+import MaintenanceCheck from '../components/MaintenanceCheck'
 
 export const metadata = {
   title: 'Naveen Academy Senior Secondary School | Best School in Chohtan, Barmer',
@@ -15,29 +15,6 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
-  const [maintenance, setMaintenance] = useState(false)
-  const [checking, setChecking] = useState(true)
-
-  useEffect(() => {
-    const checkMaintenance = async () => {
-      try {
-        const res = await fetch('/api/maintenance')
-        if (res.ok) {
-          const data = await res.json()
-          if (data.maintenance_mode && 
-              !window.location.pathname.startsWith('/admin') && 
-              !window.location.pathname.startsWith('/api') &&
-              window.location.pathname !== '/maintenance') {
-            window.location.href = '/maintenance'
-            return
-          }
-        }
-      } catch {}
-      setChecking(false)
-    }
-    checkMaintenance()
-  }, [])
-
   return (
     <html lang="en">
       <head>
@@ -52,6 +29,7 @@ export default function RootLayout({ children }) {
         className="flex flex-col min-h-screen"
         style={{ fontFamily: "'Poppins', 'Hind', sans-serif" }}
       >
+        <MaintenanceCheck />
         <AdmissionMarquee />
         <ServiceWorkerRegister />
         <Navbar />
