@@ -103,6 +103,22 @@ export default function AdminHomepage() {
         />
         <button onClick={() => handleSave('about')} className="btn-primary">Save About</button>
       </div>
+{/* Board Results Year */}
+<div className="card space-y-4">
+  <h3 className="text-xl font-semibold text-primary-500">Board Results Year</h3>
+  <input
+    value={data.board_results_year || '2025-26'}
+    onChange={e => setData({
+      ...data,
+      board_results_year: e.target.value
+    })}
+    placeholder="e.g., 2025-26"
+    className="w-full px-4 py-2 border rounded"
+  />
+  <button onClick={() => handleSave('board_results_year')} className="btn-primary">
+    Save Year
+  </button>
+</div>
 
       {/* Why Choose Us */}
       {/* ... इसी तरह बाकी sections के लिए input बनाएँ, लेकिन इतना करने से काम चल जाएगा। */}
