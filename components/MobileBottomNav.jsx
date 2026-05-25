@@ -82,7 +82,7 @@ export default function MobileBottomNav() {
   const leftButtons = !user
     ? [
         { name: 'Home', href: '/', icon: HomeIcon },
-        { name: 'Admission', href: '/admission', icon: AcademicCapIcon },
+        { name: 'Admission', href: '/admissions', icon: AcademicCapIcon },
         { name: 'Teacher', href: '/teacher-login', icon: BriefcaseIcon },
       ]
     : [
