@@ -1,4 +1,3 @@
-
 'use client'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -11,7 +10,6 @@ const supabase = createClient(
 
 const classes = ['All', '10', '11', '12']
 
-// Extract percentage number from achievement string (e.g., "98.6%")
 function extractPercentage(achievement) {
   const match = String(achievement).match(/(\d+(\.\d+)?)%/)
   return match ? parseFloat(match[1]) : 0
@@ -22,7 +20,6 @@ export default function BoardResultsPage() {
   const [activeClass, setActiveClass] = useState('All')
   const [year, setYear] = useState('2025-26')
 
-  // Fetch dynamic year
   useEffect(() => {
     const fetchYear = async () => {
       const { data, error } = await supabase
@@ -37,7 +34,6 @@ export default function BoardResultsPage() {
     fetchYear()
   }, [])
 
-  // Fetch students, sort by percentage, assign rank
   useEffect(() => {
     const fetchStudents = async () => {
       const { data } = await supabase
@@ -46,14 +42,12 @@ export default function BoardResultsPage() {
         .order('created_at', { ascending: false })
 
       if (data) {
-        // Calculate percentage and sort
         const withPercentage = data.map(s => ({
           ...s,
           percentage: extractPercentage(s.achievement),
         }))
         withPercentage.sort((a, b) => b.percentage - a.percentage)
 
-        // Assign rank (1-based, same percentage gets same rank)
         let rank = 1
         const ranked = withPercentage.map((s, index) => {
           if (index > 0 && s.percentage < withPercentage[index - 1].percentage) {
@@ -122,7 +116,7 @@ export default function BoardResultsPage() {
                 transition={{ delay: 0.1 }}
                 className="card text-center relative overflow-visible bg-white"
               >
-                {/* ---------- RANK BADGE (top-left, inside card) ---------- */}
+                {/* Rank Badge – top left */}
                 <div className="absolute -top-3 -left-3 z-20">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-white flex flex-col items-center justify-center shadow-xl border-4 border-white">
                     <span className="text-lg font-extrabold leading-none">{student.rank}</span>
@@ -130,12 +124,12 @@ export default function BoardResultsPage() {
                   </div>
                 </div>
 
-                {/* ---------- FOLDED RIBBON (top-right) ---------- */}
-<div className="absolute top-2 right-0 w-24 h-24 overflow-hidden z-10">
-  <div className="absolute top-0 right-0 w-32 bg-amber-500 text-white text-xs font-bold text-center py-1 shadow-lg transform rotate-45 translate-x-10 -translate-y-2">
-    {year}
-  </div>
-</div>
+                {/* Year Badge – top right, auto‑sized, non‑rotated */}
+                <div className="absolute top-3 right-3 z-10">
+                  <div className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md whitespace-nowrap">
+                    {year}
+                  </div>
+                </div>
 
                 <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary-500 shadow-lg">
                   <img
