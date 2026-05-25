@@ -5,7 +5,8 @@ import Footer from '../components/Footer'
 import WhatsAppButton from '../components/WhatsAppButton'
 import AdBanner from '../components/AdBanner'
 import ServiceWorkerRegister from '../components/ServiceWorkerRegister'
-import ScrollToTop from '../components/ScrollToTop';
+import ScrollToTop from '../components/ScrollToTop'
+import MobileBottomNav from '../components/MobileBottomNav';
 
 export const metadata = {
   title: 'Naveen Academy Senior Secondary School | Best School in Chohtan, Barmer',
@@ -31,7 +32,8 @@ export default function RootLayout({ children }) {
         <ServiceWorkerRegister />
         <ScrollToTop />
         <Navbar />
-        <main className="flex-1 flex flex-col">
+        <MobileBottomNav/>
+        <main className="flex-1 flex flex-col pb-16 md:pb-0">
           <div className="flex-1">{children}</div>
           <AdBanner />
         </main>
