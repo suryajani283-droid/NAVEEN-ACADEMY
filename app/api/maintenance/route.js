@@ -9,7 +9,15 @@ export async function GET() {
       .eq('section', 'maintenance_mode')
       .single();
     if (error) throw error;
-    return NextResponse.json({ maintenance_mode: data?.content === 'true' });
+    
+    return NextResponse.json(
+      { maintenance_mode: data?.content === 'true' },
+      {
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+        },
+      }
+    );
   } catch (err) {
     return NextResponse.json({ maintenance_mode: false });
   }
