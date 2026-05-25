@@ -20,6 +20,7 @@ export default function BoardResultsPage() {
   const [activeClass, setActiveClass] = useState('All')
   const [year, setYear] = useState('2025-26')
 
+  // Fetch dynamic year
   useEffect(() => {
     const fetchYear = async () => {
       const { data, error } = await supabase
@@ -34,6 +35,7 @@ export default function BoardResultsPage() {
     fetchYear()
   }, [])
 
+  // Fetch students, sort by percentage, assign global rank
   useEffect(() => {
     const fetchStudents = async () => {
       const { data } = await supabase
@@ -63,9 +65,23 @@ export default function BoardResultsPage() {
     fetchStudents()
   }, [])
 
+  // Filter by class and optionally recalculate rank for that class
   const filtered = activeClass === 'All'
     ? students
     : students.filter(s => s.class === activeClass)
+
+  // When a specific class is selected, recalculate rank only within that class
+  const displayStudents = activeClass === 'All'
+    ? filtered
+    : (() => {
+        let rank = 1
+        return filtered.map((s, i) => {
+          if (i > 0 && s.percentage < filtered[i - 1].percentage) {
+            rank = i + 1
+          }
+          return { ...s, rank }
+        })
+      })()
 
   return (
     <div className="pt-20">
@@ -108,7 +124,7 @@ export default function BoardResultsPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {filtered.map((student) => (
+            {displayStudents.map((student) => (
               <motion.div
                 key={student.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -124,7 +140,7 @@ export default function BoardResultsPage() {
                   </div>
                 </div>
 
-                {/* Year Badge – top right, nicely away from top edge */}
+                {/* Year Badge – top right */}
                 <div className="absolute top-4 right-4 z-10">
                   <div className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md whitespace-nowrap">
                     {year}
@@ -147,7 +163,7 @@ export default function BoardResultsPage() {
               </motion.div>
             ))}
           </div>
-          {filtered.length === 0 && (
+          {displayStudents.length === 0 && (
             <p className="text-center text-gray-500 py-12">No results for this class yet.</p>
           )}
         </div>
