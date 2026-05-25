@@ -131,11 +131,11 @@ export default function BoardResultsPage() {
                 </div>
 
                 {/* ---------- FOLDED RIBBON (top-right) ---------- */}
-                <div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-10">
-                  <div className="absolute -top-1 right-0 w-32 bg-amber-500 text-white text-xs font-bold text-center py-1 shadow-lg transform rotate-45 translate-x-10 -translate-y-4">
-                    {year}
-                  </div>
-                </div>
+<div className="absolute top-2 right-0 w-24 h-24 overflow-hidden z-10">
+  <div className="absolute top-0 right-0 w-32 bg-amber-500 text-white text-xs font-bold text-center py-1 shadow-lg transform rotate-45 translate-x-10 -translate-y-2">
+    {year}
+  </div>
+</div>
 
                 <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary-500 shadow-lg">
                   <img
