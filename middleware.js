@@ -4,48 +4,36 @@ import { jwtVerify } from 'jose';
 export async function middleware(request) {
   const pathname = request.nextUrl.pathname
 
-  // Allow admin login page so admins can log in
-  if (pathname === '/admin') {
+  // Allow these paths always
+  if (
+    pathname === '/admin' ||
+    pathname === '/maintenance' ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/static') ||
+    pathname.startsWith('/images')
+  ) {
     return NextResponse.next()
   }
 
-  // Allow maintenance page itself
-  if (pathname === '/maintenance') {
-    return NextResponse.next()
-  }
+  // Check maintenance cookie (set by admin panel)
+  const maintenanceCookie = request.cookies.get('maintenance_mode')?.value
 
-  // Allow API routes
-  if (pathname.startsWith('/api/')) {
-    return NextResponse.next()
-  }
-
-  // Allow static assets
-  if (pathname.startsWith('/_next') || pathname.startsWith('/static') || pathname.startsWith('/images')) {
-    return NextResponse.next()
-  }
-
-  // Check if maintenance mode is ON
-  try {
-    const maintenanceRes = await fetch(`${request.nextUrl.origin}/api/maintenance`)
-    if (maintenanceRes.ok) {
-      const { maintenance_mode } = await maintenanceRes.json()
-      if (maintenance_mode) {
-        // If user is admin (has valid adminToken), allow access
-        const token = request.cookies.get('adminToken')?.value
-        if (token) {
-          try {
-            const secret = new TextEncoder().encode(process.env.JWT_SECRET)
-            await jwtVerify(token, secret)
-            return NextResponse.next()
-          } catch {}
-        }
-        // Everyone else → maintenance page
-        return NextResponse.redirect(new URL('/maintenance', request.url))
-      }
+  if (maintenanceCookie === 'true') {
+    // If user is admin, allow access
+    const token = request.cookies.get('adminToken')?.value
+    if (token) {
+      try {
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET)
+        await jwtVerify(token, secret)
+        return NextResponse.next()
+      } catch {}
     }
-  } catch {}
+    // Everyone else → maintenance page
+    return NextResponse.redirect(new URL('/maintenance', request.url))
+  }
 
-  // Normal admin route protection
+  // Admin routes protection
   if (pathname.startsWith('/admin')) {
     const token = request.cookies.get('adminToken')?.value
     if (!token) return NextResponse.redirect(new URL('/admin', request.url))
