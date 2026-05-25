@@ -19,15 +19,20 @@ export default function AdminMaintenance() {
 
   const toggleMaintenance = async () => {
     const newState = !enabled
+
+    // Update Supabase
     const res = await fetch('/api/admin/maintenance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ enabled: newState }),
       credentials: 'include',
     })
+
     if (res.ok) {
       setEnabled(newState)
-      alert(newState ? 'Maintenance mode ON' : 'Maintenance mode OFF')
+      // Set cookie for middleware
+      document.cookie = `maintenance_mode=${newState}; path=/; max-age=86400; samesite=strict`
+      alert(newState ? '✅ Maintenance mode ON' : '✅ Maintenance mode OFF - Site is live now')
     }
   }
 
@@ -39,31 +44,23 @@ export default function AdminMaintenance() {
       
       <div className="card max-w-md mx-auto">
         <p className="text-gray-600 mb-6">
-          When enabled, all visitors (except admins) will see a "Under Maintenance" page.
+          When ON, all visitors see "Under Maintenance". Admins can still access everything.
         </p>
         
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <span className={`text-lg font-semibold ${!enabled ? 'text-green-600' : 'text-gray-400'}`}>
-            OFF
-          </span>
-          <button
-            onClick={toggleMaintenance}
-            className={`relative w-20 h-10 rounded-full transition-colors ${
-              enabled ? 'bg-red-500' : 'bg-green-500'
-            }`}
-          >
-            <div className={`absolute top-1 w-8 h-8 bg-white rounded-full shadow transition-transform ${
-              enabled ? 'translate-x-10' : 'translate-x-1'
-            }`} />
-          </button>
-          <span className={`text-lg font-semibold ${enabled ? 'text-red-600' : 'text-gray-400'}`}>
-            ON
-          </span>
-        </div>
+        <button
+          onClick={toggleMaintenance}
+          className={`px-8 py-4 rounded-full text-xl font-bold text-white transition-all ${
+            enabled 
+              ? 'bg-green-500 hover:bg-green-600' 
+              : 'bg-red-500 hover:bg-red-600'
+          }`}
+        >
+          {enabled ? '🟢 Turn OFF (Site is Live)' : '🔴 Turn ON Maintenance'}
+        </button>
 
         {enabled && (
-          <p className="text-red-500 font-semibold animate-pulse">
-            ⚠️ Website is currently under maintenance
+          <p className="mt-4 text-red-500 font-semibold animate-pulse">
+            ⚠️ Maintenance mode is ACTIVE - Visitors see maintenance page
           </p>
         )}
       </div>
