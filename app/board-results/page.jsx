@@ -1,3 +1,4 @@
+```javascript
 'use client'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -43,7 +44,7 @@ export default function BoardResultsPage() {
         .from('board_results')
         .select('*')
         .order('created_at', { ascending: false })
-      
+
       if (data) {
         // Calculate percentage and sort
         const withPercentage = data.map(s => ({
@@ -119,18 +120,19 @@ export default function BoardResultsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="card text-center relative overflow-visible"
+                className="card text-center relative overflow-visible bg-white"
               >
-                {/* 🥇 Rank Badge – top left */}
-                <div className="absolute top-2 -left-3 z-10">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 text-white flex items-center justify-center text-sm font-extrabold shadow-lg border-2 border-white">
-                    {student.rank}
+                {/* ---------- RANK BADGE (top-left, inside card) ---------- */}
+                <div className="absolute -top-3 -left-3 z-20">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-white flex flex-col items-center justify-center shadow-xl border-4 border-white">
+                    <span className="text-lg font-extrabold leading-none">{student.rank}</span>
+                    <span className="text-[10px] font-medium leading-none">Rank</span>
                   </div>
                 </div>
 
-                {/* 📅 Year Ribbon – top right */}
-                <div className="absolute top-2 -right-3 z-10">
-                  <div className="bg-amber-500 text-white text-xs font-bold px-6 py-1 transform rotate-45 translate-x-1/3 -translate-y-1/3 shadow-md whitespace-nowrap">
+                {/* ---------- FOLDED RIBBON (top-right) ---------- */}
+                <div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-10">
+                  <div className="absolute -top-1 right-0 w-32 bg-amber-500 text-white text-xs font-bold text-center py-1 shadow-lg transform rotate-45 translate-x-10 -translate-y-4">
                     {year}
                   </div>
                 </div>
@@ -159,3 +161,4 @@ export default function BoardResultsPage() {
     </div>
   )
 }
+```
