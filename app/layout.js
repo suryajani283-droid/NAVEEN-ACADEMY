@@ -5,7 +5,6 @@ import WhatsAppButton from '../components/WhatsAppButton'
 import AdBanner from '../components/AdBanner'
 import ServiceWorkerRegister from '../components/ServiceWorkerRegister'
 import ScrollToTop from '../components/ScrollToTop'
-import MobileBottomNav from '../components/MobileBottomNav'
 import AdmissionMarquee from '../components/AdmissionMarquee'
 
 export const metadata = {
@@ -31,14 +30,13 @@ export default function RootLayout({ children }) {
         <AdmissionMarquee />
         <ServiceWorkerRegister />
         <Navbar />
-        <main className="flex-1 flex flex-col pb-24 md:pb-0">
+        <main className="flex-1 flex flex-col">
           <div className="flex-1">{children}</div>
           <AdBanner />
         </main>
         <Footer />
         <WhatsAppButton />
         <ScrollToTop />
-        <MobileBottomNav />
       </body>
     </html>
   )
