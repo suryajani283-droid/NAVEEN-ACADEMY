@@ -42,12 +42,14 @@ export default function Footer() {
                 'Notices',
                 'Board Results',
                 'Fee Structure',
-                'Transport'
+                'Transport',
+                'Teacher Login',
+                'Contact'
               ].map((item) => {
-                const href = item === 'Board Results'
-                  ? '/board-results'
-                  : `/${item.toLowerCase().replace(' ', '-')}`
-
+                let href = `/${item.toLowerCase().replace(' ', '-')}`;
+                if (item === 'Board Results') href = '/board-results';
+                if (item === 'Teacher Login') href = '/teacher-login';
+                if (item === 'Contact') href = '/contact';
                 return (
                   <li key={item}>
                     <Link 
