@@ -21,7 +21,7 @@ const navigation = [
   { name: 'Gallery', href: '/gallery' },
   { name: 'Admission', href: '/admissions' },
   { name: 'Notices', href: '/notices' },
-  { name: 'Contact', href: '/contact' },
+  // Contact removed – now in footer
 ]
 
 export default function Navbar() {
@@ -104,18 +104,8 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Auth Section – Desktop */}
+          {/* Auth Section – Desktop (Teacher Login removed) */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
-            {isTeacher ? (
-              <Link href="/teacher/dashboard" className="text-xs xl:text-sm font-medium text-[#B4542C] hover:text-[#8B3A3A] whitespace-nowrap">
-                👨‍🏫 {teacherName}
-              </Link>
-            ) : (
-              <Link href="/teacher-login" className="text-xs xl:text-sm font-medium text-gray-500 hover:text-[#B4542C] whitespace-nowrap">
-                Teacher Login
-              </Link>
-            )}
-
             {user && !isTeacher ? (
               <>
                 <span className="text-xs xl:text-sm text-gray-700 whitespace-nowrap">{studentName || 'Student'}</span>
@@ -165,10 +155,7 @@ export default function Navbar() {
                     {item.name}
                   </Link>
                 ))}
-                <Link href={isTeacher ? '/teacher/dashboard' : '/teacher-login'} onClick={() => setMobileMenuOpen(false)}
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-[#B4542C] hover:bg-orange-50">
-                  {isTeacher ? `👨‍🏫 ${teacherName}` : 'Teacher Login'}
-                </Link>
+                {/* Teacher Login removed from mobile menu as well */}
               </div>
               <div className="py-6 space-y-2">
                 {user ? (
