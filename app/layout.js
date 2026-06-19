@@ -7,7 +7,6 @@ import ServiceWorkerRegister from '../components/ServiceWorkerRegister'
 import ScrollToTop from '../components/ScrollToTop'
 import MobileBottomNav from '../components/MobileBottomNav'
 import AdmissionMarquee from '../components/AdmissionMarquee'
-import MaintenanceCheck from '../components/MaintenanceCheck'
 
 export const metadata = {
   title: 'Naveen Academy Senior Secondary School | Best School in Chohtan, Barmer',
@@ -29,7 +28,6 @@ export default function RootLayout({ children }) {
         className="flex flex-col min-h-screen"
         style={{ fontFamily: "'Poppins', 'Hind', sans-serif" }}
       >
-        <MaintenanceCheck />
         <AdmissionMarquee />
         <ServiceWorkerRegister />
         <Navbar />
