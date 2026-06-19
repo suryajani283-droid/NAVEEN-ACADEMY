@@ -8,21 +8,21 @@
     "start": "next start",
     "lint": "next lint"
   },
-"dependencies": {
-  "@headlessui/react": "^1.7.17",
-  "@heroicons/react": "^2.0.18",
-  "@supabase/supabase-js": "^2.39.0",
-  "framer-motion": "^10.16.4",
-  "jsonwebtoken": "^9.0.0",
-  "jose": "^5.0.0",
-  "next": "14.0.3",
-  "web-push": "^3.5.0",
-  "react": "^18.2.0",
-  "react-dom": "^18.2.0",
-  "react-icons": "^4.12.0"
-  "leaflet": "^1.9.4",
-  "react-leaflet": "^4.2.1"
-},
+  "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
+    "@supabase/supabase-js": "^2.39.0",
+    "framer-motion": "^10.16.4",
+    "jsonwebtoken": "^9.0.0",
+    "jose": "^5.0.0",
+    "next": "14.0.3",
+    "web-push": "^3.5.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.12.0",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^4.2.1"
+  },
   "devDependencies": {
     "autoprefixer": "^10.4.16",
     "eslint": "^8.54.0",
