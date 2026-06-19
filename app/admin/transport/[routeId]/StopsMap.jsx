@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
+import { useState, useCallback } from 'react'
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, LayersControl } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 })
 
-// Custom icon for existing stops (blue)
+// Custom icons for existing stops and new stop preview
 const existingIcon = new L.Icon({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -24,7 +24,6 @@ const existingIcon = new L.Icon({
   shadowSize: [41, 41]
 })
 
-// Custom icon for the "new stop" preview (green)
 const newStopIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
@@ -34,12 +33,9 @@ const newStopIcon = new L.Icon({
   shadowSize: [41, 41]
 })
 
-// Component to handle map click events
 function MapClickHandler({ onMapClick }) {
   useMapEvents({
-    click(e) {
-      onMapClick(e.latlng)
-    },
+    click(e) { onMapClick(e.latlng) },
   })
   return null
 }
@@ -49,12 +45,12 @@ export default function StopsMap({ existingStops, onAddStop }) {
   const [form, setForm] = useState({ name_en: '', name_hi: '', stop_order: '' })
   const [popupOpen, setPopupOpen] = useState(false)
 
-  const center = [25.6, 71.5] // Chohtan/Barmer area
+  const center = [25.6, 71.5]
   const zoom = 11
 
   const handleMapClick = useCallback((latlng) => {
     setClickedPos(latlng)
-    setForm({ name_en: '', name_hi: '', stop_order: '' }) // reset form
+    setForm({ name_en: '', name_hi: '', stop_order: '' })
     setPopupOpen(true)
   }, [])
 
@@ -76,13 +72,23 @@ export default function StopsMap({ existingStops, onAddStop }) {
   return (
     <div className="w-full h-[60vh] rounded-xl overflow-hidden shadow-lg border-2 border-[#B4542C]/30 mb-8">
       <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
-        <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        <LayersControl position="topright">
+          <LayersControl.BaseLayer checked name="Streets">
+            <TileLayer
+              attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="Satellite">
+            <TileLayer
+              attribution='&copy; <a href="https://www.esri.com/">ESRI</a>'
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            />
+          </LayersControl.BaseLayer>
+        </LayersControl>
+
         <MapClickHandler onMapClick={handleMapClick} />
 
-        {/* Existing stops markers */}
         {existingStops.map((stop) => (
           <Marker key={stop.id} position={[stop.lat, stop.lng]} icon={existingIcon}>
             <Popup>
@@ -95,7 +101,6 @@ export default function StopsMap({ existingStops, onAddStop }) {
           </Marker>
         ))}
 
-        {/* New stop preview marker */}
         {clickedPos && popupOpen && (
           <Marker position={clickedPos} icon={newStopIcon}>
             <Popup>
@@ -105,15 +110,13 @@ export default function StopsMap({ existingStops, onAddStop }) {
                   placeholder="Name (English)*"
                   value={form.name_en}
                   onChange={e => setForm({ ...form, name_en: e.target.value })}
-                  className="w-full border p-1 rounded text-sm"
-                  required
+                  className="w-full border p-1 rounded text-sm" required
                 />
                 <input
                   placeholder="Name (Hindi)*"
                   value={form.name_hi}
                   onChange={e => setForm({ ...form, name_hi: e.target.value })}
-                  className="w-full border p-1 rounded text-sm"
-                  required
+                  className="w-full border p-1 rounded text-sm" required
                 />
                 <input
                   type="number"
