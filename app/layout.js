@@ -1,4 +1,5 @@
 import './globals.css'
+import ThemeProvider from '../components/ThemeProvider'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import WhatsAppButton from '../components/WhatsAppButton'
@@ -26,43 +27,41 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
         <script
-  dangerouslySetInnerHTML={{
-    __html: `
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js').then(function(reg) {
-            console.log('SW registered!', reg.scope);
-
-            // Listen for the UPDATE message from the SW and reload
-            navigator.serviceWorker.addEventListener('message', function(event) {
-              if (event.data && event.data.type === 'UPDATE') {
-                console.log('New version available, reloading...');
-                window.location.reload();
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('SW registered!', reg.scope);
+                    navigator.serviceWorker.addEventListener('message', function(event) {
+                      if (event.data && event.data.type === 'UPDATE') {
+                        window.location.reload();
+                      }
+                    });
+                  }).catch(function(err) {
+                    console.error('SW registration failed:', err);
+                  });
+                });
               }
-            });
-
-          }).catch(function(err) {
-            console.error('SW registration failed:', err);
-          });
-        });
-      }
-    `,
-  }}
-/>
+            `,
+          }}
+        />
       </head>
       <body
-        className="flex flex-col min-h-screen overflow-x-hidden"
+        className="flex flex-col min-h-screen overflow-x-hidden bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
         style={{ fontFamily: "'Poppins', 'Hind', sans-serif" }}
       >
-        <AdmissionMarquee />
-        <Navbar />
-        <main className="flex-1 flex flex-col overflow-x-hidden">
-          <div className="flex-1">{children}</div>
-          <AdBanner />
-        </main>
-        <Footer />
-        <WhatsAppButton />
-        <ScrollToTop />
+        <ThemeProvider>
+          <AdmissionMarquee />
+          <Navbar />
+          <main className="flex-1 flex flex-col overflow-x-hidden">
+            <div className="flex-1">{children}</div>
+            <AdBanner />
+          </main>
+          <Footer />
+          <WhatsAppButton />
+          <ScrollToTop />
+        </ThemeProvider>
       </body>
     </html>
   )
