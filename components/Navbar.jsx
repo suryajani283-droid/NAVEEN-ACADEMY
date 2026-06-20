@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Dialog } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, XMarkIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -21,7 +21,6 @@ const navigation = [
   { name: 'Gallery', href: '/gallery' },
   { name: 'Admission', href: '/admissions' },
   { name: 'Notices', href: '/notices' },
-  // Contact removed – now in footer
 ]
 
 export default function Navbar() {
@@ -78,7 +77,7 @@ export default function Navbar() {
     <header className={`fixed top-10 w-full z-[1000] transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-white/95'}`}>
       <nav className="container mx-auto px-2 sm:px-4 lg:px-6" aria-label="Global">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo + Name – always visible on mobile */}
+          {/* Logo + Name */}
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
             <img src="/images/logo.png" alt="Logo" className="h-10 lg:h-12 w-auto" />
             <div>
@@ -87,7 +86,7 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation + Settings */}
           <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
             {navigation.map((item) => (
               <Link
@@ -102,9 +101,17 @@ export default function Navbar() {
                 {item.name}
               </Link>
             ))}
+            {/* Settings Icon */}
+            <Link
+              href="/settings"
+              className="p-1.5 text-gray-600 hover:text-[#B4542C] transition-colors"
+              title="Settings"
+            >
+              <Cog6ToothIcon className="h-5 w-5" />
+            </Link>
           </div>
 
-          {/* Auth Section – Desktop (Teacher Login removed) */}
+          {/* Auth Section – Desktop */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {user && !isTeacher ? (
               <>
@@ -116,7 +123,7 @@ export default function Navbar() {
             ) : null}
           </div>
 
-          {/* Mobile menu button – larger icon */}
+          {/* Mobile menu button */}
           <div className="flex lg:hidden mr-1">
             <button
               type="button"
@@ -155,7 +162,12 @@ export default function Navbar() {
                     {item.name}
                   </Link>
                 ))}
-                {/* Teacher Login removed from mobile menu as well */}
+                {/* Settings link in mobile menu */}
+                <Link href="/settings" onClick={() => setMobileMenuOpen(false)}
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-gray-700 hover:bg-orange-50 flex items-center gap-2">
+                  <Cog6ToothIcon className="h-5 w-5" />
+                  Settings
+                </Link>
               </div>
               <div className="py-6 space-y-2">
                 {user ? (
