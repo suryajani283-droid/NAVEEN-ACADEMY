@@ -1,68 +1,39 @@
-import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '../../../../lib/supabase';
-import { verifyAdminToken } from '../../../../lib/auth';
+import { createClient } from '@supabase/supabase-js'
+import webpush from 'web-push'
 
-export async function POST(request) {
-  try {
-    await verifyAdminToken(request);
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
 
-    // ✅ सही तरीका: डायनामिक इम्पोर्ट + default एक्सपोर्ट
-    const webpush = (await import('web-push')).default;
+webpush.setVapidDetails(
+  `mailto:${process.env.VAPID_EMAIL}`,
+  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+)
 
-    if (
-      process.env.VAPID_PUBLIC_KEY &&
-      process.env.VAPID_PRIVATE_KEY &&
-      process.env.VAPID_SUBJECT
-    ) {
-      webpush.setVapidDetails(
-        process.env.VAPID_SUBJECT,
-        process.env.VAPID_PUBLIC_KEY,
-        process.env.VAPID_PRIVATE_KEY
-      );
-    } else {
-      return NextResponse.json(
-        { error: 'VAPID environment variables are not configured' },
-        { status: 500 }
-      );
+export async function POST(req) {
+  const { title, body, url } = await req.json()
+  const payload = JSON.stringify({ title, body, url })
+
+  const { data: subs, error } = await supabase
+    .from('push_subscriptions')
+    .select('subscription')
+
+  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+
+  const results = []
+  for (const sub of subs) {
+    try {
+      await webpush.sendNotification(sub.subscription, payload)
+      results.push({ endpoint: sub.subscription.endpoint, status: 'sent' })
+    } catch (err) {
+      if (err.statusCode === 410 || err.statusCode === 404) {
+        await supabase.from('push_subscriptions').delete().eq('endpoint', sub.subscription.endpoint)
+      }
+      results.push({ endpoint: sub.subscription.endpoint, status: 'failed' })
     }
-
-    const { title, body, url, targetClass } = await request.json();
-
-    let query = supabaseAdmin
-      .from('push_subscriptions')
-      .select('subscription');
-    if (targetClass) {
-      query = query.or(`class.eq.${targetClass},class.is.null`);
-    }
-    const { data: subscriptions, error } = await query;
-    if (error) throw error;
-
-    const payload = JSON.stringify({
-      title: title || 'Naveen Academy',
-      body: body || 'New update available',
-      icon: '/images/logo.png',
-      badge: '/images/logo.png',
-      data: { url: url || '/student-corner' },
-    });
-
-    const results = await Promise.allSettled(
-      subscriptions.map(async (row) => {
-        try {
-          await webpush.sendNotification(row.subscription, payload);
-        } catch (err) {
-          // हटाएँ अमान्य सब्सक्रिप्शन
-          if (err.statusCode === 410 || err.statusCode === 404) {
-            await supabaseAdmin
-              .from('push_subscriptions')
-              .delete()
-              .eq('subscription', row.subscription);
-          }
-        }
-      })
-    );
-
-    return NextResponse.json({ sent: subscriptions.length });
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
   }
+
+  return new Response(JSON.stringify({ results }), { status: 200 })
 }
