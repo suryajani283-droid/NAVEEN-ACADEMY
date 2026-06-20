@@ -1,19 +1,31 @@
-import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '../../../../lib/supabase';
+import { createClient } from '@supabase/supabase-js'
 
-export async function POST(request) {
-  try {
-    const { subscription, class: studentClass } = await request.json();
-    if (!subscription) return NextResponse.json({ error: 'Subscription required' }, { status: 400 });
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
 
-    // Insert (ignore duplicates by same endpoint)
-    const { error } = await supabaseAdmin
-      .from('push_subscriptions')
-      .insert({ subscription, class: studentClass || null });
+export async function POST(req) {
+  const subscription = await req.json()
+  const { error } = await supabase
+    .from('push_subscriptions')
+    .upsert({
+      endpoint: subscription.endpoint,
+      subscription: subscription,
+      created_at: new Date()
+    }, { onConflict: 'endpoint' })
 
-    if (error && error.code !== '23505') throw error; // 23505 = duplicate
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
+  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+  return new Response(JSON.stringify({ success: true }), { status: 200 })
+}
+
+export async function DELETE(req) {
+  const { endpoint } = await req.json()
+  const { error } = await supabase
+    .from('push_subscriptions')
+    .delete()
+    .eq('endpoint', endpoint)
+
+  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+  return new Response(JSON.stringify({ success: true }), { status: 200 })
 }
