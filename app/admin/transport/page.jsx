@@ -97,6 +97,12 @@ export default function AdminTransport() {
           >
             + Add Student
           </Link>
+          <a
+            href="/api/admin/export"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow"
+          >
+            📥 Export Excel
+          </a>
           <Link
             href="/admin/transport/new"
             className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white px-4 py-2 rounded-lg shadow"
