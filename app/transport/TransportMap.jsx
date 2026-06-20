@@ -20,6 +20,34 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 })
 
+// Helper functions for distance calculation
+function deg2rad(deg) {
+  return deg * (Math.PI / 180)
+}
+
+function getDistanceFromLatLngInKm(lat1, lng1, lat2, lng2) {
+  const R = 6371 // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1)
+  const dLng = deg2rad(lng2 - lng1)
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
+
+function calculateRouteDistance(routePoints) {
+  if (!routePoints || routePoints.length < 2) return 0
+  let total = 0
+  for (let i = 0; i < routePoints.length - 1; i++) {
+    const [lat1, lng1] = routePoints[i]
+    const [lat2, lng2] = routePoints[i + 1]
+    total += getDistanceFromLatLngInKm(lat1, lng1, lat2, lng2)
+  }
+  return total
+}
+
 export default function TransportMap() {
   const [allRoutes, setAllRoutes] = useState([])
   const [stopsByRoute, setStopsByRoute] = useState({})
@@ -149,10 +177,15 @@ export default function TransportMap() {
 
       {/* Legend and stop list */}
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-2xl font-semibold text-[#8B3A3A] mb-4">Bus Routes & Stops</h2>
+        <h2 className="text-2xl font-semibold text-[#8B3A3A] mb-4">Bus Routes & Stops (बस रूट और स्टॉप)</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {allRoutes.map(route => {
             const stops = stopsByRoute[route.id] || []
+            const polylineForDistance = (route.route_points && route.route_points.length > 1)
+              ? route.route_points
+              : stops.map(s => [s.lat, s.lng])
+            const distanceKm = calculateRouteDistance(polylineForDistance)
+
             return (
               <div key={route.id} className="bg-white rounded-lg shadow p-4 border-l-4" style={{ borderColor: route.color }}>
                 <div className="flex items-center gap-2 mb-3">
@@ -160,6 +193,9 @@ export default function TransportMap() {
                   <h3 className="font-semibold text-gray-800">{route.name_en}</h3>
                   <span className="text-sm text-gray-500">({route.name_hi})</span>
                 </div>
+                <p className="text-sm font-medium text-[#B4542C] mb-2">
+                  📏 {distanceKm.toFixed(1)} km
+                </p>
                 <ul className="space-y-2">
                   {stops.map((stop, idx) => (
                     <li key={stop.id} className="flex items-center justify-between text-sm">
