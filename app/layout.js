@@ -3,7 +3,6 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import WhatsAppButton from '../components/WhatsAppButton'
 import AdBanner from '../components/AdBanner'
-import ServiceWorkerRegister from '../components/ServiceWorkerRegister'
 import ScrollToTop from '../components/ScrollToTop'
 import AdmissionMarquee from '../components/AdmissionMarquee'
 
@@ -22,6 +21,21 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Hind:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
+<script
+  dangerouslySetInnerHTML={{
+    __html: `
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').then(function(reg) {
+            console.log('SW registered!', reg.scope);
+          }).catch(function(err) {
+            console.error('SW registration failed:', err);
+          });
+        });
+      }
+    `,
+  }}
+/>
       </head>
       <body
         className="flex flex-col min-h-screen"
