@@ -11,23 +11,15 @@ export default function WhatsAppButton() {
       href={`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed z-50 bg-green-500 text-white rounded-full shadow-2xl hover:bg-green-600 transition-all
-           bottom-16 right-4 md:bottom-6 md:right-6 p-4 md:p-5"
-      whileHover={{ scale: 1.15 }}
+      className="fixed z-50 bottom-6 right-4 bg-green-500 text-white rounded-full shadow-lg
+                 flex items-center justify-center
+                 w-14 h-14 md:w-16 md:h-16
+                 hover:bg-green-600 transition-colors
+                 max-w-[calc(100vw-2rem)]"
+      whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
-      animate={{
-        boxShadow: [
-          '0 0 0 0 rgba(34, 197, 94, 0.5)',
-          '0 0 0 20px rgba(34, 197, 94, 0)',
-          '0 0 0 0 rgba(34, 197, 94, 0.5)',
-        ],
-      }}
-      transition={{
-        duration: 2,
-        repeat: Infinity,
-      }}
     >
-      <FaWhatsapp className="text-2xl md:text-4xl" />
+      <FaWhatsapp className="text-2xl md:text-3xl" />
     </motion.a>
   )
 }
