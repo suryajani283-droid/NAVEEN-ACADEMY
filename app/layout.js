@@ -1,5 +1,6 @@
 import './globals.css'
 import ThemeProvider from '../components/ThemeProvider'
+import LanguageProvider from '../components/LanguageProvider'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import WhatsAppButton from '../components/WhatsAppButton'
@@ -52,15 +53,17 @@ export default function RootLayout({ children }) {
         style={{ fontFamily: "'Poppins', 'Hind', sans-serif" }}
       >
         <ThemeProvider>
-          <AdmissionMarquee />
-          <Navbar />
-          <main className="flex-1 flex flex-col overflow-x-hidden">
-            <div className="flex-1">{children}</div>
-            <AdBanner />
-          </main>
-          <Footer />
-          <WhatsAppButton />
-          <ScrollToTop />
+          <LanguageProvider>
+            <AdmissionMarquee />
+            <Navbar />
+            <main className="flex-1 flex flex-col overflow-x-hidden">
+              <div className="flex-1">{children}</div>
+              <AdBanner />
+            </main>
+            <Footer />
+            <WhatsAppButton />
+            <ScrollToTop />
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>
