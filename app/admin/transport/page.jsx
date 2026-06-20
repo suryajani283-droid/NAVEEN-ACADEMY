@@ -6,24 +6,51 @@ import { useRouter } from 'next/navigation'
 export default function AdminTransport() {
   const [routes, setRoutes] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const router = useRouter()
 
   const fetchRoutes = async () => {
-    const res = await fetch('/api/admin/transport/routes')
-    const data = await res.json()
-    if (Array.isArray(data)) setRoutes(data)
-    setLoading(false)
+    try {
+      const res = await fetch('/api/admin/transport/routes')
+      if (!res.ok) throw new Error('Server returned ' + res.status)
+      const data = await res.json()
+      if (Array.isArray(data)) {
+        setRoutes(data)
+      } else {
+        setError('Unexpected data format')
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load routes')
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { fetchRoutes() }, [])
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this route and all its stops?')) return
-    await fetch(`/api/admin/transport/routes/${id}`, { method: 'DELETE' })
-    fetchRoutes()
+    try {
+      const res = await fetch(`/api/admin/transport/routes/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Delete failed')
+      fetchRoutes() // refresh
+    } catch (err) {
+      alert('Delete error: ' + err.message)
+    }
   }
 
-  if (loading) return <div className="container mx-auto px-4 py-8 mt-16">Loading...</div>
+  if (loading) return <div className="container mx-auto px-4 py-8 mt-16 text-center">Loading routes...</div>
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8 mt-16 text-center">
+        <p className="text-red-600 mb-4">Error: {error}</p>
+        <button onClick={fetchRoutes} className="bg-[#B4542C] text-white px-4 py-2 rounded">
+          Retry
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 mt-16">
