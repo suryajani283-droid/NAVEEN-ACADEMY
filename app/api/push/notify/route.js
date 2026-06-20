@@ -6,13 +6,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-webpush.setVapidDetails(
-  `mailto:${process.env.VAPID_EMAIL}`,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-)
-
 export async function POST(req) {
+  // VAPID details sirf tabhi set karein jab request aaye
+  webpush.setVapidDetails(
+    `mailto:${process.env.VAPID_EMAIL}`,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  )
+
   const { title, body, url } = await req.json()
   const payload = JSON.stringify({ title, body, url })
 
@@ -20,7 +21,9 @@ export async function POST(req) {
     .from('push_subscriptions')
     .select('subscription')
 
-  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+  if (error) {
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+  }
 
   const results = []
   for (const sub of subs) {
@@ -29,7 +32,10 @@ export async function POST(req) {
       results.push({ endpoint: sub.subscription.endpoint, status: 'sent' })
     } catch (err) {
       if (err.statusCode === 410 || err.statusCode === 404) {
-        await supabase.from('push_subscriptions').delete().eq('endpoint', sub.subscription.endpoint)
+        await supabase
+          .from('push_subscriptions')
+          .delete()
+          .eq('endpoint', sub.subscription.endpoint)
       }
       results.push({ endpoint: sub.subscription.endpoint, status: 'failed' })
     }
