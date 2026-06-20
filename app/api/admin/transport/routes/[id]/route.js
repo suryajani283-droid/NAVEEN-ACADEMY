@@ -8,10 +8,12 @@ const supabase = createClient(
 export async function PUT(req, { params }) {
   const { id } = params
   const body = await req.json()
-  const { name_en, name_hi, color } = body
+  const { name_en, name_hi, color, route_points } = body
+  const updateData = { name_en, name_hi, color }
+  if (route_points !== undefined) updateData.route_points = route_points
   const { data, error } = await supabase
     .from('bus_routes')
-    .update({ name_en, name_hi, color })
+    .update(updateData)
     .eq('id', id)
     .select()
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
