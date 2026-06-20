@@ -92,6 +92,12 @@ export default function AdminTransport() {
             👨‍🎓 Students List
           </Link>
           <Link
+            href="/admin/transport/students/add"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
+          >
+            + Add Student
+          </Link>
+          <Link
             href="/admin/transport/new"
             className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white px-4 py-2 rounded-lg shadow"
           >
