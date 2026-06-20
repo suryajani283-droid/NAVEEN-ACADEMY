@@ -26,20 +26,29 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
         <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
-                    console.log('SW registered!', reg.scope);
-                  }).catch(function(err) {
-                    console.error('SW registration failed:', err);
-                  });
-                });
+  dangerouslySetInnerHTML={{
+    __html: `
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').then(function(reg) {
+            console.log('SW registered!', reg.scope);
+
+            // Listen for the UPDATE message from the SW and reload
+            navigator.serviceWorker.addEventListener('message', function(event) {
+              if (event.data && event.data.type === 'UPDATE') {
+                console.log('New version available, reloading...');
+                window.location.reload();
               }
-            `,
-          }}
-        />
+            });
+
+          }).catch(function(err) {
+            console.error('SW registration failed:', err);
+          });
+        });
+      }
+    `,
+  }}
+/>
       </head>
       <body
         className="flex flex-col min-h-screen overflow-x-hidden"
