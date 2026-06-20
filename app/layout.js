@@ -21,28 +21,28 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Hind:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
-<script
-  dangerouslySetInnerHTML={{
-    __html: `
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js').then(function(reg) {
-            console.log('SW registered!', reg.scope);
-          }).catch(function(err) {
-            console.error('SW registration failed:', err);
-          });
-        });
-      }
-    `,
-  }}
-/>
+        {/* Inline script to register the service worker */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('SW registered!', reg.scope);
+                  }).catch(function(err) {
+                    console.error('SW registration failed:', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
       </head>
       <body
         className="flex flex-col min-h-screen"
         style={{ fontFamily: "'Poppins', 'Hind', sans-serif" }}
       >
         <AdmissionMarquee />
-        <ServiceWorkerRegister />
         <Navbar />
         <main className="flex-1 flex flex-col">
           <div className="flex-1">{children}</div>
