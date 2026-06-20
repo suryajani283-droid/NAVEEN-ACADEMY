@@ -6,13 +6,13 @@ import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { createClient } from '@supabase/supabase-js'
 
-// Supabase client (anon key – public data)
+// Supabase public client (anon key)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-// Fix default icon
+// Fix default marker icon
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -24,48 +24,74 @@ export default function TransportMap() {
   const [allRoutes, setAllRoutes] = useState([])
   const [stopsByRoute, setStopsByRoute] = useState({})
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  useEffect(() => {
-    fetchData()
-  }, [])
+  useEffect(() => { fetchData() }, [])
 
   const fetchData = async () => {
-    // Fetch routes
-    const { data: routes, error: routeError } = await supabase
-      .from('bus_routes')
-      .select('*')
-      .order('id')
-    if (routeError) {
-      console.error('Error fetching routes:', routeError)
+    try {
+      // Fetch all routes
+      const { data: routes, error: routeErr } = await supabase
+        .from('bus_routes')
+        .select('*')
+        .order('id')
+      if (routeErr) throw new Error(routeErr.message)
+
+      // Fetch all stops
+      const { data: stops, error: stopErr } = await supabase
+        .from('bus_stops')
+        .select('*')
+        .order('stop_order')
+      if (stopErr) throw new Error(stopErr.message)
+
+      // Group stops by route_id
+      const grouped = {}
+      stops.forEach(stop => {
+        if (!grouped[stop.route_id]) grouped[stop.route_id] = []
+        grouped[stop.route_id].push(stop)
+      })
+
+      setAllRoutes(routes || [])
+      setStopsByRoute(grouped)
+    } catch (err) {
+      setError(err.message)
+    } finally {
       setLoading(false)
-      return
     }
-
-    // Fetch all stops
-    const { data: stops, error: stopError } = await supabase
-      .from('bus_stops')
-      .select('*')
-      .order('stop_order')
-    if (stopError) {
-      console.error('Error fetching stops:', stopError)
-      setLoading(false)
-      return
-    }
-
-    // Group stops by route_id
-    const grouped = {}
-    stops.forEach(stop => {
-      if (!grouped[stop.route_id]) grouped[stop.route_id] = []
-      grouped[stop.route_id].push(stop)
-    })
-
-    setAllRoutes(routes || [])
-    setStopsByRoute(grouped)
-    setLoading(false)
   }
 
-  if (loading) return <div className="text-center py-20">Loading bus routes...</div>
-  if (allRoutes.length === 0) return <div className="text-center py-20 text-gray-500">No bus routes available yet.</div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[70vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B3A3A] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading bus routes...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[70vh]">
+        <div className="text-center text-red-600">
+          <p className="text-xl font-semibold mb-2">Error loading routes</p>
+          <p className="text-sm">{error}</p>
+          <button onClick={fetchData} className="mt-4 bg-[#B4542C] text-white px-4 py-2 rounded">
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (allRoutes.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[70vh]">
+        <p className="text-gray-500 text-xl">No bus routes available yet.</p>
+      </div>
+    )
+  }
 
   const mapCenter = [25.6, 71.5]
   const mapZoom = 10
@@ -91,8 +117,9 @@ export default function TransportMap() {
 
           {allRoutes.map(route => {
             const routeStops = stopsByRoute[route.id] || []
-            // Use route_points if available, otherwise fallback to stop coordinates
-            const polylineCoords = route.route_points
+
+            // Use drawn road path if available, else fallback to stops coordinates
+            const polylineCoords = (route.route_points && route.route_points.length > 1)
               ? route.route_points
               : routeStops.map(s => [s.lat, s.lng])
 
@@ -120,7 +147,7 @@ export default function TransportMap() {
         </MapContainer>
       </div>
 
-      {/* Legend */}
+      {/* Legend and stop list */}
       <div className="max-w-4xl mx-auto">
         <h2 className="text-2xl font-semibold text-[#8B3A3A] mb-4">Bus Routes & Stops</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
