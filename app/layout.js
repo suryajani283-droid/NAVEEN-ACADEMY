@@ -17,11 +17,14 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1e40af" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Naveen Academy" />
         <link
           href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Hind:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
-        {/* Inline script to register the service worker */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -39,12 +42,12 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body
-        className="flex flex-col min-h-screen"
+        className="flex flex-col min-h-screen overflow-x-hidden"
         style={{ fontFamily: "'Poppins', 'Hind', sans-serif" }}
       >
         <AdmissionMarquee />
         <Navbar />
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col overflow-x-hidden">
           <div className="flex-1">{children}</div>
           <AdBanner />
         </main>
