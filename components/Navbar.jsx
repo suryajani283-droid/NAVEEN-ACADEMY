@@ -5,25 +5,27 @@ import { useRouter } from 'next/navigation'
 import { Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
 import { createClient } from '@supabase/supabase-js'
+import { useLanguage } from './LanguageProvider'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-const navigation = [
-  { name: 'Home', href: '/' },
-  { name: 'About', href: '/about' },
-  { name: 'Academics', href: '/academics' },
-  { name: 'Faculty', href: '/faculty' },
-  { name: 'Student Corner', href: '/student-corner', color: true },
-  { name: 'Parent Corner', href: '/parent-corner', color: true },
-  { name: 'Gallery', href: '/gallery' },
-  { name: 'Admission', href: '/admissions' },
-  { name: 'Notices', href: '/notices' },
-]
-
 export default function Navbar() {
+  const { t } = useLanguage()
+  const navigation = [
+    { name: t('home'), href: '/' },
+    { name: t('about'), href: '/about' },
+    { name: t('academics'), href: '/academics' },
+    { name: t('faculty'), href: '/faculty' },
+    { name: t('studentCorner'), href: '/student-corner', color: true },
+    { name: t('parentCorner'), href: '/parent-corner', color: true },
+    { name: t('gallery'), href: '/gallery' },
+    { name: t('admission'), href: '/admissions' },
+    { name: t('notices'), href: '/notices' },
+  ]
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [user, setUser] = useState(null)
@@ -74,19 +76,17 @@ export default function Navbar() {
   }
 
   return (
-    <header className={`fixed top-10 w-full z-[1000] transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-white/95'}`}>
+    <header className={`fixed top-10 w-full z-[1000] transition-all duration-300 ${scrolled ? 'bg-white shadow-lg dark:bg-gray-800 dark:shadow-gray-700' : 'bg-white/95 dark:bg-gray-800/95'}`}>
       <nav className="container mx-auto px-2 sm:px-4 lg:px-6" aria-label="Global">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo + Name */}
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
             <img src="/images/logo.png" alt="Logo" className="h-10 lg:h-12 w-auto" />
             <div>
-              <span className="text-base lg:text-xl font-bold text-[#8B3A3A]">Naveen Academy</span>
-              <p className="text-[10px] lg:text-xs text-[#B4542C] font-medium">Sr. Sec. School, Chohtan</p>
+              <span className="text-base lg:text-xl font-bold text-[#8B3A3A] dark:text-[#D98C8C]">{t('navTitle')}</span>
+              <p className="text-[10px] lg:text-xs text-[#B4542C] dark:text-[#E0966A] font-medium">{t('navSubtitle')}</p>
             </div>
           </Link>
 
-          {/* Desktop Navigation + Settings */}
           <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
             {navigation.map((item) => (
               <Link
@@ -94,40 +94,33 @@ export default function Navbar() {
                 href={item.href}
                 className={`px-2 py-1.5 text-xs xl:text-sm font-medium rounded transition-colors whitespace-nowrap ${
                   item.color
-                    ? 'text-[#A52A2A] hover:text-[#8B3A3A] hover:bg-red-50'
-                    : 'text-gray-700 hover:text-[#B4542C] hover:bg-orange-50'
+                    ? 'text-[#A52A2A] hover:text-[#8B3A3A] hover:bg-red-50 dark:text-[#D98C8C] dark:hover:text-red-300 dark:hover:bg-red-900'
+                    : 'text-gray-700 hover:text-[#B4542C] hover:bg-orange-50 dark:text-gray-300 dark:hover:text-orange-300 dark:hover:bg-gray-700'
                 }`}
               >
                 {item.name}
               </Link>
             ))}
-            {/* Settings Icon */}
-            <Link
-              href="/settings"
-              className="p-1.5 text-gray-600 hover:text-[#B4542C] transition-colors"
-              title="Settings"
-            >
+            <Link href="/settings" className="p-1.5 text-gray-600 dark:text-gray-300 hover:text-[#B4542C] transition-colors" title={t('settings')}>
               <Cog6ToothIcon className="h-5 w-5" />
             </Link>
           </div>
 
-          {/* Auth Section – Desktop */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {user && !isTeacher ? (
               <>
-                <span className="text-xs xl:text-sm text-gray-700 whitespace-nowrap">{studentName || 'Student'}</span>
-                <button onClick={handleLogout} className="text-xs xl:text-sm text-red-400 hover:text-red-300 whitespace-nowrap">Logout</button>
+                <span className="text-xs xl:text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{studentName || 'Student'}</span>
+                <button onClick={handleLogout} className="text-xs xl:text-sm text-red-400 hover:text-red-300 dark:text-red-300 dark:hover:text-red-200 whitespace-nowrap">{t('logout')}</button>
               </>
             ) : !user && !isTeacher ? (
-              <Link href="/login" className="text-xs xl:text-sm font-semibold text-gray-700 hover:text-[#B4542C] whitespace-nowrap">Login</Link>
+              <Link href="/login" className="text-xs xl:text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-[#B4542C] dark:hover:text-orange-300 whitespace-nowrap">{t('login')}</Link>
             ) : null}
           </div>
 
-          {/* Mobile menu button */}
           <div className="flex lg:hidden mr-1">
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-md p-2.5 text-gray-600 animate-pulse"
+              className="inline-flex items-center justify-center rounded-md p-2.5 text-gray-600 dark:text-gray-300 animate-pulse"
               onClick={() => setMobileMenuOpen(true)}
               style={{ animationDuration: '2s' }}
             >
@@ -137,52 +130,50 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
       <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
         <div className="fixed inset-0 z-50" />
-        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm">
+        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white dark:bg-gray-900 px-6 py-6 sm:max-w-sm">
           <div className="flex items-center justify-between">
             <Link href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
-              <span className="text-xl font-bold text-[#8B3A3A]">Naveen Academy</span>
+              <span className="text-xl font-bold text-[#8B3A3A] dark:text-[#D98C8C]">{t('navTitle')}</span>
             </Link>
-            <button onClick={() => setMobileMenuOpen(false)} className="-m-2.5 rounded-md p-2.5 text-gray-600">
+            <button onClick={() => setMobileMenuOpen(false)} className="-m-2.5 rounded-md p-2.5 text-gray-600 dark:text-gray-300">
               <XMarkIcon className="h-7 w-7" />
             </button>
           </div>
           <div className="mt-6 flow-root">
-            <div className="-my-6 divide-y divide-gray-200">
+            <div className="-my-6 divide-y divide-gray-200 dark:divide-gray-700">
               <div className="space-y-1 py-6">
                 {navigation.map((item) => (
                   <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}
                     className={`-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold ${
                       item.color
-                        ? 'text-[#A52A2A] hover:bg-red-50'
-                        : 'text-gray-700 hover:bg-orange-50'
+                        ? 'text-[#A52A2A] hover:bg-red-50 dark:text-[#D98C8C] dark:hover:bg-red-900'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700'
                     }`}>
                     {item.name}
                   </Link>
                 ))}
-                {/* Settings link in mobile menu */}
                 <Link href="/settings" onClick={() => setMobileMenuOpen(false)}
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-gray-700 hover:bg-orange-50 flex items-center gap-2">
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center gap-2">
                   <Cog6ToothIcon className="h-5 w-5" />
-                  Settings
+                  {t('settings')}
                 </Link>
               </div>
               <div className="py-6 space-y-2">
                 {user ? (
                   <>
-                    <p className="text-sm text-gray-500 text-center">{isTeacher ? teacherName : studentName || 'Student'}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center">{isTeacher ? teacherName : studentName || 'Student'}</p>
                     <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                      className="block w-full text-center text-red-400 hover:text-red-300 py-2">Logout</button>
+                      className="block w-full text-center text-red-400 hover:text-red-300 dark:text-red-300 dark:hover:text-red-200 py-2">{t('logout')}</button>
                   </>
                 ) : (
                   <Link href="/login" onClick={() => setMobileMenuOpen(false)}
-                    className="block text-center text-gray-700 hover:text-[#B4542C] py-2">Login</Link>
+                    className="block text-center text-gray-700 dark:text-gray-300 hover:text-[#B4542C] dark:hover:text-orange-300 py-2">{t('login')}</Link>
                 )}
                 <Link href="/admissions" onClick={() => setMobileMenuOpen(false)}
                   className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white block text-center w-full rounded-full px-3 py-2.5 font-semibold">
-                  Admission Open 2026-27
+                  {t('admissionOpen')}
                 </Link>
               </div>
             </div>
