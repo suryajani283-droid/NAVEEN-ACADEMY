@@ -6,7 +6,7 @@
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     @apply text-gray-800 bg-white;
   }
@@ -17,17 +17,16 @@
     @apply bg-primary-500 text-white px-6 py-3 rounded-lg font-semibold 
            hover:bg-primary-600 transition-all duration-300 transform hover:scale-105;
   }
-  
+
   .btn-secondary {
     @apply bg-secondary-500 text-white px-6 py-3 rounded-lg font-semibold 
            hover:bg-secondary-600 transition-all duration-300 transform hover:scale-105;
   }
-  
+
   .section-title {
     @apply text-3xl md:text-4xl font-bold text-primary-500 text-center mb-8;
   }
-  
-  
+
   .card {
     @apply bg-white 
            rounded-2xl 
@@ -37,6 +36,40 @@
            hover:shadow-[0_10px_30px_-5px_rgba(0,0,0,0.1)]
            hover:-translate-y-1
            transition-all duration-300;
-  
+  }
 }
+
+/* ====== Google Translate Widget fixes ====== */
+/* Hide the top toolbar banner */
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+
+body {
+  top: 0 !important; /* remove the forced margin created by the toolbar */
+}
+
+/* Make the gadget container disappear (the "Select Language" text) */
+.goog-te-gadget {
+  font-size: 0;
+}
+
+/* Style the actual language selector dropdown */
+.goog-te-gadget .goog-te-combo {
+  outline: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: white;
+  font-size: 14px;
+  width: 100%;
+  color: #1f2937;
+  font-family: inherit;
+}
+
+/* Dark mode support for the dropdown (when body has class "dark") */
+.dark .goog-te-gadget .goog-te-combo {
+  background: #1f2937;
+  color: #f9fafb;
+  border-color: #4b5563;
 }
