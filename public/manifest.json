@@ -4,6 +4,7 @@
   "description": "Best school in Chohtan, Barmer, Rajasthan – Quality education and admission open 2026-27.",
   "start_url": "/",
   "scope": "/",
+  "id": "https://naveen-academy.onrender.com",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#1e40af",
@@ -11,6 +12,7 @@
   "lang": "en",
   "dir": "ltr",
   "categories": ["education", "school"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
