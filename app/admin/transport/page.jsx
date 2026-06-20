@@ -3,6 +3,34 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+// Distance helpers
+function deg2rad(deg) {
+  return deg * (Math.PI / 180)
+}
+
+function getDistanceFromLatLngInKm(lat1, lng1, lat2, lng2) {
+  const R = 6371
+  const dLat = deg2rad(lat2 - lat1)
+  const dLng = deg2rad(lng2 - lng1)
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
+
+function calculateRouteDistance(routePoints) {
+  if (!routePoints || routePoints.length < 2) return null
+  let total = 0
+  for (let i = 0; i < routePoints.length - 1; i++) {
+    const [lat1, lng1] = routePoints[i]
+    const [lat2, lng2] = routePoints[i + 1]
+    total += getDistanceFromLatLngInKm(lat1, lng1, lat2, lng2)
+  }
+  return total
+}
+
 export default function AdminTransport() {
   const [routes, setRoutes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -33,7 +61,7 @@ export default function AdminTransport() {
     try {
       const res = await fetch(`/api/admin/transport/routes/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Delete failed')
-      fetchRoutes() // refresh
+      fetchRoutes()
     } catch (err) {
       alert('Delete error: ' + err.message)
     }
@@ -56,12 +84,20 @@ export default function AdminTransport() {
     <div className="container mx-auto px-4 py-8 mt-16">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-[#8B3A3A]">Bus Routes</h1>
-        <Link
-          href="/admin/transport/new"
-          className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white px-4 py-2 rounded-lg shadow"
-        >
-          + Add New Route
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/admin/transport/students"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow"
+          >
+            👨‍🎓 Students List
+          </Link>
+          <Link
+            href="/admin/transport/new"
+            className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white px-4 py-2 rounded-lg shadow"
+          >
+            + Add New Route
+          </Link>
+        </div>
       </div>
 
       {routes.length === 0 ? (
@@ -71,32 +107,38 @@ export default function AdminTransport() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {routes.map(route => (
-            <div
-              key={route.id}
-              className="bg-white p-4 rounded-lg shadow flex items-center justify-between"
-              style={{ borderLeft: `4px solid ${route.color}` }}
-            >
-              <div>
-                <p className="text-lg font-semibold text-gray-800">{route.name_en}</p>
-                <p className="text-sm text-gray-500">{route.name_hi}</p>
+          {routes.map(route => {
+            const dist = calculateRouteDistance(route.route_points)
+            return (
+              <div
+                key={route.id}
+                className="bg-white p-4 rounded-lg shadow flex items-center justify-between"
+                style={{ borderLeft: `4px solid ${route.color}` }}
+              >
+                <div>
+                  <p className="text-lg font-semibold text-gray-800">{route.name_en}</p>
+                  <p className="text-sm text-gray-500">{route.name_hi}</p>
+                  {dist !== null && (
+                    <p className="text-sm font-medium text-[#B4542C] mt-1">📏 {dist.toFixed(1)} km</p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Link
+                    href={`/admin/transport/${route.id}`}
+                    className="text-blue-600 hover:underline text-sm"
+                  >
+                    Manage Stops
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(route.id)}
+                    className="text-red-600 hover:underline text-sm"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Link
-                  href={`/admin/transport/${route.id}`}
-                  className="text-blue-600 hover:underline text-sm"
-                >
-                  Manage Stops
-                </Link>
-                <button
-                  onClick={() => handleDelete(route.id)}
-                  className="text-red-600 hover:underline text-sm"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>
