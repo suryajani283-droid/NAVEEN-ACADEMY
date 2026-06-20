@@ -7,12 +7,36 @@ import { useLanguage } from '../../components/LanguageProvider'
 
 export default function SettingsPage() {
   const { dark, toggleTheme } = useTheme()
-  const { lang, toggleLanguage, t } = useLanguage()
+  const { t } = useLanguage()
   const [version, setVersion] = useState('')
   const router = useRouter()
 
   useEffect(() => {
     setVersion('1.0.0')
+
+    // Load Google Translate script if not already present
+    if (!window.googleTranslateElementInit) {
+      window.googleTranslateElementInit = function () {
+        new window.google.translate.TranslateElement(
+          {
+            pageLanguage: 'en',
+            includedLanguages: 'en,hi,gu,mr,pa,te,ta,kn,bn,or,as,ne',
+            layout: window.google.translate.TranslateElement.InlineLayout.VERTICAL,
+            autoDisplay: false,
+          },
+          'google_translate_element'
+        )
+      }
+    }
+
+    // Append the external script if it hasn't been added
+    if (!document.querySelector('script[src*="translate.google.com/translate_a/element.js"]')) {
+      const script = document.createElement('script')
+      script.src =
+        'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'
+      script.async = true
+      document.body.appendChild(script)
+    }
   }, [])
 
   const clearCache = async () => {
@@ -31,6 +55,7 @@ export default function SettingsPage() {
       <h1 className="text-3xl font-bold mb-8 text-center">{t('settings')}</h1>
 
       <div className="space-y-6">
+        {/* Dark / Light Mode */}
         <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
           <span className="font-medium">{dark ? t('lightMode') : t('darkMode')}</span>
           <button
@@ -41,16 +66,16 @@ export default function SettingsPage() {
           </button>
         </div>
 
-        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-          <span className="font-medium">{t('language')}</span>
-          <button
-            onClick={toggleLanguage}
-            className="bg-gray-200 dark:bg-gray-700 px-4 py-2 rounded-full text-sm"
-          >
-            {lang === 'en' ? 'English / हिंदी' : 'हिंदी / English'}
-          </button>
+        {/* Google Translate Language Switcher */}
+        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+          <h3 className="font-medium mb-3">{t('language')}</h3>
+          <div id="google_translate_element"></div>
+          <p className="text-xs text-gray-500 mt-2">
+            Select any language to translate the entire site instantly.
+          </p>
         </div>
 
+        {/* Push Notifications */}
         <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
           <span className="font-medium">Push Notifications</span>
           <button
@@ -61,6 +86,7 @@ export default function SettingsPage() {
           </button>
         </div>
 
+        {/* Clear Cache */}
         <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
           <span className="font-medium">{t('clearCache')}</span>
           <button
@@ -71,8 +97,11 @@ export default function SettingsPage() {
           </button>
         </div>
 
+        {/* Version */}
         <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('version')}: {version}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {t('version')}: {version}
+          </p>
         </div>
 
         <button
