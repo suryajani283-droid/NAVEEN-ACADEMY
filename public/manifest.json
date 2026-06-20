@@ -1,21 +1,27 @@
 {
-  "name": "Naveen Academy Senior Secondary School",
+  "name": "Naveen Academy",
   "short_name": "Naveen Academy",
-  "description": "Official app of Naveen Academy, Chohtan. Access homework, results, notices and more.",
+  "description": "Naveen Academy Senior Secondary School – Quality Education in Chohtan, Barmer",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1e40af",
   "icons": [
     {
-      "src": "/images/logo.png",
+      "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/images/logo.png",
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
