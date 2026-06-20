@@ -22,7 +22,7 @@ export default function AdmissionMarquee() {
   }, [])
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] bg-orange-500 text-white overflow-hidden shadow-md">
+    <div className="fixed top-0 left-0 right-0 z-[1100] bg-orange-500 text-white overflow-hidden shadow-md">
       <div
         ref={scrollRef}
         className="flex overflow-x-hidden whitespace-nowrap py-2"
