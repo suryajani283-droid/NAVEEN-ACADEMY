@@ -75,7 +75,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className={`fixed top-10 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-white/95'}`}>
+    <header className={`fixed top-10 w-full z-[1000] transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-white/95'}`}>
       <nav className="container mx-auto px-2 sm:px-4 lg:px-6" aria-label="Global">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo + Name – always visible on mobile */}
