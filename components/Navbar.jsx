@@ -134,11 +134,11 @@ export default function Navbar() {
       </nav>
 
       {/* ---------------------------------------- */}
-      {/* 🍊 MOBILE SIDE PANEL — Orange transparent */}
-      {/* ---------------------------------------- */}
+      /* 🍊 MOBILE SIDE PANEL – Transparent site colors, no blur */
+      /* ---------------------------------------- */}
       <Transition show={mobileMenuOpen} as="div">
         <Dialog as="div" className="relative z-[2000]" onClose={setMobileMenuOpen}>
-          {/* Subtle backdrop */}
+          {/* Light backdrop – no blur */}
           <Transition.Child
             as="div"
             enter="ease-out duration-300"
@@ -147,7 +147,7 @@ export default function Navbar() {
             leave="ease-in duration-200"
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/30"
           />
 
           <div className="fixed inset-0 overflow-hidden">
@@ -163,15 +163,15 @@ export default function Navbar() {
                   leaveTo="translate-x-full"
                   className="pointer-events-auto w-screen max-w-sm"
                 >
-                  <Dialog.Panel className="flex h-full flex-col overflow-y-auto bg-orange-100/80 dark:bg-orange-900/70 backdrop-blur-lg shadow-2xl rounded-l-2xl border-l border-orange-200 dark:border-orange-800">
+                  <Dialog.Panel className="flex h-full flex-col overflow-y-auto bg-[#B4542C]/85 dark:bg-[#8B3A3A]/85 backdrop-blur-none shadow-2xl rounded-l-2xl border-l border-white/20">
                     <div className="px-4 py-6 sm:px-6">
                       <div className="flex items-center justify-between">
-                        <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {t('settings')}
+                        <Dialog.Title className="text-lg font-semibold text-white">
+                          Naveen Academy
                         </Dialog.Title>
                         <button
                           type="button"
-                          className="rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white focus:outline-none"
+                          className="rounded-md text-white/80 hover:text-white focus:outline-none"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           <XMarkIcon className="h-6 w-6" />
@@ -188,8 +188,8 @@ export default function Navbar() {
                             onClick={() => setMobileMenuOpen(false)}
                             className={`block rounded-lg px-4 py-3 text-base font-semibold transition-colors ${
                               item.color
-                                ? 'text-[#A52A2A] hover:bg-red-100 dark:text-[#D98C8C] dark:hover:bg-red-900'
-                                : 'text-gray-800 hover:bg-orange-200 dark:text-gray-200 dark:hover:bg-orange-800'
+                                ? 'text-white hover:bg-white/20'
+                                : 'text-white hover:bg-white/10'
                             }`}
                           >
                             {item.name}
@@ -198,7 +198,7 @@ export default function Navbar() {
                         <Link
                           href="/settings"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center justify-end gap-2 rounded-lg px-4 py-3 text-base font-semibold text-gray-800 hover:bg-orange-200 dark:text-gray-200 dark:hover:bg-orange-800"
+                          className="flex items-center justify-end gap-2 rounded-lg px-4 py-3 text-base font-semibold text-white hover:bg-white/10"
                         >
                           {t('settings')}
                           <Cog6ToothIcon className="h-5 w-5" />
@@ -207,15 +207,15 @@ export default function Navbar() {
                     </div>
 
                     {/* Auth section */}
-                    <div className="px-4 sm:px-6 py-4 border-t border-orange-200 dark:border-orange-800">
+                    <div className="px-4 sm:px-6 py-4 border-t border-white/20">
                       {user ? (
                         <div className="space-y-3">
-                          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-center text-sm text-white/80">
                             {isTeacher ? teacherName : studentName || 'Student'}
                           </p>
                           <button
                             onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                            className="block w-full text-center py-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+                            className="block w-full text-center py-2 text-red-200 hover:text-red-100"
                           >
                             {t('logout')}
                           </button>
@@ -224,7 +224,7 @@ export default function Navbar() {
                         <Link
                           href="/login"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="block text-center py-2 text-gray-800 hover:text-[#B4542C] dark:text-gray-200 dark:hover:text-orange-300"
+                          className="block text-center py-2 text-white hover:text-white/80"
                         >
                           {t('login')}
                         </Link>
@@ -232,7 +232,7 @@ export default function Navbar() {
                       <Link
                         href="/admissions"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="mt-3 block w-full text-center bg-[#B4542C] hover:bg-[#8B3A3A] text-white rounded-full px-4 py-2.5 font-semibold"
+                        className="mt-3 block w-full text-center bg-white text-[#B4542C] hover:bg-gray-100 font-semibold rounded-full px-4 py-2.5"
                       >
                         {t('admissionOpen')}
                       </Link>
