@@ -7,6 +7,7 @@ import WhatsAppButton from '../components/WhatsAppButton'
 import AdBanner from '../components/AdBanner'
 import ScrollToTop from '../components/ScrollToTop'
 import AdmissionMarquee from '../components/AdmissionMarquee'
+import PushSubscribe from '../components/PushSubscribe'
 
 export const metadata = {
   title: 'Naveen Academy Senior Secondary School | Best School in Chohtan, Barmer',
