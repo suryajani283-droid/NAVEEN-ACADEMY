@@ -3,6 +3,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
+const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+if (!key) {
+  alert('Notification key missing. Please contact admin.')
+  return
+}
+
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
