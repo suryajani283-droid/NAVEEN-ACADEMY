@@ -8,7 +8,7 @@ import AdBanner from '../components/AdBanner'
 import ScrollToTop from '../components/ScrollToTop'
 import AdmissionMarquee from '../components/AdmissionMarquee'
 import PushSubscribe from '../components/PushSubscribe'
-
+import NotificationPrompt from '../components/NotificationPrompt'
 export const metadata = {
   title: 'Naveen Academy Senior Secondary School | Best School in Chohtan, Barmer',
   description: 'Naveen Academy offers quality education. Admissions Open 2026-27.',
@@ -62,6 +62,7 @@ export default function RootLayout({ children }) {
               <AdBanner />
             </main>
             <Footer />
+           <NotificationPrompt />
             <WhatsAppButton />
             <ScrollToTop />
           </LanguageProvider>
