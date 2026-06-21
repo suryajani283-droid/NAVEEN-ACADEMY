@@ -117,14 +117,14 @@ export default function Navbar() {
             ) : null}
           </div>
 
-          <div className="flex lg:hidden mr-1">
+          {/* ✅ FIXED: Hamburger button properly aligned to the right */}
+          <div className="flex lg:hidden ml-auto">
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-md p-2.5 text-gray-600 dark:text-gray-300 animate-pulse"
+              className="inline-flex items-center justify-center rounded-md p-2.5 text-gray-600 dark:text-gray-300"
               onClick={() => setMobileMenuOpen(true)}
-              style={{ animationDuration: '2s' }}
             >
-              <Bars3Icon className="h-8 w-8" />
+              <Bars3Icon className="h-7 w-7" />
             </button>
           </div>
         </div>
@@ -143,7 +143,8 @@ export default function Navbar() {
           </div>
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-200 dark:divide-gray-700">
-              <div className="space-y-1 py-6">
+              {/* ✅ FIXED: All mobile menu items aligned right */}
+              <div className="space-y-1 py-6 text-right">
                 {navigation.map((item) => (
                   <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}
                     className={`-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold ${
@@ -155,12 +156,12 @@ export default function Navbar() {
                   </Link>
                 ))}
                 <Link href="/settings" onClick={() => setMobileMenuOpen(false)}
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center gap-2">
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center gap-2 justify-end">
                   <Cog6ToothIcon className="h-5 w-5" />
                   {t('settings')}
                 </Link>
               </div>
-              <div className="py-6 space-y-2">
+              <div className="py-6 space-y-2 text-right">
                 {user ? (
                   <>
                     <p className="text-sm text-gray-500 dark:text-gray-400 text-center">{isTeacher ? teacherName : studentName || 'Student'}</p>
