@@ -3,12 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
-const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-if (!key) {
-  alert('Notification key missing. Please contact admin.')
-  return
-}
-
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
@@ -54,14 +48,20 @@ export default function NotificationPrompt() {
   }, [subscribed, dismissed])
 
   const handleSubscribe = async () => {
+    // Safety check: VAPID key must exist
+    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    if (!vapidPublicKey) {
+      alert('Notifications not configured yet. Please contact the school admin.')
+      console.error('NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set')
+      return
+    }
+
     setLoading(true)
     try {
       const reg = await navigator.serviceWorker.ready
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-        )
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
       })
       // Save to backend
       await fetch('/api/push/subscribe', {
