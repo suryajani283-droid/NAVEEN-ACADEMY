@@ -7,8 +7,8 @@ import WhatsAppButton from '../components/WhatsAppButton'
 import AdBanner from '../components/AdBanner'
 import ScrollToTop from '../components/ScrollToTop'
 import AdmissionMarquee from '../components/AdmissionMarquee'
-import PushSubscribe from '../components/PushSubscribe'
 import NotificationPrompt from '../components/NotificationPrompt'
+
 export const metadata = {
   title: 'Naveen Academy Senior Secondary School | Best School in Chohtan, Barmer',
   description: 'Naveen Academy offers quality education. Admissions Open 2026-27.',
@@ -57,12 +57,13 @@ export default function RootLayout({ children }) {
           <LanguageProvider>
             <AdmissionMarquee />
             <Navbar />
-            <main className="flex-1 flex flex-col overflow-x-hidden">
+            {/* Added pt-24 md:pt-28 – pushes all content below the fixed header */}
+            <main className="flex-1 flex flex-col overflow-x-hidden pt-24 md:pt-28">
               <div className="flex-1">{children}</div>
               <AdBanner />
             </main>
             <Footer />
-           <NotificationPrompt />
+            <NotificationPrompt />
             <WhatsAppButton />
             <ScrollToTop />
           </LanguageProvider>
