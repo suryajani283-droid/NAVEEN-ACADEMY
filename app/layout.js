@@ -57,8 +57,7 @@ export default function RootLayout({ children }) {
           <LanguageProvider>
             <AdmissionMarquee />
             <Navbar />
-            {/* Added pt-24 md:pt-28 – pushes all content below the fixed header */}
-            <main className="flex-1 flex flex-col overflow-x-hidden pt-24 md:pt-28">
+            <main className="flex-1 flex flex-col overflow-x-hidden pt-16 md:pt-20">
               <div className="flex-1">{children}</div>
               <AdBanner />
             </main>
