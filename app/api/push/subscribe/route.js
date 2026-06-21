@@ -15,17 +15,9 @@ export async function POST(req) {
       created_at: new Date()
     }, { onConflict: 'endpoint' })
 
-  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
-  return new Response(JSON.stringify({ success: true }), { status: 200 })
-}
-
-export async function DELETE(req) {
-  const { endpoint } = await req.json()
-  const { error } = await supabase
-    .from('push_subscriptions')
-    .delete()
-    .eq('endpoint', endpoint)
-
-  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+  if (error) {
+    console.error('Insert error:', error)
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+  }
   return new Response(JSON.stringify({ success: true }), { status: 200 })
 }
