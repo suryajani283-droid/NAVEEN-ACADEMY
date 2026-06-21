@@ -28,16 +28,30 @@ export async function POST(req) {
   const results = []
   for (const sub of subs) {
     try {
-      await webpush.sendNotification(sub.subscription, payload)
-      results.push({ endpoint: sub.subscription.endpoint, status: 'sent' })
+      // Parse the subscription if it's a string (fixes double-encoding issue)
+      const pushSubscription = typeof sub.subscription === 'string'
+        ? JSON.parse(sub.subscription)
+        : sub.subscription
+
+      await webpush.sendNotification(pushSubscription, payload)
+      results.push({ endpoint: pushSubscription.endpoint, status: 'sent' })
     } catch (err) {
-      if (err.statusCode === 410 || err.statusCode === 404) {
+      // Extract endpoint from parsed subscription for deletion
+      let endpoint = null
+      try {
+        const parsed = typeof sub.subscription === 'string' ? JSON.parse(sub.subscription) : sub.subscription
+        endpoint = parsed?.endpoint
+      } catch (e) {
+        endpoint = null
+      }
+
+      if ((err.statusCode === 410 || err.statusCode === 404) && endpoint) {
         await supabase
           .from('push_subscriptions')
           .delete()
-          .eq('endpoint', sub.subscription.endpoint)
+          .eq('endpoint', endpoint)
       }
-      results.push({ endpoint: sub.subscription.endpoint, status: 'failed' })
+      results.push({ endpoint: endpoint || 'unknown', status: 'failed', error: err.message })
     }
   }
 
