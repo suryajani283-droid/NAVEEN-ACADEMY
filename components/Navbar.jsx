@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Dialog } from '@headlessui/react'
+import { Dialog, Transition } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
 import { createClient } from '@supabase/supabase-js'
 import { useLanguage } from './LanguageProvider'
@@ -79,6 +79,7 @@ export default function Navbar() {
     <header className={`fixed top-10 w-full z-[1000] transition-all duration-300 ${scrolled ? 'bg-white shadow-lg dark:bg-gray-800 dark:shadow-gray-700' : 'bg-white/95 dark:bg-gray-800/95'}`}>
       <nav className="container mx-auto px-2 sm:px-4 lg:px-6" aria-label="Global">
         <div className="flex items-center justify-between h-16 lg:h-20">
+          {/* Logo + Name */}
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
             <img src="/images/logo.png" alt="Logo" className="h-10 lg:h-12 w-auto" />
             <div>
@@ -87,6 +88,7 @@ export default function Navbar() {
             </div>
           </Link>
 
+          {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
             {navigation.map((item) => (
               <Link
@@ -106,6 +108,7 @@ export default function Navbar() {
             </Link>
           </div>
 
+          {/* Auth Section – Desktop */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {user && !isTeacher ? (
               <>
@@ -117,7 +120,7 @@ export default function Navbar() {
             ) : null}
           </div>
 
-          {/* ✅ FIXED: Hamburger button properly aligned to the right */}
+          {/* Mobile hamburger button */}
           <div className="flex lg:hidden ml-auto">
             <button
               type="button"
@@ -130,57 +133,117 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
-        <div className="fixed inset-0 z-50" />
-        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white dark:bg-gray-900 px-6 py-6 sm:max-w-sm">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
-              <span className="text-xl font-bold text-[#8B3A3A] dark:text-[#D98C8C]">{t('navTitle')}</span>
-            </Link>
-            <button onClick={() => setMobileMenuOpen(false)} className="-m-2.5 rounded-md p-2.5 text-gray-600 dark:text-gray-300">
-              <XMarkIcon className="h-7 w-7" />
-            </button>
-          </div>
-          <div className="mt-6 flow-root">
-            <div className="-my-6 divide-y divide-gray-200 dark:divide-gray-700">
-              {/* ✅ FIXED: All mobile menu items aligned right */}
-              <div className="space-y-1 py-6 text-right">
-                {navigation.map((item) => (
-                  <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}
-                    className={`-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold ${
-                      item.color
-                        ? 'text-[#A52A2A] hover:bg-red-50 dark:text-[#D98C8C] dark:hover:bg-red-900'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700'
-                    }`}>
-                    {item.name}
-                  </Link>
-                ))}
-                <Link href="/settings" onClick={() => setMobileMenuOpen(false)}
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center gap-2 justify-end">
-                  <Cog6ToothIcon className="h-5 w-5" />
-                  {t('settings')}
-                </Link>
-              </div>
-              <div className="py-6 space-y-2 text-right">
-                {user ? (
-                  <>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center">{isTeacher ? teacherName : studentName || 'Student'}</p>
-                    <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                      className="block w-full text-center text-red-400 hover:text-red-300 dark:text-red-300 dark:hover:text-red-200 py-2">{t('logout')}</button>
-                  </>
-                ) : (
-                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}
-                    className="block text-center text-gray-700 dark:text-gray-300 hover:text-[#B4542C] dark:hover:text-orange-300 py-2">{t('login')}</Link>
-                )}
-                <Link href="/admissions" onClick={() => setMobileMenuOpen(false)}
-                  className="bg-[#B4542C] hover:bg-[#8B3A3A] text-white block text-center w-full rounded-full px-3 py-2.5 font-semibold">
-                  {t('admissionOpen')}
-                </Link>
+      {/* ---------------------------------------- */}
+      {/* 🍊 MOBILE SIDE PANEL — Orange transparent */}
+      {/* ---------------------------------------- */}
+      <Transition show={mobileMenuOpen} as="div">
+        <Dialog as="div" className="relative z-[2000]" onClose={setMobileMenuOpen}>
+          {/* Subtle backdrop */}
+          <Transition.Child
+            as="div"
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm"
+          />
+
+          <div className="fixed inset-0 overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="pointer-events-none fixed top-24 right-0 flex max-w-full">
+                <Transition.Child
+                  as="div"
+                  enter="transform transition ease-in-out duration-300"
+                  enterFrom="translate-x-full"
+                  enterTo="translate-x-0"
+                  leave="transform transition ease-in-out duration-300"
+                  leaveFrom="translate-x-0"
+                  leaveTo="translate-x-full"
+                  className="pointer-events-auto w-screen max-w-sm"
+                >
+                  <Dialog.Panel className="flex h-full flex-col overflow-y-auto bg-orange-100/80 dark:bg-orange-900/70 backdrop-blur-lg shadow-2xl rounded-l-2xl border-l border-orange-200 dark:border-orange-800">
+                    <div className="px-4 py-6 sm:px-6">
+                      <div className="flex items-center justify-between">
+                        <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {t('settings')}
+                        </Dialog.Title>
+                        <button
+                          type="button"
+                          className="rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white focus:outline-none"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <XMarkIcon className="h-6 w-6" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="px-4 sm:px-6 flex-1">
+                      <div className="space-y-1 text-right">
+                        {navigation.map((item) => (
+                          <Link
+                            key={item.name}
+                            href={item.href}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={`block rounded-lg px-4 py-3 text-base font-semibold transition-colors ${
+                              item.color
+                                ? 'text-[#A52A2A] hover:bg-red-100 dark:text-[#D98C8C] dark:hover:bg-red-900'
+                                : 'text-gray-800 hover:bg-orange-200 dark:text-gray-200 dark:hover:bg-orange-800'
+                            }`}
+                          >
+                            {item.name}
+                          </Link>
+                        ))}
+                        <Link
+                          href="/settings"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center justify-end gap-2 rounded-lg px-4 py-3 text-base font-semibold text-gray-800 hover:bg-orange-200 dark:text-gray-200 dark:hover:bg-orange-800"
+                        >
+                          {t('settings')}
+                          <Cog6ToothIcon className="h-5 w-5" />
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Auth section */}
+                    <div className="px-4 sm:px-6 py-4 border-t border-orange-200 dark:border-orange-800">
+                      {user ? (
+                        <div className="space-y-3">
+                          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                            {isTeacher ? teacherName : studentName || 'Student'}
+                          </p>
+                          <button
+                            onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                            className="block w-full text-center py-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+                          >
+                            {t('logout')}
+                          </button>
+                        </div>
+                      ) : (
+                        <Link
+                          href="/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block text-center py-2 text-gray-800 hover:text-[#B4542C] dark:text-gray-200 dark:hover:text-orange-300"
+                        >
+                          {t('login')}
+                        </Link>
+                      )}
+                      <Link
+                        href="/admissions"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="mt-3 block w-full text-center bg-[#B4542C] hover:bg-[#8B3A3A] text-white rounded-full px-4 py-2.5 font-semibold"
+                      >
+                        {t('admissionOpen')}
+                      </Link>
+                    </div>
+                  </Dialog.Panel>
+                </Transition.Child>
               </div>
             </div>
           </div>
-        </Dialog.Panel>
-      </Dialog>
+        </Dialog>
+      </Transition>
     </header>
   )
 }
