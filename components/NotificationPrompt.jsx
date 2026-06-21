@@ -20,7 +20,6 @@ export default function NotificationPrompt() {
   const [dismissed, setDismissed] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Check subscription status on mount and every 30 seconds
   const checkSubscription = useCallback(async () => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
     try {
@@ -28,51 +27,53 @@ export default function NotificationPrompt() {
       const sub = await reg.pushManager.getSubscription()
       setSubscribed(!!sub)
     } catch (err) {
-      console.error('Subscription check failed:', err)
+      console.error('Check failed:', err)
     }
   }, [])
 
   useEffect(() => {
     checkSubscription()
-    const interval = setInterval(checkSubscription, 30000) // check every 30s
+    const interval = setInterval(checkSubscription, 30000)
     return () => clearInterval(interval)
   }, [checkSubscription])
 
-  // Show popup every 5 minutes if not subscribed and not dismissed
   useEffect(() => {
     if (subscribed || dismissed) return
     const showPopup = () => setShow(true)
-    showPopup() // show immediately first time
-    const interval = setInterval(showPopup, 5 * 60 * 1000) // every 5 min
+    showPopup()
+    const interval = setInterval(showPopup, 5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [subscribed, dismissed])
 
   const handleSubscribe = async () => {
-    // Safety check: VAPID key must exist
     const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
     if (!vapidPublicKey) {
-      alert('Notifications not configured yet. Please contact the school admin.')
-      console.error('NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set')
+      alert('Notifications not configured yet. Please contact admin.')
       return
     }
 
     setLoading(true)
     try {
+      // Wait for the service worker to be fully ready
       const reg = await navigator.serviceWorker.ready
+      // Delay 1 second just in case
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
       })
-      // Save to backend
+
       await fetch('/api/push/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sub)
       })
+
       setSubscribed(true)
       setShow(false)
     } catch (err) {
-      console.error('Subscription failed:', err)
+      console.error('Subscription error:', err)
       alert('Could not enable notifications: ' + err.message)
     } finally {
       setLoading(false)
