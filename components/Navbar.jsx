@@ -133,9 +133,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* ---------------------------------------- */}
-      /* 🍊 MOBILE SIDE PANEL – Transparent site colors, no blur */
-      /* ---------------------------------------- */}
+      {/* 🍊 MOBILE SIDE PANEL – Transparent site colors, no blur */}
       <Transition show={mobileMenuOpen} as="div">
         <Dialog as="div" className="relative z-[2000]" onClose={setMobileMenuOpen}>
           {/* Light backdrop – no blur */}
