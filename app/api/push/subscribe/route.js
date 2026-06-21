@@ -6,17 +6,48 @@ const supabase = createClient(
 )
 
 export async function POST(req) {
-  const subscription = await req.json()
+  try {
+    const subscription = await req.json()
+
+    // Basic validation
+    if (!subscription || !subscription.endpoint) {
+      return new Response(JSON.stringify({ error: 'Invalid subscription' }), { status: 400 })
+    }
+
+    const { error } = await supabase
+      .from('push_subscriptions')
+      .upsert(
+        {
+          endpoint: subscription.endpoint,
+          subscription: subscription,   // store the whole object as JSONB
+          created_at: new Date()
+        },
+        { onConflict: 'endpoint' }
+      )
+
+    if (error) {
+      console.error('Subscription save error:', error)
+      return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+    }
+
+    return new Response(JSON.stringify({ success: true }), { status: 200 })
+  } catch (err) {
+    console.error('Subscribe API error:', err)
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 })
+  }
+}
+
+export async function DELETE(req) {
+  const { endpoint } = await req.json()
+  if (!endpoint) {
+    return new Response(JSON.stringify({ error: 'Missing endpoint' }), { status: 400 })
+  }
   const { error } = await supabase
     .from('push_subscriptions')
-    .upsert({
-      endpoint: subscription.endpoint,
-      subscription: subscription,
-      created_at: new Date()
-    }, { onConflict: 'endpoint' })
-
+    .delete()
+    .eq('endpoint', endpoint)
   if (error) {
-    console.error('Insert error:', error)
+    console.error('Delete error:', error)
     return new Response(JSON.stringify({ error: error.message }), { status: 500 })
   }
   return new Response(JSON.stringify({ success: true }), { status: 200 })
