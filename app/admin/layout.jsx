@@ -35,6 +35,7 @@ const sidebarSections = [
       { href: '/admin/timetable', label: 'Timetable', icon: ClockIcon },
       { href: '/admin/video-lectures', label: 'Video Lectures', icon: PlayCircleIcon },
       { href: '/admin/attendance/report', label: 'Attendance Report', icon: DocumentTextIcon },
+      { href: '/admin/attendance/monthly', label: 'Monthly Report', icon: DocumentTextIcon },
     ],
   },
   {
