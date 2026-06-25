@@ -5,13 +5,13 @@ export default function TeacherAttendance() {
   const [students, setStudents] = useState([])
   const [attendance, setAttendance] = useState({})   // { studentId: 'present'/'absent' }
   const [selectedClass, setSelectedClass] = useState('')
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]) // today
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [message, setMessage] = useState('')
   const [whatsappLinks, setWhatsappLinks] = useState([])
   const [absentCounts, setAbsentCounts] = useState({})
   const [saving, setSaving] = useState(false)
 
-  // Fetch students when class changes
+  // Fetch students when class changes, also fetch existing attendance for the date
   useEffect(() => {
     if (selectedClass) {
       fetchStudents(selectedClass)
@@ -25,7 +25,6 @@ export default function TeacherAttendance() {
       const data = await res.json()
       if (Array.isArray(data)) {
         setStudents(data)
-        // Default all to present (will be overwritten if existing attendance found)
         const initial = {}
         data.forEach(s => initial[s.id] = 'present')
         setAttendance(initial)
@@ -54,7 +53,7 @@ export default function TeacherAttendance() {
 
   const handleClassChange = (e) => {
     setSelectedClass(e.target.value)
-    setWhatsappLinks([])  // clear old links
+    setWhatsappLinks([])
   }
 
   const handleDateChange = (e) => {
@@ -115,7 +114,18 @@ export default function TeacherAttendance() {
         .filter(s => s.parent_phone)
         .map(s => {
           const totalAbsent = counts[s.id] || 0
-          const msg = `Dear Parent,%0A%0AThis is to inform you that ${s.student_name} (Class ${selectedClass}) was ABSENT on ${today}.%0ATotal absences this academic year: ${totalAbsent}.%0A%0APlease ensure regular attendance.%0A%0A- Naveen Academy`
+          // 🆕 Bilingual message (English + Hindi)
+          const msg =
+            `Dear Parent,%0A%0A` +
+            `This is to inform you that ${s.student_name} (Class ${selectedClass}) was ABSENT today (${today}).%0A` +
+            `Total absences this academic year: ${totalAbsent}.%0A%0A` +
+            `Please ensure regular attendance.%0A%0A` +
+            `प्रिय अभिभावक,%0A%0A` +
+            `सूचित किया जाता है कि ${s.student_name} (कक्षा ${selectedClass}) आज (${today}) अनुपस्थित रहा/रही।%0A` +
+            `इस शैक्षणिक वर्ष में कुल अनुपस्थिति: ${totalAbsent}।%0A%0A` +
+            `कृपया नियमित उपस्थिति सुनिश्चित करें।%0A%0A` +
+            `- Naveen Academy / नवीन अकादमी`
+
           return {
             name: s.student_name,
             phone: s.parent_phone,
@@ -214,9 +224,19 @@ export default function TeacherAttendance() {
                 .filter(s => attendance[s.id] === 'absent')
                 .map(s => {
                   const totalAbsent = absentCounts[s.id] || 0
-                  return `${s.student_name} (Class ${selectedClass}) was absent on ${today}. Total absences: ${totalAbsent}.`
+                  return (
+                    `Dear Parent,\n\n` +
+                    `This is to inform you that ${s.student_name} (Class ${selectedClass}) was ABSENT today (${today}).\n` +
+                    `Total absences this academic year: ${totalAbsent}.\n\n` +
+                    `Please ensure regular attendance.\n\n` +
+                    `प्रिय अभिभावक,\n\n` +
+                    `सूचित किया जाता है कि ${s.student_name} (कक्षा ${selectedClass}) आज (${today}) अनुपस्थित रहा/रही।\n` +
+                    `इस शैक्षणिक वर्ष में कुल अनुपस्थिति: ${totalAbsent}।\n\n` +
+                    `कृपया नियमित उपस्थिति सुनिश्चित करें।\n\n` +
+                    `- Naveen Academy / नवीन अकादमी`
+                  )
                 })
-                .join('\n\n')
+                .join('\n\n---\n\n')
               navigator.clipboard.writeText(text).then(() => alert('Messages copied! Paste in WhatsApp.')).catch(() => alert('Could not copy.'))
             }}
             className="bg-blue-600 text-white px-6 py-2 rounded"
