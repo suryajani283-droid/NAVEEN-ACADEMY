@@ -19,8 +19,13 @@ export default function AdminAttendanceReport() {
       const res = await fetch(`/api/attendance?class=${selectedClass}&date=${selectedDate}`)
       const data = await res.json()
       if (Array.isArray(data)) {
-        // Merge with student names (already joined in API, but if not, we fetch separately)
-        setRecords(data)
+        // Sort alphabetically by student_name
+        const sortedData = [...data].sort((a, b) => {
+          const nameA = (a.students?.student_name || '').toLowerCase();
+          const nameB = (b.students?.student_name || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        setRecords(sortedData);
       } else {
         setError('No data found.')
       }
@@ -75,6 +80,7 @@ export default function AdminAttendanceReport() {
           <table className="min-w-full bg-white rounded shadow">
             <thead>
               <tr className="bg-gray-100">
+                <th className="p-2 text-center w-16">S.No.</th>
                 <th className="p-2 text-left">Student Name</th>
                 <th className="p-2 text-left">Father Name</th>
                 <th className="p-2 text-left">Status</th>
@@ -82,8 +88,9 @@ export default function AdminAttendanceReport() {
               </tr>
             </thead>
             <tbody>
-              {records.map(rec => (
+              {records.map((rec, idx) => (
                 <tr key={rec.id} className="border-b">
+                  <td className="p-2 text-center">{idx + 1}</td>
                   <td className="p-2">{rec.students?.student_name || '—'}</td>
                   <td className="p-2">{rec.students?.father_name || '—'}</td>
                   <td className={`p-2 font-medium ${rec.status === 'present' ? 'text-green-600' : 'text-red-600'}`}>
