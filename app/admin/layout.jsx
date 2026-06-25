@@ -34,6 +34,7 @@ const sidebarSections = [
       { href: '/admin/results', label: 'Results', icon: TrophyIcon },
       { href: '/admin/timetable', label: 'Timetable', icon: ClockIcon },
       { href: '/admin/video-lectures', label: 'Video Lectures', icon: PlayCircleIcon },
+      { href: '/admin/attendance/report', label: 'Attendance Report', icon: DocumentTextIcon },
     ],
   },
   {
