@@ -33,6 +33,10 @@ export default function TeacherDashboard() {
         <Link href={`/teacher/video-lectures?class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(sub)}`} className="card text-center hover:shadow-lg">
           <span className="text-4xl">🎬</span><h3 className="font-semibold mt-2">Video Lectures</h3>
         </Link>
+        {/* 🆕 Attendance card */}
+        <Link href={`/teacher/attendance?class=${encodeURIComponent(cls)}`} className="card text-center hover:shadow-lg">
+          <span className="text-4xl">📋</span><h3 className="font-semibold mt-2">Attendance</h3>
+        </Link>
       </div>
     </div>
   )
