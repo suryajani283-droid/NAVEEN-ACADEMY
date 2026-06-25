@@ -9,7 +9,7 @@ import {
   ArrowDownTrayIcon, TrophyIcon, ClockIcon,
   CalendarDaysIcon, ChatBubbleLeftRightIcon, PhoneIcon,
   TagIcon, ArrowRightOnRectangleIcon, PlayCircleIcon,
-  DevicePhoneMobileIcon
+  DevicePhoneMobileIcon, ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline'
 
 const sidebarSections = [
@@ -29,6 +29,7 @@ const sidebarSections = [
     links: [
       { href: '/admin/homework', label: 'Homework', icon: BookOpenIcon },
       { href: '/admin/notes', label: 'Notes', icon: DocumentTextIcon },
+      { href: '/admin/attendance', label: 'Attendance', icon: ClipboardDocumentListIcon },
       { href: '/admin/downloads', label: 'Downloads', icon: ArrowDownTrayIcon },
       { href: '/admin/results', label: 'Results', icon: TrophyIcon },
       { href: '/admin/timetable', label: 'Timetable', icon: ClockIcon },
@@ -89,7 +90,7 @@ export default function AdminLayout({ children }) {
 
   const [role, setRole] = useState(null)
   const [teacherClass, setTeacherClass] = useState(null)
-  const [loading, setLoading] = useState(true)   // ✅ prevent flash
+  const [loading, setLoading] = useState(true)
 
   // Detect role from cookie
   useEffect(() => {
@@ -108,7 +109,7 @@ export default function AdminLayout({ children }) {
         setRole(null)
       }
     }
-    setLoading(false)   // done checking
+    setLoading(false)
   }, [])
 
   // Redirect teachers away from forbidden pages
@@ -124,6 +125,7 @@ export default function AdminLayout({ children }) {
       '/admin/results',
       '/admin/timetable',
       '/admin/video-lectures',
+      '/admin/attendance',
     ]
     const isAllowed = allowed.some(p => pathname === p || pathname.startsWith(p + '/'))
     if (!isAllowed) {
@@ -162,7 +164,6 @@ export default function AdminLayout({ children }) {
 
   const isActive = (href) => pathname === href || pathname.startsWith(href + '/')
 
-  // Show nothing until role is known (prevents full sidebar flash)
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
