@@ -3,21 +3,21 @@ import { useState, useEffect } from 'react'
 
 export default function TeacherAttendance() {
   const [students, setStudents] = useState([])
-  const [attendance, setAttendance] = useState({})
+  const [attendance, setAttendance] = useState({})   // { studentId: 'present'/'absent' }
   const [selectedClass, setSelectedClass] = useState('')
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]) // today
   const [message, setMessage] = useState('')
   const [whatsappLinks, setWhatsappLinks] = useState([])
   const [absentCounts, setAbsentCounts] = useState({})
   const [saving, setSaving] = useState(false)
 
+  // Fetch students when class changes
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const cls = params.get('class')
-    if (cls) {
-      setSelectedClass(cls)
-      fetchStudents(cls)
+    if (selectedClass) {
+      fetchStudents(selectedClass)
+      fetchExistingAttendance(selectedClass, selectedDate)
     }
-  }, [])
+  }, [selectedClass, selectedDate])
 
   const fetchStudents = async (className) => {
     try {
@@ -25,6 +25,7 @@ export default function TeacherAttendance() {
       const data = await res.json()
       if (Array.isArray(data)) {
         setStudents(data)
+        // Default all to present (will be overwritten if existing attendance found)
         const initial = {}
         data.forEach(s => initial[s.id] = 'present')
         setAttendance(initial)
@@ -34,10 +35,31 @@ export default function TeacherAttendance() {
     }
   }
 
+  // Fetch existing attendance for the selected date/class and pre-fill toggles
+  const fetchExistingAttendance = async (className, date) => {
+    try {
+      const res = await fetch(`/api/attendance?class=${className}&date=${date}`)
+      const data = await res.json()
+      if (Array.isArray(data) && data.length > 0) {
+        const existing = {}
+        data.forEach(record => {
+          existing[record.student_id] = record.status
+        })
+        setAttendance(prev => ({ ...prev, ...existing }))
+      }
+    } catch (err) {
+      console.error('Failed to fetch existing attendance', err)
+    }
+  }
+
   const handleClassChange = (e) => {
-    const cls = e.target.value
-    setSelectedClass(cls)
-    if (cls) fetchStudents(cls)
+    setSelectedClass(e.target.value)
+    setWhatsappLinks([])  // clear old links
+  }
+
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value)
+    setWhatsappLinks([])
   }
 
   const toggleStatus = (id) => {
@@ -54,7 +76,7 @@ export default function TeacherAttendance() {
 
     const records = Object.entries(attendance).map(([studentId, status]) => ({
       student_id: Number(studentId),
-      date: new Date().toISOString().split('T')[0],
+      date: selectedDate,
       status
     }))
 
@@ -68,7 +90,6 @@ export default function TeacherAttendance() {
       if (!res.ok) throw new Error('Save failed')
       setMessage('Attendance saved!')
 
-      // Count absences and build links
       const counts = {}
       const absentStudents = students.filter(s => attendance[s.id] === 'absent')
 
@@ -78,7 +99,6 @@ export default function TeacherAttendance() {
         return
       }
 
-      // Get old absent counts for each absent student
       for (const s of absentStudents) {
         try {
           const res2 = await fetch(`/api/attendance/stats?student_id=${s.id}`)
@@ -90,19 +110,12 @@ export default function TeacherAttendance() {
       }
       setAbsentCounts(counts)
 
-      // Generate WhatsApp links
-      const today = new Date().toLocaleDateString('en-IN')
+      const today = new Date(selectedDate).toLocaleDateString('en-IN')
       const links = absentStudents
-        .filter(s => {
-          if (!s.parent_phone) {
-            console.warn('Missing parent_phone for', s.student_name)
-            return false
-          }
-          return true
-        })
+        .filter(s => s.parent_phone)
         .map(s => {
           const totalAbsent = counts[s.id] || 0
-          const msg = `Dear Parent,%0A%0AThis is to inform you that ${s.student_name} (Class ${selectedClass}) was ABSENT today (${today}).%0ATotal absences this academic year: ${totalAbsent}.%0A%0APlease ensure regular attendance.%0A%0A- Naveen Academy`
+          const msg = `Dear Parent,%0A%0AThis is to inform you that ${s.student_name} (Class ${selectedClass}) was ABSENT on ${today}.%0ATotal absences this academic year: ${totalAbsent}.%0A%0APlease ensure regular attendance.%0A%0A- Naveen Academy`
           return {
             name: s.student_name,
             phone: s.parent_phone,
@@ -127,12 +140,21 @@ export default function TeacherAttendance() {
     <div className="container mx-auto px-4 py-8 pt-20">
       <h1 className="text-3xl font-bold text-[#8B3A3A] mb-4">Daily Attendance</h1>
 
-      <select value={selectedClass} onChange={handleClassChange} className="border p-2 rounded mb-6">
-        <option value="">Select Class</option>
-        {['1','2','3','4','5','6','7','8','9','10','11','12'].map(cls => (
-          <option key={cls} value={cls}>{cls}</option>
-        ))}
-      </select>
+      <div className="flex gap-4 mb-6">
+        <select value={selectedClass} onChange={handleClassChange} className="border p-2 rounded">
+          <option value="">Select Class</option>
+          {['1','2','3','4','5','6','7','8','9','10','11','12'].map(cls => (
+            <option key={cls} value={cls}>{cls}</option>
+          ))}
+        </select>
+
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={handleDateChange}
+          className="border p-2 rounded"
+        />
+      </div>
 
       {students.length > 0 && (
         <div className="space-y-2">
@@ -162,7 +184,7 @@ export default function TeacherAttendance() {
       {whatsappLinks.length > 0 && (
         <div className="mt-6">
           <h2 className="text-xl font-semibold mb-2">Send WhatsApp Messages (Absent Students)</h2>
-          <ul className="space-y-2">
+          <ul className="space-y-2 mb-4">
             {whatsappLinks.map((item, idx) => (
               <li key={idx}>
                 <a href={item.link} target="_blank" className="text-blue-600 underline">
@@ -171,6 +193,36 @@ export default function TeacherAttendance() {
               </li>
             ))}
           </ul>
+
+          <button
+            onClick={() => {
+              whatsappLinks.forEach((item, i) => {
+                setTimeout(() => {
+                  window.open(item.link, '_blank')
+                }, i * 800)
+              })
+            }}
+            className="bg-green-600 text-white px-6 py-2 rounded mr-2"
+          >
+            📤 Send All (One-by-One)
+          </button>
+
+          <button
+            onClick={() => {
+              const today = new Date(selectedDate).toLocaleDateString('en-IN')
+              const text = students
+                .filter(s => attendance[s.id] === 'absent')
+                .map(s => {
+                  const totalAbsent = absentCounts[s.id] || 0
+                  return `${s.student_name} (Class ${selectedClass}) was absent on ${today}. Total absences: ${totalAbsent}.`
+                })
+                .join('\n\n')
+              navigator.clipboard.writeText(text).then(() => alert('Messages copied! Paste in WhatsApp.')).catch(() => alert('Could not copy.'))
+            }}
+            className="bg-blue-600 text-white px-6 py-2 rounded"
+          >
+            📋 Copy All Messages
+          </button>
         </div>
       )}
     </div>
