@@ -39,6 +39,25 @@ export default function AdminAttendanceReport() {
   const absentCount = records.filter(r => r.status === 'absent').length
   const presentCount = records.filter(r => r.status === 'present').length
 
+  // 📥 Export Daily Report as CSV
+  const exportDailyCSV = () => {
+    const header = ['S.No.', 'Student Name', 'Father Name', 'Status', 'Parent Phone']
+    const rows = records.map((rec, idx) => [
+      idx + 1,
+      rec.students?.student_name || '—',
+      rec.students?.father_name || '—',
+      rec.status,
+      rec.students?.parent_phone || '—'
+    ])
+    const csv = [header.join(','), ...rows.map(r => r.join(','))].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `attendance_${selectedClass}_${selectedDate}.csv`
+    a.click()
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 pt-20">
       <h1 className="text-3xl font-bold text-[#8B3A3A] mb-6">Attendance Report</h1>
@@ -64,6 +83,12 @@ export default function AdminAttendanceReport() {
         >
           Show Report
         </button>
+
+        {records.length > 0 && (
+          <button onClick={exportDailyCSV} className="bg-green-600 text-white px-4 py-2 rounded">
+            📥 Download CSV
+          </button>
+        )}
       </div>
 
       {error && <p className="text-red-600 mb-4">{error}</p>}
