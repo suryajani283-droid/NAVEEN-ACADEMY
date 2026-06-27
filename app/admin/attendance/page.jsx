@@ -11,7 +11,7 @@ export default function TeacherAttendance() {
   const [saved, setSaved] = useState(false)   // true after saving attendance
   const [saving, setSaving] = useState(false)
 
-  // Fetch students when class changes, and existing attendance for the date
+  // Fetch students when class/date changes, and existing attendance for the date
   useEffect(() => {
     if (selectedClass) {
       fetchStudents(selectedClass)
@@ -28,7 +28,7 @@ export default function TeacherAttendance() {
         const initial = {}
         data.forEach(s => initial[s.id] = 'present')
         setAttendance(initial)
-        setSaved(false)  // reset saved state when class/date changes
+        setSaved(false)  // reset saved state
       }
     } catch (err) {
       setMessage('Error fetching students.')
@@ -66,31 +66,41 @@ export default function TeacherAttendance() {
       ...prev,
       [id]: prev[id] === 'present' ? 'absent' : 'present'
     }))
-    // If the user changes status after saving, we should reset saved state
-    // to force re-save before WhatsApp buttons become active
-    setSaved(false)
+    setSaved(false)   // need to re‑save after changes
   }
 
-  // Generate WhatsApp link for a specific absent student
-  const getWhatsAppLink = (student, totalAbsent) => {
+  // Create the bilingual message text (used in both WhatsApp and SMS)
+  const getMessageText = (student, totalAbsent) => {
     const today = new Date(selectedDate).toLocaleDateString('en-IN')
-    const msg =
-      `Dear Parent,%0A%0A` +
-      `This is to inform you that ${student.student_name} (Class ${selectedClass}) was ABSENT today (${today}).%0A` +
-      `Total absences this academic year: ${totalAbsent}.%0A%0A` +
-      `Please ensure regular attendance.%0A%0A` +
-      `प्रिय अभिभावक,%0A%0A` +
-      `सूचित किया जाता है कि ${student.student_name} (कक्षा ${selectedClass}) आज (${today}) अनुपस्थित रहा/रही।%0A` +
-      `इस शैक्षणिक वर्ष में कुल अनुपस्थिति: ${totalAbsent}।%0A%0A` +
-      `कृपया नियमित उपस्थिति सुनिश्चित करें।%0A%0A` +
+    return (
+      `Dear Parent,\n\n` +
+      `This is to inform you that ${student.student_name} (Class ${selectedClass}) was ABSENT today (${today}).\n` +
+      `Total absences this academic year: ${totalAbsent}.\n\n` +
+      `Please ensure regular attendance.\n\n` +
+      `प्रिय अभिभावक,\n\n` +
+      `सूचित किया जाता है कि ${student.student_name} (कक्षा ${selectedClass}) आज (${today}) अनुपस्थित रहा/रही।\n` +
+      `इस शैक्षणिक वर्ष में कुल अनुपस्थिति: ${totalAbsent}।\n\n` +
+      `कृपया नियमित उपस्थिति सुनिश्चित करें।\n\n` +
       `- Naveen Academy / नवीन अकादमी`
+    )
+  }
+
+  // WhatsApp link (uses wa.me)
+  const getWhatsAppLink = (student, totalAbsent) => {
+    const msg = getMessageText(student, totalAbsent).replace(/\n/g, '%0A')
     return `https://wa.me/${student.parent_phone}?text=${msg}`
+  }
+
+  // SMS link (uses sms: scheme)
+  const getSMSLink = (student, totalAbsent) => {
+    const msg = getMessageText(student, totalAbsent)
+    return `sms:${student.parent_phone}?body=${encodeURIComponent(msg)}`
   }
 
   const saveAttendance = async () => {
     setSaving(true)
     setMessage('')
-    setSaved(false)   // saved will become true only after successful save
+    setSaved(false)
 
     const records = Object.entries(attendance).map(([studentId, status]) => ({
       student_id: Number(studentId),
@@ -111,7 +121,7 @@ export default function TeacherAttendance() {
       const counts = {}
       const absentStudents = students.filter(s => attendance[s.id] === 'absent')
 
-      // Fetch absent counts for those who are absent today
+      // Fetch absent counts for all absent students
       for (const s of absentStudents) {
         try {
           const res2 = await fetch(`/api/attendance/stats?student_id=${s.id}`)
@@ -122,7 +132,7 @@ export default function TeacherAttendance() {
         }
       }
       setAbsentCounts(counts)
-      setSaved(true)   // now WhatsApp buttons can appear
+      setSaved(true)   // show send buttons now
     } catch (err) {
       setMessage('Error saving attendance.')
       console.error(err)
@@ -164,17 +174,29 @@ export default function TeacherAttendance() {
                   {attendance[s.id] === 'present' ? 'Present' : 'Absent'}
                 </button>
 
-                {/* WhatsApp button – visible only if absent AND saved */}
+                {/* Send buttons – only for absent, after save, and if phone exists */}
                 {attendance[s.id] === 'absent' && saved && s.parent_phone && (
-                  <a
-                    href={getWhatsAppLink(s, absentCounts[s.id] || 0)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-green-600 text-white px-2 py-1 rounded text-sm hover:bg-green-700"
-                    title="Send WhatsApp"
-                  >
-                    📤
-                  </a>
+                  <>
+                    {/* WhatsApp button */}
+                    <a
+                      href={getWhatsAppLink(s, absentCounts[s.id] || 0)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-green-600 text-white px-2 py-1 rounded text-sm hover:bg-green-700"
+                      title="Send WhatsApp"
+                    >
+                      📤 WA
+                    </a>
+
+                    {/* SMS button */}
+                    <a
+                      href={getSMSLink(s, absentCounts[s.id] || 0)}
+                      className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700"
+                      title="Send SMS (opens messaging app)"
+                    >
+                      💬 SMS
+                    </a>
+                  </>
                 )}
               </div>
             </div>
