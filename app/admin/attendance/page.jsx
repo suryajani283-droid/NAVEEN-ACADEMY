@@ -11,7 +11,10 @@ export default function TeacherAttendance() {
   const [saved, setSaved] = useState(false)   // true after saving attendance
   const [saving, setSaving] = useState(false)
 
-  // Fetch students when class/date changes, and existing attendance for the date
+  // Academic year start date (1 April)
+  const ACADEMIC_START = '2025-04-01'
+
+  // Fetch students and existing attendance when class/date change
   useEffect(() => {
     if (selectedClass) {
       fetchStudents(selectedClass)
@@ -28,7 +31,7 @@ export default function TeacherAttendance() {
         const initial = {}
         data.forEach(s => initial[s.id] = 'present')
         setAttendance(initial)
-        setSaved(false)  // reset saved state
+        setSaved(false)
       }
     } catch (err) {
       setMessage('Error fetching students.')
@@ -69,7 +72,7 @@ export default function TeacherAttendance() {
     setSaved(false)   // need to re‑save after changes
   }
 
-  // Create the bilingual message text (used in both WhatsApp and SMS)
+  // Bilingual message text (English + Hindi)
   const getMessageText = (student, totalAbsent) => {
     const today = new Date(selectedDate).toLocaleDateString('en-IN')
     return (
@@ -85,13 +88,13 @@ export default function TeacherAttendance() {
     )
   }
 
-  // WhatsApp link (uses wa.me)
+  // WhatsApp link
   const getWhatsAppLink = (student, totalAbsent) => {
     const msg = getMessageText(student, totalAbsent).replace(/\n/g, '%0A')
     return `https://wa.me/${student.parent_phone}?text=${msg}`
   }
 
-  // SMS link (uses sms: scheme)
+  // SMS link
   const getSMSLink = (student, totalAbsent) => {
     const msg = getMessageText(student, totalAbsent)
     return `sms:${student.parent_phone}?body=${encodeURIComponent(msg)}`
@@ -114,25 +117,28 @@ export default function TeacherAttendance() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ records })
       })
-
       if (!res.ok) throw new Error('Save failed')
       setMessage('Attendance saved!')
 
-      const counts = {}
-      const absentStudents = students.filter(s => attendance[s.id] === 'absent')
+      // 1. Fetch all attendance for this class from the start of the academic year
+      const fromDate = ACADEMIC_START
+      const toDate = selectedDate   // up to today (inclusive)
+      const resAll = await fetch(`/api/attendance?class=${selectedClass}&from=${fromDate}&to=${toDate}`)
+      const allData = await resAll.json()
 
-      // Fetch absent counts for all absent students
-      for (const s of absentStudents) {
-        try {
-          const res2 = await fetch(`/api/attendance/stats?student_id=${s.id}`)
-          const data = await res2.json()
-          counts[s.id] = data.count || 0
-        } catch (e) {
-          counts[s.id] = 0
-        }
+      // 2. Count absences per student
+      const counts = {}
+      if (Array.isArray(allData)) {
+        allData.forEach(record => {
+          if (record.status === 'absent') {
+            const sid = record.student_id
+            counts[sid] = (counts[sid] || 0) + 1
+          }
+        })
       }
       setAbsentCounts(counts)
-      setSaved(true)   // show send buttons now
+      setSaved(true)   // show send buttons
+
     } catch (err) {
       setMessage('Error saving attendance.')
       console.error(err)
@@ -177,7 +183,6 @@ export default function TeacherAttendance() {
                 {/* Send buttons – only for absent, after save, and if phone exists */}
                 {attendance[s.id] === 'absent' && saved && s.parent_phone && (
                   <>
-                    {/* WhatsApp button */}
                     <a
                       href={getWhatsAppLink(s, absentCounts[s.id] || 0)}
                       target="_blank"
@@ -187,12 +192,10 @@ export default function TeacherAttendance() {
                     >
                       📤 WA
                     </a>
-
-                    {/* SMS button */}
                     <a
                       href={getSMSLink(s, absentCounts[s.id] || 0)}
                       className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700"
-                      title="Send SMS (opens messaging app)"
+                      title="Send SMS"
                     >
                       💬 SMS
                     </a>
