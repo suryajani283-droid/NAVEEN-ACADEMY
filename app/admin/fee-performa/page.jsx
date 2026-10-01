@@ -117,14 +117,15 @@ export default function AdminFeePerformaPage() {
   return (
     <div className="min-h-screen bg-slate-100 p-4 md:p-6">
       <style jsx global>{`
-        .fee-table { width: 100%; border-collapse: collapse; font-size: 12px; color: #000; }
+        .fee-table { width: 100%; border-collapse: collapse; font-size: 12px; color: #000; table-layout: fixed; }
         .fee-table th, .fee-table td {
           border: 1px solid #000; padding: 4px 6px; text-align: center; vertical-align: middle;
+          word-break: break-word; overflow-wrap: break-word;
         }
         .fee-table th { background: #f8f9fa; font-weight: 700; }
         .fee-table input {
           width: 100%; border: none; outline: none; background: transparent;
-          font-size: 12px; text-align: center;
+          font-size: 12px; text-align: center; padding: 0;
         }
         .fee-table input.text-left { text-align: left; }
         .fee-table input:focus { background: #e8f0fe; }
@@ -132,13 +133,57 @@ export default function AdminFeePerformaPage() {
         .bg-due { background: #fff0f0; color: #b00000; font-weight: bold; }
 
         @media print {
-          @page { size: A4 landscape; margin: 10mm; }
-          body { background: #fff !important; }
+          @page { size: A4 landscape; margin: 6mm; }
+
+          html, body {
+            background: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
           .no-print { display: none !important; }
-          .print-area { box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
-          .fee-table { font-size: 11px; }
-          .fee-table th, .fee-table td { padding: 3px 4px; border: 1px solid #000 !important; }
-          .fee-table input { border: none !important; background: transparent !important; }
+
+          .print-area {
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+
+          /* scroll wrapper print में content clip करता है — visible करें */
+          .print-area .overflow-x-auto { overflow: visible !important; }
+
+          .fee-table {
+            width: 100% !important;
+            table-layout: fixed !important;
+            font-size: 9px !important;
+          }
+
+          .fee-table th, .fee-table td {
+            padding: 1.5px 2px !important;
+            border: 1px solid #000 !important;
+            font-size: 9px !important;
+            line-height: 1.15 !important;
+            word-break: break-word;
+          }
+
+          .fee-table input {
+            border: none !important;
+            background: transparent !important;
+            color: #000 !important;
+            font-size: 9px !important;
+            padding: 0 !important;
+            width: 100% !important;
+          }
+
+          .print-area h1 { font-size: 14px !important; margin: 0 0 2px 0 !important; }
+          .print-area h2 { font-size: 10.5px !important; margin: 0 0 5px 0 !important; }
+
+          /* Rows बीच में न कटें */
+          .fee-table tr { page-break-inside: avoid !important; }
+          .fee-table thead { display: table-header-group !important; }
         }
       `}</style>
 
@@ -258,24 +303,24 @@ export default function AdminFeePerformaPage() {
             <table className="fee-table">
               <thead>
                 <tr>
-                  <th rowSpan={2} style={{ width: 35 }}>क्र.सं.</th>
-                  <th rowSpan={2} style={{ width: 220 }}>नाम / पिता का नाम</th>
-                  <th rowSpan={2} style={{ width: 100 }}>मो. नं.</th>
-                  <th rowSpan={2} style={{ width: 100 }}>रूट नाम</th>
-                  <th rowSpan={2} style={{ width: 70 }}>पिछला</th>
-                  <th rowSpan={2} style={{ width: 75 }}>प्रवेश शुल्क</th>
-                  <th rowSpan={2} style={{ width: 75 }}>शिक्षण शुल्क</th>
-                  <th rowSpan={2} style={{ width: 75 }}>वाहन शुल्क</th>
-                  <th rowSpan={2} style={{ width: 80 }}>योग</th>
+                  <th rowSpan={2} style={{ width: '3%' }}>क्र.सं.</th>
+                  <th rowSpan={2} style={{ width: '20%' }}>नाम / पिता का नाम</th>
+                  <th rowSpan={2} style={{ width: '9%' }}>मो. नं.</th>
+                  <th rowSpan={2} style={{ width: '8%' }}>रूट नाम</th>
+                  <th rowSpan={2} style={{ width: '7%' }}>पिछला</th>
+                  <th rowSpan={2} style={{ width: '7%' }}>प्रवेश शुल्क</th>
+                  <th rowSpan={2} style={{ width: '7%' }}>शिक्षण शुल्क</th>
+                  <th rowSpan={2} style={{ width: '7%' }}>वाहन शुल्क</th>
+                  <th rowSpan={2} style={{ width: '7%' }}>योग</th>
                   <th colSpan={2} style={{ fontSize: 10, fontStyle: 'italic', fontWeight: 'normal' }}>
                     पेंसिल से भरें
                   </th>
-                  <th rowSpan={2} style={{ width: 120 }}>दूरभाष पर मिली दिनांक</th>
-                  <th rowSpan={2} className="no-print" style={{ width: 30 }}>#</th>
+                  <th rowSpan={2} style={{ width: '9%' }}>दूरभाष दिनांक</th>
+                  <th rowSpan={2} className="no-print" style={{ width: '2%' }}>#</th>
                 </tr>
                 <tr>
-                  <th style={{ width: 80 }}>कुल जमा</th>
-                  <th style={{ width: 80 }}>कुल बकाया</th>
+                  <th style={{ width: '7%' }}>कुल जमा</th>
+                  <th style={{ width: '7%' }}>कुल बकाया</th>
                 </tr>
               </thead>
               <tbody>
