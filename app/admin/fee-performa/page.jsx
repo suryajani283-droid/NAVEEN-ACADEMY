@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { rowTotal, rowDue } from '@/lib/feePerforma';
+import FeeImportModal from '@/components/FeeImportModal';
 
 const blankRow = (sno) => ({
   sno,
@@ -25,6 +26,7 @@ export default function AdminFeePerformaPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState('');
+  const [importOpen, setImportOpen] = useState(false);
 
   /* Load list of class sheets on mount */
   useEffect(() => {
@@ -88,6 +90,17 @@ export default function AdminFeePerformaPage() {
     );
   }
 
+  /* --- Excel import handler --- */
+  function handleImported(imported, mode) {
+    setRows((prev) => {
+      const base = mode === 'replace' ? [] : prev;
+      const merged = [...base, ...imported];
+      return merged.map((r, i) => ({ ...r, sno: i + 1 }));
+    });
+    setToast(`✓ ${imported.length} छात्र जोड़े गए — सेव करें`);
+    setTimeout(() => setToast(''), 3000);
+  }
+
   async function save() {
     if (!activeId) return;
     setSaving(true);
@@ -144,6 +157,13 @@ export default function AdminFeePerformaPage() {
             className="rounded bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
           >
             💾 {saving ? 'सेव हो रहा है...' : 'डेटा सेव करें'}
+          </button>
+          <button
+            onClick={() => setImportOpen(true)}
+            disabled={!activeId}
+            className="rounded bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-50"
+          >
+            📥 Excel से आयात करें
           </button>
           <button
             onClick={addRow}
@@ -350,6 +370,13 @@ export default function AdminFeePerformaPage() {
           </div>
         </div>
       )}
+
+      {/* ============ EXCEL IMPORT MODAL ============ */}
+      <FeeImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImport={handleImported}
+      />
     </div>
   );
 }
