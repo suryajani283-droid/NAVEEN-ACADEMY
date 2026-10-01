@@ -40,21 +40,18 @@
 }
 
 /* ====== Google Translate Widget fixes ====== */
-/* Hide the top toolbar banner */
 .goog-te-banner-frame.skiptranslate {
   display: none !important;
 }
 
 body {
-  top: 0 !important; /* remove the forced margin created by the toolbar */
+  top: 0 !important;
 }
 
-/* Make the gadget container disappear (the "Select Language" text) */
 .goog-te-gadget {
   font-size: 0;
 }
 
-/* Style the actual language selector dropdown */
 .goog-te-gadget .goog-te-combo {
   outline: none;
   padding: 8px 12px;
@@ -67,7 +64,6 @@ body {
   font-family: inherit;
 }
 
-/* Dark mode support for the dropdown (when body has class "dark") */
 .dark .goog-te-gadget .goog-te-combo {
   background: #1f2937;
   color: #f9fafb;
@@ -88,4 +84,26 @@ body {
 
 .animate-slide-up {
   animation: slide-up 0.5s ease-out;
+}
+
+/* =====================================================
+   PRINT FIX — सिर्फ fee performa / print pages पर लागू
+   ===================================================== */
+@media print {
+  /* Navbar, Footer, Marquee, WhatsApp, BottomNav सब छुपाएँ */
+  nav, header, footer, aside,
+  [class*="Navbar"], [class*="navbar"],
+  [class*="Footer"], [class*="footer"],
+  [class*="Marquee"], [class*="marquee"],
+  [class*="WhatsApp"], [class*="whatsapp"],
+  [class*="MobileBottomNav"], [class*="mobile-bottom"],
+  [class*="PushSubscribe"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* हर बार नया page header repeat हो */
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr    { page-break-inside: avoid; }
 }
