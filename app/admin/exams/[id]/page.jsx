@@ -135,6 +135,30 @@ export default function ExamEditorPage() {
     );
   }
 
+  /* ---------- PHOTO UPLOAD ---------- */
+  async function handlePhotoUpload(idx, file) {
+    if (!file) return;
+    const student = students[idx];
+    const key = student.id || `tmp-${idx}-${Date.now()}`;
+
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('key', key);
+
+    setToast('📤 फोटो अपलोड हो रहा है...');
+    try {
+      const res = await fetch('/api/admin/upload-photo', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      updateStudent(idx, 'photo_url', data.url);
+      setToast('✓ फोटो अपलोड हुआ — अब सेव करें');
+      setTimeout(() => setToast(''), 2500);
+    } catch (e) {
+      setToast('✗ ' + e.message);
+      setTimeout(() => setToast(''), 3000);
+    }
+  }
+
   /* ---------- SAVE ---------- */
   async function save() {
     if (!exam?.name || !exam?.class_name) {
@@ -203,14 +227,23 @@ export default function ExamEditorPage() {
         .ac-logo-box {
           width: 50px;
           height: 50px;
-          border: 1px dashed #666;
+          border: 1px solid #666;
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 9px;
           color: #666;
           flex-shrink: 0;
+          overflow: hidden;
+          background: #fff;
         }
+        .ac-logo-box img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+        .ac-logo-placeholder { font-size: 9px; color: #666; }
+
         .ac-header-text { flex: 1; text-align: center; }
         .ac-header-text h1 {
           font-size: 15px;
@@ -268,6 +301,8 @@ export default function ExamEditorPage() {
           font-size: 9px;
           color: #666;
           flex-shrink: 0;
+          overflow: hidden;
+          background: #fff;
         }
         .ac-photo img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -528,7 +563,7 @@ export default function ExamEditorPage() {
                 onClick={() => setExcelImportOpen(true)}
                 className="rounded bg-purple-600 px-3 py-2 text-xs font-semibold text-white hover:bg-purple-700"
               >
-                📊 Excel फ़ाइल चुनें
+                     📊 Excel फ़ाइल चुनें
               </button>
               <p className="mt-2 text-[10px] text-purple-700">
                 कॉलम: रोल नं, नाम, पिता का नाम, माता, मोबाइल, कक्षा, जन्म तिथि, लिंग, नामांकन
@@ -553,7 +588,7 @@ export default function ExamEditorPage() {
               </select>
             </div>
 
-       {!students.length ? (
+            {!students.length ? (
               <p className="py-8 text-center text-sm text-slate-500">
                 कोई छात्र नहीं — ऊपर से Excel/Fee Performa import करें या manual जोड़ें
               </p>
@@ -563,6 +598,7 @@ export default function ExamEditorPage() {
                   <thead className="bg-slate-100">
                     <tr>
                       <th className="border px-1 py-2 w-10">#</th>
+                      <th className="border px-1 py-2 w-20">फोटो</th>
                       <th className="border px-1 py-2 w-20">Roll</th>
                       <th className="border px-1 py-2">नाम</th>
                       <th className="border px-1 py-2">पिता</th>
@@ -578,6 +614,42 @@ export default function ExamEditorPage() {
                     {students.map((s, i) => (
                       <tr key={i}>
                         <td className="border px-1 py-1 text-center">{i + 1}</td>
+
+                        {/* PHOTO CELL */}
+                        <td className="border px-1 py-1">
+                          <div className="flex flex-col items-center gap-1">
+                            {s.photo_url ? (
+                              <img
+                                src={s.photo_url}
+                                alt=""
+                                className="h-14 w-11 border border-slate-300 object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-14 w-11 items-center justify-center border border-dashed border-slate-300 text-[8px] text-slate-400">
+                                फोटो
+                              </div>
+                            )}
+                            <label className="cursor-pointer rounded bg-indigo-600 px-1.5 py-0.5 text-[9px] font-semibold text-white hover:bg-indigo-700">
+                              {s.photo_url ? 'बदलें' : 'अपलोड'}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => handlePhotoUpload(i, e.target.files?.[0])}
+                              />
+                            </label>
+                            {s.photo_url && (
+                              <button
+                                type="button"
+                                onClick={() => updateStudent(i, 'photo_url', '')}
+                                className="text-[9px] text-red-600 hover:underline"
+                              >
+                                हटाएँ
+                              </button>
+                            )}
+                          </div>
+                        </td>
+
                         <td className="border px-1 py-1">
                           <input value={s.roll_no || ''} onChange={(e) => updateStudent(i, 'roll_no', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
                         </td>
