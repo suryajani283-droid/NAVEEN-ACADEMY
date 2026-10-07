@@ -553,10 +553,121 @@ export default function ExamEditorPage() {
               </select>
             </div>
 
-            {!students.length ? (
+       {!students.length ? (
               <p className="py-8 text-center text-sm text-slate-500">
                 कोई छात्र नहीं — ऊपर से Excel/Fee Performa import करें या manual जोड़ें
               </p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w
+                <table className="w-full text-xs">
+                  <thead className="bg-slate-100">
+                    <tr>
+                      <th className="border px-1 py-2 w-10">#</th>
+                      <th className="border px-1 py-2 w-20">Roll</th>
+                      <th className="border px-1 py-2">नाम</th>
+                      <th className="border px-1 py-2">पिता</th>
+                      <th className="border px-1 py-2">माता</th>
+                      <th className="border px-1 py-2 w-28">मोबाइल</th>
+                      <th className="border px-1 py-2 w-24">जन्म तिथि</th>
+                      <th className="border px-1 py-2 w-20">लिंग</th>
+                      <th className="border px-1 py-2 w-24">नामांकन</th>
+                      <th className="border px-1 py-2 w-8"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {students.map((s, i) => (
+                      <tr key={i}>
+                        <td className="border px-1 py-1 text-center">{i + 1}</td>
+                        <td className="border px-1 py-1">
+                          <input value={s.roll_no || ''} onChange={(e) => updateStudent(i, 'roll_no', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                        </td>
+                        <td className="border px-1 py-1">
+                          <input value={s.student_name || ''} onChange={(e) => updateStudent(i, 'student_name', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                        </td>
+                        <td className="border px-1 py-1">
+                          <input value={s.father_name || ''} onChange={(e) => updateStudent(i, 'father_name', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                        </td>
+                        <td className="border px-1 py-1">
+                          <input value={s.mother_name || ''} onChange={(e) => updateStudent(i, 'mother_name', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                        </td>
+                        <td className="border px-1 py-1">
+                          <input value={s.mobile || ''} onChange={(e) => updateStudent(i, 'mobile', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                        </td>
+                        <td className="border px-1 py-1">
+                          <input value={s.dob || ''} placeholder="DD/MM/YYYY" onChange={(e) => updateStudent(i, 'dob', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                        </td>
+                        <td className="border px-1 py-1">
+                          <select value={s.gender || ''} onChange={(e) => updateStudent(i, 'gender', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50">
+                            <option value="">—</option>
+                            <option value="पुरुष / Male">पुरुष</option>
+                            <option value="महिला / Female">महिला</option>
+                            <option value="अन्य / Other">अन्य</option>
+                          </select>
+                        </td>
+                        <td className="border px-1 py-1">
+                          <input value={s.enrollment_no || ''} onChange={(e) => updateStudent(i, 'enrollment_no', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                        </td>
+                        <td className="border px-1 py-1 text-center">
+                          <button onClick={() => deleteStudent(i)} className="font-bold text-red-600 hover:text-red-800">×</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ============ PRINT PREVIEW TAB ============ */}
+        {tab === 'print' && (
+          <div>
+            {!students.length ? (
+              <div className="rounded-lg bg-white py-20 text-center text-slate-500">
+                कोई छात्र नहीं — पहले छात्र tab में जाकर जोड़ें
+              </div>
+            ) : (
+              <>
+                <div className="mb-3 flex items-center justify-between rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                  <span>{students.length} Admit Cards तैयार हैं — ऊपर "📄 Admit Cards प्रिंट" दबाएँ</span>
+                  <span className="font-semibold">A4 portrait</span>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3">
+                  {students.map((s, i) => (
+                    <AdmitCard
+                      key={s.id || `${s.roll_no}-${i}`}
+                      exam={exam}
+                      student={s}
+                      school={school}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* PRINT-ONLY SECTION */}
+      {tab === 'print' && students.length > 0 && (
+        <div className="hidden print:block">
+          {students.map((s, i) => (
+            <AdmitCard
+              key={`p-${s.id || i}`}
+              exam={exam}
+              student={s}
+              school={school}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* EXCEL IMPORT MODAL */}
+      <AdmitCardImportModal
+        open={excelImportOpen}
+        onClose={() => setExcelImportOpen(false)}
+        onImport={handleExcelImported}
+      />
+    </div>
+  );
+}
