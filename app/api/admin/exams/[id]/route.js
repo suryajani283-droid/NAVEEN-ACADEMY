@@ -1,33 +1,72 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
+/* ============ GET — Load exam + subjects + students ============ */
 export async function GET(_req, { params }) {
   const { id } = await params;
+
   const { data: exam, error: e1 } = await supabaseAdmin
-    .from('exams').select('*').eq('id', id).single();
+    .from('exams')
+    .select('*')
+    .eq('id', id)
+    .single();
+
   if (e1) return NextResponse.json({ error: e1.message }, { status: 404 });
 
   const { data: subjects } = await supabaseAdmin
-    .from('exam_subjects').select('*').eq('exam_id', id).order('sort_order');
+    .from('exam_subjects')
+    .select('*')
+    .eq('exam_id', id)
+    .order('sort_order');
 
   const { data: students } = await supabaseAdmin
-    .from('exam_students').select('*').eq('exam_id', id).order('sort_order');
+    .from('exam_students')
+    .select('*')
+    .eq('exam_id', id)
+    .order('sort_order');
 
-  return NextResponse.json({ ...exam, subjects: subjects || [], students: students || [] });
+  return NextResponse.json({
+    ...exam,
+    subjects: subjects || [],
+    students: students || [],
+  });
 }
 
+/* ============ PUT — Save exam + subjects + students ============ */
 export async function PUT(req, { params }) {
   const { id } = await params;
   try {
     const body = await req.json();
-    const { name, class_name, session, exam_type, instructions, subjects = [], students = [] } = body;
 
+    const {
+      name,
+      class_name,
+      session,
+      exam_type,
+      instructions,
+      public_form_open,
+      form_deadline,
+      subjects = [],
+      students = [],
+    } = body;
+
+    /* 1. Exams table update — सभी fields जिनकी जरूरत है */
     const { error: e1 } = await supabaseAdmin
       .from('exams')
-      .update({ name, class_name, session, exam_type, instructions, updated_at: new Date().toISOString() })
+      .update({
+        name,
+        class_name,
+        session,
+        exam_type,
+        instructions,
+        public_form_open: public_form_open ?? false,
+        form_deadline: form_deadline || null,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', id);
     if (e1) throw e1;
 
+    /* 2. Subjects refresh */
     await supabaseAdmin.from('exam_subjects').delete().eq('exam_id', id);
     if (subjects.length) {
       await supabaseAdmin.from('exam_subjects').insert(
@@ -42,6 +81,7 @@ export async function PUT(req, { params }) {
       );
     }
 
+    /* 3. Students refresh — सभी नए fields सहित */
     await supabaseAdmin.from('exam_students').delete().eq('exam_id', id);
     if (students.length) {
       await supabaseAdmin.from('exam_students').insert(
@@ -57,6 +97,8 @@ export async function PUT(req, { params }) {
           dob: s.dob || '',
           gender: s.gender || '',
           photo_url: s.photo_url || '',
+          sr_no: s.sr_no || '',
+          selected_subjects: Array.isArray(s.selected_subjects) ? s.selected_subjects : [],
           sort_order: i,
         }))
       );
@@ -68,6 +110,7 @@ export async function PUT(req, { params }) {
   }
 }
 
+/* ============ DELETE — पूरा exam हटाएँ ============ */
 export async function DELETE(_req, { params }) {
   const { id } = await params;
   const { error } = await supabaseAdmin.from('exams').delete().eq('id', id);
