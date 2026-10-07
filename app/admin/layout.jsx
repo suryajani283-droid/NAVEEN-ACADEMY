@@ -30,6 +30,7 @@ const sidebarSections = [
       { href: '/admin/homework', label: 'Homework', icon: BookOpenIcon },
       { href: '/admin/notes', label: 'Notes', icon: DocumentTextIcon },
 { href: '/admin/fee-performa', label: 'फीस प्रपत्र', icon: '💰' },
+      { href: '/admin/fee-messages', label: 'फीस मैसेज', icon: '📱' },
       { href: '/admin/attendance', label: 'Attendance', icon: ClipboardDocumentListIcon },
       { href: '/admin/downloads', label: 'Downloads', icon: ArrowDownTrayIcon },
       { href: '/admin/results', label: 'Results', icon: TrophyIcon },
