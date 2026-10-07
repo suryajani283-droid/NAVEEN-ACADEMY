@@ -20,14 +20,14 @@ export async function GET(_req, { params }) {
     return NextResponse.json({ error: 'फॉर्म की अंतिम तिथि बीत चुकी है' }, { status: 403 });
   }
 
-  // subjects list (student इनमें से चुनेगा)
+  /* Subjects list — यही miss हो रहा था */
   const { data: subjects } = await supabaseAdmin
     .from('exam_subjects')
     .select('subject')
     .eq('exam_id', examId)
     .order('sort_order');
 
-  // class list — exam.class_name में comma हो सकते हैं
+  /* Class list — comma separated classes */
   const classes = String(exam.class_name || '')
     .split(',')
     .map((c) => c.trim())
