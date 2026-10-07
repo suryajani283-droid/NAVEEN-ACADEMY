@@ -38,8 +38,11 @@ export default function AdmitCard({ exam, student, school }) {
       {/* HEADER */}
       <div className="ac-header">
         <div className="ac-logo-box">
-          <div className="ac-logo-placeholder">लोगो</div>
-        </div>
+  <img
+    src="https://suryajani28-cejdx.wordpress.com/wp-content/uploads/2026/03/img-20260322-wa0012.jpg"
+    alt="School Logo"
+  />
+</div>
         <div className="ac-header-text">
           <h1>{schoolName}</h1>
           <p className="ac-addr">{address}</p>
