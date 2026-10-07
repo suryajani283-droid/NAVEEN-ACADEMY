@@ -84,7 +84,8 @@ export default function ExamEditorPage() {
       {
         student_name: '', father_name: '', mother_name: '', mobile: '',
         roll_no: String(s.length + 1), enrollment_no: '',
-        class_section: exam?.class_name || '', dob: '', gender: '', photo_url: '',
+        class_section: exam?.class_name || '', dob: '', gender: '',
+        photo_url: '', sr_no: '', selected_subjects: [],
       },
     ]);
   }
@@ -175,6 +176,8 @@ export default function ExamEditorPage() {
         session: exam.session,
         exam_type: exam.exam_type,
         instructions: exam.instructions,
+        public_form_open: !!exam.public_form_open,
+        form_deadline: exam.form_deadline || null,
         subjects,
         students,
       }),
@@ -183,6 +186,11 @@ export default function ExamEditorPage() {
     setToast(res.ok ? '✓ सेव हो गया' : '✗ सेव नहीं हुआ');
     setTimeout(() => setToast(''), 2000);
   }
+
+  const publicLink = useMemo(() => {
+    if (typeof window === 'undefined') return `/exam-form/${id}`;
+    return `${window.location.origin}/exam-form/${id}`;
+  }, [id]);
 
   const school = useMemo(
     () => ({
@@ -200,7 +208,6 @@ export default function ExamEditorPage() {
   return (
     <div className="min-h-screen bg-slate-100 p-4 md:p-6">
       <style jsx global>{`
-        /* ===== Admit Card styles ===== */
         .admit-card {
           width: 190mm;
           min-height: 138mm;
@@ -237,11 +244,7 @@ export default function ExamEditorPage() {
           overflow: hidden;
           background: #fff;
         }
-        .ac-logo-box img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
+        .ac-logo-box img { width: 100%; height: 100%; object-fit: contain; }
         .ac-logo-placeholder { font-size: 9px; color: #666; }
 
         .ac-header-text { flex: 1; text-align: center; }
@@ -253,40 +256,14 @@ export default function ExamEditorPage() {
         }
         .ac-addr { font-size: 10px; margin: 0; }
         .ac-aff { font-size: 9px; margin: 1px 0 0; color: #333; }
-        .ac-exam-title {
-          font-size: 12px;
-          font-weight: 700;
-          margin-top: 4px;
-          color: #b00000;
-        }
-        .ac-card-label {
-          font-size: 11px;
-          font-weight: 700;
-          margin-top: 2px;
-          text-decoration: underline;
-        }
+        .ac-exam-title { font-size: 12px; font-weight: 700; margin-top: 4px; color: #b00000; }
+        .ac-card-label { font-size: 11px; font-weight: 700; margin-top: 2px; text-decoration: underline; }
 
-        .ac-body {
-          display: flex;
-          gap: 6px;
-          margin-bottom: 5px;
-        }
+        .ac-body { display: flex; gap: 6px; margin-bottom: 5px; }
         .ac-details { flex: 1; }
-        .ac-details-table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 10.5px;
-        }
-        .ac-details-table td {
-          border: 1px solid #000;
-          padding: 2px 4px;
-          vertical-align: middle;
-        }
-        .ac-details-table .lbl {
-          background: #f1f3f5;
-          font-weight: 600;
-          width: 24%;
-        }
+        .ac-details-table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+        .ac-details-table td { border: 1px solid #000; padding: 2px 4px; vertical-align: middle; }
+        .ac-details-table .lbl { background: #f1f3f5; font-weight: 600; width: 24%; }
         .ac-details-table .val { width: 26%; }
         .ac-details-table .bold { font-weight: 700; }
 
@@ -307,11 +284,7 @@ export default function ExamEditorPage() {
         .ac-photo img { width: 100%; height: 100%; object-fit: cover; }
 
         .ac-schedule { margin-bottom: 5px; }
-        .ac-schedule-table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 10.5px;
-        }
+        .ac-schedule-table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
         .ac-schedule-table th {
           background: #f1f3f5;
           border: 1px solid #000;
@@ -325,29 +298,14 @@ export default function ExamEditorPage() {
         }
         .ac-schedule-table td.left { text-align: left; }
 
-        .ac-instructions {
-          border: 1px solid #000;
-          padding: 3px 6px;
-          margin-bottom: 5px;
-          font-size: 9.5px;
-        }
+        .ac-instructions { border: 1px solid #000; padding: 3px 6px; margin-bottom: 5px; font-size: 9.5px; }
         .ac-ins-title { font-weight: 700; margin-bottom: 2px; }
         .ac-instructions ol { margin: 0; padding-left: 16px; }
         .ac-instructions li { line-height: 1.3; }
 
-        .ac-signatures {
-          display: flex;
-          justify-content: space-between;
-          gap: 12px;
-          margin-top: 6px;
-          margin-bottom: 4px;
-        }
+        .ac-signatures { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; margin-bottom: 4px; }
         .ac-sign { text-align: center; flex: 1; }
-        .ac-sign-line {
-          border-bottom: 1px solid #000;
-          height: 22px;
-          margin-bottom: 2px;
-        }
+        .ac-sign-line { border-bottom: 1px solid #000; height: 22px; margin-bottom: 2px; }
         .ac-sign-label { font-size: 9.5px; }
 
         .ac-footnote {
@@ -358,19 +316,12 @@ export default function ExamEditorPage() {
           color: #333;
         }
 
-        /* ===== PRINT ===== */
         @media print {
           @page { size: A4 portrait; margin: 6mm; }
-          html, body {
-            background: #fff !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
+          html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
           nav, header, footer, aside,
           [class*="Navbar"], [class*="Footer"], [class*="Marquee"],
-          [class*="WhatsApp"], [class*="MobileBottomNav"] {
-            display: none !important;
-          }
+          [class*="WhatsApp"], [class*="MobileBottomNav"] { display: none !important; }
           .no-print { display: none !important; }
           .print-hide { display: none !important; }
           .admit-card {
@@ -416,6 +367,72 @@ export default function ExamEditorPage() {
           </div>
         </div>
 
+        {/* ============ PUBLIC FORM TOGGLE ============ */}
+        <div className="mb-4 rounded-lg border border-indigo-200 bg-indigo-50 p-4">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-bold text-indigo-900">🌐 Public Student Form</p>
+              <p className="text-[11px] text-indigo-700">
+                छात्र खुद class चुनकर, नाम + जन्म तिथि से लॉगिन करके विवरण + फोटो भरेंगे
+              </p>
+            </div>
+            <label className="flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={!!exam.public_form_open}
+                onChange={(e) => updateExam('public_form_open', e.target.checked)}
+              />
+              <span className="text-sm font-semibold text-indigo-900">
+                {exam.public_form_open ? 'खुला है' : 'बंद है'}
+              </span>
+            </label>
+          </div>
+
+          {exam.public_form_open && (
+            <>
+              <div className="mb-2">
+                <label className="mb-1 block text-[11px] font-semibold text-indigo-800">
+                  अंतिम तिथि (optional)
+                </label>
+                <input
+                  type="date"
+                  value={exam.form_deadline ? String(exam.form_deadline).slice(0, 10) : ''}
+                  onChange={(e) => updateExam('form_deadline', e.target.value)}
+                  className="rounded border border-indigo-300 px-2 py-1 text-xs"
+                />
+              </div>
+
+              <div className="rounded bg-white p-3">
+                <p className="mb-1 text-[11px] font-semibold text-indigo-800">छात्रों को यह link भेजें:</p>
+                <div className="mb-2 break-all rounded border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] text-slate-700">
+                  {publicLink}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(publicLink);
+                      setToast('✓ Link copy हो गया');
+                      setTimeout(() => setToast(''), 2000);
+                    }}
+                    className="rounded bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
+                  >
+                    📋 Copy Link
+                  </button>
+                  <button
+                    onClick={() => {
+                      const msg = `${exam.name} (${exam.class_name}) का फॉर्म भरें:\n${publicLink}\n\nकक्षा चुनकर, नाम व जन्म तिथि से लॉगिन करें।`;
+                      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+                    }}
+                    className="rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+                  >
+                    📱 WhatsApp Share
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
         {/* TABS */}
         <div className="mb-4 flex flex-wrap gap-1 rounded-lg bg-white p-1 shadow-sm">
           {[
@@ -445,7 +462,7 @@ export default function ExamEditorPage() {
                 className="rounded bg-cyan-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-cyan-700"
               >
                 ➕ विषय जोड़ें
-              </button>
+           </button>
               <button
                 onClick={autoFillPeriods}
                 className="rounded bg-slate-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700"
@@ -557,16 +574,16 @@ export default function ExamEditorPage() {
             {/* Excel import */}
             <div className="mb-3 rounded border border-purple-200 bg-purple-50 p-3">
               <p className="mb-2 text-xs font-semibold text-purple-900">
-                📊 Excel से छात्र import करें (Admit Card के लिए)
+                📊 Excel से छात्र import करें
               </p>
               <button
                 onClick={() => setExcelImportOpen(true)}
                 className="rounded bg-purple-600 px-3 py-2 text-xs font-semibold text-white hover:bg-purple-700"
               >
-                     📊 Excel फ़ाइल चुनें
+                📊 Excel फ़ाइल चुनें
               </button>
               <p className="mt-2 text-[10px] text-purple-700">
-                कॉलम: रोल नं, नाम, पिता का नाम, माता, मोबाइल, कक्षा, जन्म तिथि, लिंग, नामांकन
+                ज़रूरी कॉलम: <b>नाम</b> और <b>जन्म तिथि</b> (DD/MM/YYYY) — बाकी student भरेगा
               </p>
             </div>
 
@@ -600,90 +617,125 @@ export default function ExamEditorPage() {
                       <th className="border px-1 py-2 w-10">#</th>
                       <th className="border px-1 py-2 w-20">फोटो</th>
                       <th className="border px-1 py-2 w-20">Roll</th>
+                      <th className="border px-1 py-2 w-20">SR</th>
                       <th className="border px-1 py-2">नाम</th>
                       <th className="border px-1 py-2">पिता</th>
                       <th className="border px-1 py-2">माता</th>
                       <th className="border px-1 py-2 w-28">मोबाइल</th>
                       <th className="border px-1 py-2 w-24">जन्म तिथि</th>
                       <th className="border px-1 py-2 w-20">लिंग</th>
-                      <th className="border px-1 py-2 w-24">नामांकन</th>
+                      <th className="border px-1 py-2 w-40">विषय</th>
+                      <th className="border px-1 py-2 w-20">Status</th>
                       <th className="border px-1 py-2 w-8"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {students.map((s, i) => (
-                      <tr key={i}>
-                        <td className="border px-1 py-1 text-center">{i + 1}</td>
+                    {students.map((s, i) => {
+                      const subjectList = Array.isArray(s.selected_subjects) ? s.selected_subjects : [];
+                      const isSubmitted = !!s.submitted_at;
+                      return (
+                        <tr key={i}>
+                          <td className="border px-1 py-1 text-center">{i + 1}</td>
 
-                        {/* PHOTO CELL */}
-                        <td className="border px-1 py-1">
-                          <div className="flex flex-col items-center gap-1">
-                            {s.photo_url ? (
-                              <img
-                                src={s.photo_url}
-                                alt=""
-                                className="h-14 w-11 border border-slate-300 object-cover"
-                              />
+                          {/* PHOTO */}
+                          <td className="border px-1 py-1">
+                            <div className="flex flex-col items-center gap-1">
+                              {s.photo_url ? (
+                                <img
+                                  src={s.photo_url}
+                                  alt=""
+                                  className="h-14 w-11 border border-slate-300 object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-14 w-11 items-center justify-center border border-dashed border-slate-300 text-[8px] text-slate-400">
+                                  फोटो
+                                </div>
+                              )}
+                              <label className="cursor-pointer rounded bg-indigo-600 px-1.5 py-0.5 text-[9px] font-semibold text-white hover:bg-indigo-700">
+                                {s.photo_url ? 'बदलें' : 'अपलोड'}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handlePhotoUpload(i, e.target.files?.[0])}
+                                />
+                              </label>
+                              {s.photo_url && (
+                                <button
+                                  type="button"
+                                  onClick={() => updateStudent(i, 'photo_url', '')}
+                                  className="text-[9px] text-red-600 hover:underline"
+                                >
+                                  हटाएँ
+                                </button>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* ROLL (admin generate करेगा) */}
+                          <td className="border px-1 py-1">
+                            <input
+                              value={s.roll_no || ''}
+                              onChange={(e) => updateStudent(i, 'roll_no', e.target.value)}
+                              className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50"
+                            />
+                          </td>
+
+                          {/* SR (student भरेगा) */}
+                          <td className="border px-1 py-1">
+                            <input
+                              value={s.sr_no || ''}
+                              onChange={(e) => updateStudent(i, 'sr_no', e.target.value)}
+                              className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50"
+                            />
+                          </td>
+
+                          <td className="border px-1 py-1">
+                            <input value={s.student_name || ''} onChange={(e) => updateStudent(i, 'student_name', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                          </td>
+                          <td className="border px-1 py-1">
+                            <input value={s.father_name || ''} onChange={(e) => updateStudent(i, 'father_name', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                          </td>
+                          <td className="border px-1 py-1">
+                            <input value={s.mother_name || ''} onChange={(e) => updateStudent(i, 'mother_name', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                          </td>
+                          <td className="border px-1 py-1">
+                            <input value={s.mobile || ''} onChange={(e) => updateStudent(i, 'mobile', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                          </td>
+                          <td className="border px-1 py-1">
+                            <input value={s.dob || ''} placeholder="DD/MM/YYYY" onChange={(e) => updateStudent(i, 'dob', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
+                          </td>
+                          <td className="border px-1 py-1">
+                            <select value={s.gender || ''} onChange={(e) => updateStudent(i, 'gender', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50">
+                              <option value="">—</option>
+                              <option value="पुरुष / Male">पुरुष</option>
+                              <option value="महिला / Female">महिला</option>
+                              <option value="अन्य / Other">अन्य</option>
+                            </select>
+                          </td>
+
+                          {/* SUBJECTS */}
+                          <td className="border px-1 py-1 text-[10px]">
+                            {subjectList.length ? subjectList.join(', ') : <span className="text-slate-400">—</span>}
+                          </td>
+
+                          {/* SUBMITTED STATUS */}
+                          <td className="border px-1 py-1 text-center text-[10px]">
+                            {isSubmitted ? (
+                              <span className="rounded bg-emerald-100 px-1.5 py-0.5 font-semibold text-emerald-700">
+                                ✓ भरा
+                              </span>
                             ) : (
-                              <div className="flex h-14 w-11 items-center justify-center border border-dashed border-slate-300 text-[8px] text-slate-400">
-                                फोटो
-                              </div>
+                              <span className="text-slate-400">—</span>
                             )}
-                            <label className="cursor-pointer rounded bg-indigo-600 px-1.5 py-0.5 text-[9px] font-semibold text-white hover:bg-indigo-700">
-                              {s.photo_url ? 'बदलें' : 'अपलोड'}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => handlePhotoUpload(i, e.target.files?.[0])}
-                              />
-                            </label>
-                            {s.photo_url && (
-                              <button
-                                type="button"
-                                onClick={() => updateStudent(i, 'photo_url', '')}
-                                className="text-[9px] text-red-600 hover:underline"
-                              >
-                                हटाएँ
-                              </button>
-                            )}
-                          </div>
-                        </td>
+                          </td>
 
-                        <td className="border px-1 py-1">
-                          <input value={s.roll_no || ''} onChange={(e) => updateStudent(i, 'roll_no', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
-                        </td>
-                        <td className="border px-1 py-1">
-                          <input value={s.student_name || ''} onChange={(e) => updateStudent(i, 'student_name', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
-                        </td>
-                        <td className="border px-1 py-1">
-                          <input value={s.father_name || ''} onChange={(e) => updateStudent(i, 'father_name', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
-                        </td>
-                        <td className="border px-1 py-1">
-                          <input value={s.mother_name || ''} onChange={(e) => updateStudent(i, 'mother_name', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
-                        </td>
-                        <td className="border px-1 py-1">
-                          <input value={s.mobile || ''} onChange={(e) => updateStudent(i, 'mobile', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
-                        </td>
-                        <td className="border px-1 py-1">
-                          <input value={s.dob || ''} placeholder="DD/MM/YYYY" onChange={(e) => updateStudent(i, 'dob', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
-                        </td>
-                        <td className="border px-1 py-1">
-                          <select value={s.gender || ''} onChange={(e) => updateStudent(i, 'gender', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50">
-                            <option value="">—</option>
-                            <option value="पुरुष / Male">पुरुष</option>
-                            <option value="महिला / Female">महिला</option>
-                            <option value="अन्य / Other">अन्य</option>
-                          </select>
-                        </td>
-                        <td className="border px-1 py-1">
-                          <input value={s.enrollment_no || ''} onChange={(e) => updateStudent(i, 'enrollment_no', e.target.value)} className="w-full rounded border-0 px-1 text-xs focus:bg-blue-50" />
-                        </td>
-                        <td className="border px-1 py-1 text-center">
-                          <button onClick={() => deleteStudent(i)} className="font-bold text-red-600 hover:text-red-800">×</button>
-                        </td>
-                      </tr>
-                    ))}
+                          <td className="border px-1 py-1 text-center">
+                            <button onClick={() => deleteStudent(i)} className="font-bold text-red-600 hover:text-red-800">×</button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
