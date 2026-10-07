@@ -38,6 +38,7 @@ const sidebarSections = [
       { href: '/admin/video-lectures', label: 'Video Lectures', icon: PlayCircleIcon },
       { href: '/admin/attendance/report', label: 'Attendance Report', icon: DocumentTextIcon },
       { href: '/admin/attendance/monthly', label: 'Monthly Report', icon: DocumentTextIcon },
+      { href: '/admin/exams', label: 'परीक्षा / Admit Card', icon: '📝' },
     ],
   },
   {
