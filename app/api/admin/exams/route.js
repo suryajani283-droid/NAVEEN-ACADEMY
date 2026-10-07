@@ -13,7 +13,9 @@ export async function GET() {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { name, class_name, session = '2025-26', exam_type = 'Half Yearly', instructions = '' } = body;
+   const { name, class_name, session, exam_type, instructions,
+        public_form_open, form_deadline,
+        subjects = [], students = [] } = body;
     if (!name || !class_name) {
       return NextResponse.json({ error: 'name and class_name required' }, { status: 400 });
     }
