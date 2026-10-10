@@ -12,6 +12,7 @@ export default function FeeDepositModal({
   className,
   session,
   onPaidChange,
+  onStudentChange,
 }) {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,11 +21,28 @@ export default function FeeDepositModal({
   const [error, setError] = useState('');
   const [toast, setToast] = useState('');
 
+  /* Editable student details */
+  const [details, setDetails] = useState({
+    father_name: '',
+    mother_name: '',
+    sr_no: '',
+    dob: '',
+  });
+  const [savingDetails, setSavingDetails] = useState(false);
+  const [detailsToast, setDetailsToast] = useState('');
+
   useEffect(() => {
     if (!open || !student) return;
     setForm({ amount: '', date: todayISO(), note: '' });
     setError('');
     setToast('');
+    setDetails({
+      father_name: student.father_name || '',
+      mother_name: student.mother_name || '',
+      sr_no: student.sr_no || '',
+      dob: student.dob || '',
+    });
+    setDetailsToast('');
     loadPayments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, student?.id]);
@@ -48,6 +66,39 @@ export default function FeeDepositModal({
   const totalPaid = payments.reduce((s, p) => s + Number(p.amount || 0), 0);
   const due = totalFee - totalPaid;
 
+  /* ---------- Save student details ---------- */
+  async function saveDetails() {
+    if (!student) return;
+    setSavingDetails(true);
+    setDetailsToast('');
+    try {
+      const res = await fetch(
+        `/api/admin/fee-performa/student/${student.id}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(details),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save fail');
+
+      setDetailsToast('✓ जानकारी सेव हो गई');
+      setTimeout(() => setDetailsToast(''), 2500);
+
+      /* Update parent state so table shows new values */
+      if (onStudentChange && data.student) {
+        onStudentChange(student.id, data.student);
+      }
+    } catch (e) {
+      setDetailsToast('✗ ' + e.message);
+      setTimeout(() => setDetailsToast(''), 3000);
+    } finally {
+      setSavingDetails(false);
+    }
+  }
+
+  /* ---------- Add payment ---------- */
   async function handleAdd() {
     const amount = Number(form.amount);
     if (!amount || amount <= 0) {
@@ -126,41 +177,109 @@ export default function FeeDepositModal({
           </button>
         </div>
 
-        {/* Student Details */}
-        <div className="mb-3 rounded border border-slate-200 bg-slate-50 p-3">
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div>
-              <span className="text-slate-500">नाम: </span>
-              <b>{student.name || '—'}</b>
+        {/* ============ STUDENT DETAILS — editable ============ */}
+        <div className="mb-3 rounded border border-indigo-200 bg-indigo-50 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-bold text-indigo-900">
+              👤 छात्र विवरण (भरें / सुधारें)
+            </p>
+            {detailsToast && (
+              <span className="text-[11px] font-semibold text-emerald-700">
+                {detailsToast}
+              </span>
+            )}
+          </div>
+
+          <div className="mb-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {/* Name — read only */}
+            <div className="sm:col-span-2">
+              <label className="mb-0.5 block text-[10px] font-semibold text-slate-600">
+                छात्र का नाम
+              </label>
+              <input
+                value={student.name || ''}
+                readOnly
+                className="w-full cursor-not-allowed rounded border border-slate-200 bg-slate-100 px-2 py-1.5 text-sm"
+              />
             </div>
+
             <div>
-              <span className="text-slate-500">कक्षा: </span>
-              <b>{student.class_section || className || '—'}</b>
+              <label className="mb-0.5 block text-[10px] font-semibold text-slate-600">
+                पिता का नाम
+              </label>
+              <input
+                value={details.father_name}
+                onChange={(e) =>
+                  setDetails({ ...details, father_name: e.target.value })
+                }
+                placeholder="पिता का नाम"
+                className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+              />
             </div>
+
             <div>
-              <span className="text-slate-500">पिता: </span>
-              <b>{student.father_name || '—'}</b>
+              <label className="mb-0.5 block text-[10px] font-semibold text-slate-600">
+                माता का नाम
+              </label>
+              <input
+                value={details.mother_name}
+                onChange={(e) =>
+                  setDetails({ ...details, mother_name: e.target.value })
+                }
+                placeholder="माता का नाम"
+                className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+              />
             </div>
+
             <div>
-              <span className="text-slate-500">माता: </span>
-              <b>{student.mother_name || '—'}</b>
+              <label className="mb-0.5 block text-[10px] font-semibold text-slate-600">
+                SR नंबर
+              </label>
+              <input
+                value={details.sr_no}
+                onChange={(e) =>
+                  setDetails({ ...details, sr_no: e.target.value })
+                }
+                placeholder="जैसे 12345"
+                className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+              />
             </div>
+
             <div>
-              <span className="text-slate-500">SR नंबर: </span>
-              <b>{student.sr_no || '—'}</b>
+              <label className="mb-0.5 block text-[10px] font-semibold text-slate-600">
+                जन्म तिथि
+              </label>
+              <input
+                type="date"
+                value={
+                  details.dob && /^\d{4}-\d{2}-\d{2}$/.test(details.dob)
+                    ? details.dob
+                    : ''
+                }
+                onChange={(e) => setDetails({ ...details, dob: e.target.value })}
+                className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+              />
             </div>
-            <div>
-              <span className="text-slate-500">जन्म तिथि: </span>
-              <b>{student.dob || '—'}</b>
-            </div>
-            <div className="col-span-2">
-              <span className="text-slate-500">मोबाइल: </span>
-              <b>{student.mobile || '—'}</b>
+
+            <div className="sm:col-span-2 text-[11px] text-slate-600">
+              <span className="font-semibold">कक्षा:</span>{' '}
+              {student.class_section || className || '—'}
+              {' • '}
+              <span className="font-semibold">मोबाइल:</span>{' '}
+              {student.mobile || '—'}
             </div>
           </div>
+
+          <button
+            onClick={saveDetails}
+            disabled={savingDetails}
+            className="rounded bg-indigo-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {savingDetails ? 'सेव हो रहा है...' : '💾 जानकारी सेव करें'}
+          </button>
         </div>
 
-        {/* Fee Summary */}
+        {/* ============ FEE SUMMARY ============ */}
         <div className="mb-3 grid grid-cols-3 gap-2">
           <div className="rounded border border-slate-200 bg-white p-2 text-center">
             <div className="text-[10px] uppercase text-slate-500">कुल फीस</div>
@@ -198,9 +317,9 @@ export default function FeeDepositModal({
           </div>
         </div>
 
-        {/* Add Payment Form */}
-        <div className="mb-3 rounded border border-indigo-200 bg-indigo-50 p-3">
-          <p className="mb-2 text-xs font-bold text-indigo-900">
+        {/* ============ ADD PAYMENT ============ */}
+        <div className="mb-3 rounded border border-emerald-200 bg-emerald-50 p-3">
+          <p className="mb-2 text-xs font-bold text-emerald-900">
             ➕ नई फीस जमा करें
           </p>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -254,7 +373,7 @@ export default function FeeDepositModal({
           </div>
         </div>
 
-        {/* Payment History */}
+        {/* ============ HISTORY ============ */}
         <div>
           <p className="mb-2 text-xs font-bold text-slate-700">
             📜 जमा इतिहास ({payments.length})
@@ -281,7 +400,9 @@ export default function FeeDepositModal({
                 <tbody>
                   {payments.map((p) => (
                     <tr key={p.id}>
-                      <td className="border-b px-2 py-1.5">{p.payment_date || '—'}</td>
+                      <td className="border-b px-2 py-1.5">
+                        {p.payment_date || '—'}
+                      </td>
                       <td className="border-b px-2 py-1.5 text-right font-semibold text-emerald-700">
                         {Number(p.amount).toLocaleString('en-IN')}
                       </td>
