@@ -120,14 +120,22 @@ export default function AdminFeePerformaPage() {
     setFeeModalOpen(true);
   }
 
- function handleStudentChange(studentId, updatedStudent) {
-  setRows((prev) =>
-    prev.map((s) => (s.id === studentId ? { ...s, ...updatedStudent } : s))
-  );
-  setSelectedStudent((prev) =>
-    prev && prev.id === studentId ? { ...prev, ...updatedStudent } : prev
-  );
-}
+  /* Payment add/delete होने पर paid field update करें */
+  function handlePaidChange(studentId, newPaid) {
+    setRows((prev) =>
+      prev.map((s) => (s.id === studentId ? { ...s, paid: newPaid } : s))
+    );
+  }
+
+  /* Modal में student details (father, mother, sr_no, dob) save होने पर */
+  function handleStudentChange(studentId, updatedStudent) {
+    setRows((prev) =>
+      prev.map((s) => (s.id === studentId ? { ...s, ...updatedStudent } : s))
+    );
+    setSelectedStudent((prev) =>
+      prev && prev.id === studentId ? { ...prev, ...updatedStudent } : prev
+    );
+  }
 
   async function save() {
     if (!activeId) return;
@@ -467,18 +475,18 @@ export default function AdminFeePerformaPage() {
       />
 
       {/* ============ FEE DEPOSIT MODAL ============ */}
-   <FeeDepositModal
-  open={feeModalOpen}
-  onClose={() => {
-    setFeeModalOpen(false);
-    setSelectedStudent(null);
-  }}
-  student={selectedStudent}
-  className={className}
-  session={session}
-  onPaidChange={handlePaidChange}
-  onStudentChange={handleStudentChange}
-/>
+      <FeeDepositModal
+        open={feeModalOpen}
+        onClose={() => {
+          setFeeModalOpen(false);
+          setSelectedStudent(null);
+        }}
+        student={selectedStudent}
+        className={className}
+        session={session}
+        onPaidChange={handlePaidChange}
+        onStudentChange={handleStudentChange}
+      />
     </div>
   );
 }
