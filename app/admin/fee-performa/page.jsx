@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { rowTotal, rowDue } from '@/lib/feePerforma';
 import FeeImportModal from '@/components/FeeImportModal';
+import FeeDepositModal from '@/components/FeeDepositModal';
 
 const blankRow = (sno) => ({
   sno,
@@ -15,6 +16,11 @@ const blankRow = (sno) => ({
   vehicle_fee: 0,
   paid: 0,
   phone_date: '',
+  father_name: '',
+  mother_name: '',
+  class_section: '',
+  sr_no: '',
+  dob: '',
 });
 
 export default function AdminFeePerformaPage() {
@@ -27,6 +33,8 @@ export default function AdminFeePerformaPage() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState('');
   const [importOpen, setImportOpen] = useState(false);
+  const [feeModalOpen, setFeeModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   /* Load list of class sheets on mount */
   useEffect(() => {
@@ -101,6 +109,23 @@ export default function AdminFeePerformaPage() {
     setTimeout(() => setToast(''), 3000);
   }
 
+  /* --- Fee deposit modal --- */
+  function openFeeModal(row) {
+    if (!row.id) {
+      setToast('⚠️ पहले डेटा सेव करें, फिर फीस जमा करें');
+      setTimeout(() => setToast(''), 3000);
+      return;
+    }
+    setSelectedStudent({ ...row, performa_id: activeId });
+    setFeeModalOpen(true);
+  }
+
+  function handlePaidChange(studentId, newPaid) {
+    setRows((prev) =>
+      prev.map((s) => (s.id === studentId ? { ...s, paid: newPaid } : s))
+    );
+  }
+
   async function save() {
     if (!activeId) return;
     setSaving(true);
@@ -110,7 +135,15 @@ export default function AdminFeePerformaPage() {
       body: JSON.stringify({ class_name: className, session, students: rows }),
     });
     setSaving(false);
-    setToast(res.ok ? '✓ सुरक्षित हो गया!' : '✗ सेव नहीं हुआ');
+    if (res.ok) {
+      setToast('✓ सुरक्षित हो गया!');
+      /* Reload to get stable IDs for new rows */
+      const fresh = await fetch(`/api/admin/fee-performa/${activeId}`);
+      const data = await fresh.json();
+      if (data.students) setRows(data.students);
+    } else {
+      setToast('✗ सेव नहीं हुआ');
+    }
     setTimeout(() => setToast(''), 2000);
   }
 
@@ -152,7 +185,6 @@ export default function AdminFeePerformaPage() {
             max-width: 100% !important;
           }
 
-          /* scroll wrapper print में content clip करता है — visible करें */
           .print-area .overflow-x-auto { overflow: visible !important; }
 
           .fee-table {
@@ -181,7 +213,6 @@ export default function AdminFeePerformaPage() {
           .print-area h1 { font-size: 14px !important; margin: 0 0 2px 0 !important; }
           .print-area h2 { font-size: 10.5px !important; margin: 0 0 5px 0 !important; }
 
-          /* Rows बीच में न कटें */
           .fee-table tr { page-break-inside: avoid !important; }
           .fee-table thead { display: table-header-group !important; }
         }
@@ -316,7 +347,7 @@ export default function AdminFeePerformaPage() {
                     पेंसिल से भरें
                   </th>
                   <th rowSpan={2} style={{ width: '9%' }}>दूरभाष दिनांक</th>
-                  <th rowSpan={2} className="no-print" style={{ width: '2%' }}>#</th>
+                  <th rowSpan={2} className="no-print" style={{ width: '5%' }}>#</th>
                 </tr>
                 <tr>
                   <th style={{ width: '7%' }}>कुल जमा</th>
@@ -399,13 +430,22 @@ export default function AdminFeePerformaPage() {
                         />
                       </td>
                       <td className="no-print">
-                        <button
-                          onClick={() => deleteRow(idx)}
-                          className="font-bold text-red-600 hover:text-red-800"
-                          title="हटाएं"
-                        >
-                          ×
-                        </button>
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => openFeeModal(r)}
+                            className="rounded bg-indigo-600 px-1.5 py-0.5 text-xs font-bold text-white hover:bg-indigo-700"
+                            title="फीस जमा करें"
+                          >
+                            💰
+                          </button>
+                          <button
+                            onClick={() => deleteRow(idx)}
+                            className="font-bold text-red-600 hover:text-red-800"
+                            title="हटाएं"
+                          >
+                            ×
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -421,6 +461,19 @@ export default function AdminFeePerformaPage() {
         open={importOpen}
         onClose={() => setImportOpen(false)}
         onImport={handleImported}
+      />
+
+      {/* ============ FEE DEPOSIT MODAL ============ */}
+      <FeeDepositModal
+        open={feeModalOpen}
+        onClose={() => {
+          setFeeModalOpen(false);
+          setSelectedStudent(null);
+        }}
+        student={selectedStudent}
+        className={className}
+        session={session}
+        onPaidChange={handlePaidChange}
       />
     </div>
   );
