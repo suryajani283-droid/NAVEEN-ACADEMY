@@ -1,0 +1,94 @@
+import { NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
+
+/* GET — एक student की payments की list */
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  const studentId = searchParams.get('student_id');
+  if (!studentId) {
+    return NextResponse.json({ error: 'student_id required' }, { status: 400 });
+  }
+  const { data, error } = await supabaseAdmin
+    .from('fee_payments')
+    .select('*')
+    .eq('student_id', studentId)
+    .order('payment_date', { ascending: false })
+    .order('created_at', { ascending: false });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
+}
+
+/* POST — नई payment जोड़ें */
+export async function POST(req) {
+  try {
+    const body = await req.json();
+    const { student_id, performa_id, amount, payment_date, note = '' } = body;
+
+    if (!student_id || !performa_id) {
+      return NextResponse.json({ error: 'student_id and performa_id required' }, { status: 400 });
+    }
+    const amt = Number(amount);
+    if (!amt || amt <= 0) {
+      return NextResponse.json({ error: 'राशि सही भरें' }, { status: 400 });
+    }
+    if (!payment_date) {
+      return NextResponse.json({ error: 'दिनांक ज़रूरी है' }, { status: 400 });
+    }
+
+    /* अगर यह पहली payment है और student का पहले से paid > 0 है,
+       तो opening balance को एक entry के रूप में save करें */
+    const { count } = await supabaseAdmin
+      .from('fee_payments')
+      .select('id', { count: 'exact', head: true })
+      .eq('student_id', student_id);
+
+    if ((count || 0) === 0) {
+      const { data: student } = await supabaseAdmin
+        .from('fee_performa_students')
+        .select('paid')
+        .eq('id', student_id)
+        .single();
+
+      const existingPaid = Number(student?.paid || 0);
+      if (existingPaid > 0) {
+        await supabaseAdmin.from('fee_payments').insert({
+          student_id,
+          performa_id,
+          amount: existingPaid,
+          payment_date: new Date().toISOString().slice(0, 10),
+          note: 'पिछली जमा राशि',
+        });
+      }
+    }
+
+    /* नई payment insert */
+    const { error: e1 } = await supabaseAdmin.from('fee_payments').insert({
+      student_id,
+      performa_id,
+      amount: amt,
+      payment_date,
+      note,
+    });
+    if (e1) throw e1;
+
+    /* Total recompute और fee_performa_students.paid update */
+    const { data: allPayments } = await supabaseAdmin
+      .from('fee_payments')
+      .select('amount')
+      .eq('student_id', student_id);
+
+    const totalPaid = (allPayments || []).reduce(
+      (sum, p) => sum + Number(p.amount || 0),
+      0
+    );
+
+    await supabaseAdmin
+      .from('fee_performa_students')
+      .update({ paid: totalPaid })
+      .eq('id', student_id);
+
+    return NextResponse.json({ ok: true, paid: totalPaid });
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
