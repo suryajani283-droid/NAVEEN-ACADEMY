@@ -464,17 +464,18 @@ export default function AdminFeePerformaPage() {
       />
 
       {/* ============ FEE DEPOSIT MODAL ============ */}
-      <FeeDepositModal
-        open={feeModalOpen}
-        onClose={() => {
-          setFeeModalOpen(false);
-          setSelectedStudent(null);
-        }}
-        student={selectedStudent}
-        className={className}
-        session={session}
-        onPaidChange={handlePaidChange}
-      />
+   <FeeDepositModal
+  open={feeModalOpen}
+  onClose={() => {
+    setFeeModalOpen(false);
+    setSelectedStudent(null);
+  }}
+  student={selectedStudent}
+  className={className}
+  session={session}
+  onPaidChange={handlePaidChange}
+  onStudentChange={handleStudentChange}
+/>
     </div>
   );
 }
