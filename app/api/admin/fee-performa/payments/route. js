@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
-/* GET — एक student की payments की list */
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const studentId = searchParams.get('student_id');
@@ -18,14 +17,16 @@ export async function GET(req) {
   return NextResponse.json(data);
 }
 
-/* POST — नई payment जोड़ें */
 export async function POST(req) {
   try {
     const body = await req.json();
     const { student_id, performa_id, amount, payment_date, note = '' } = body;
 
     if (!student_id || !performa_id) {
-      return NextResponse.json({ error: 'student_id and performa_id required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'student_id and performa_id required' },
+        { status: 400 }
+      );
     }
     const amt = Number(amount);
     if (!amt || amt <= 0) {
@@ -35,8 +36,6 @@ export async function POST(req) {
       return NextResponse.json({ error: 'दिनांक ज़रूरी है' }, { status: 400 });
     }
 
-    /* अगर यह पहली payment है और student का पहले से paid > 0 है,
-       तो opening balance को एक entry के रूप में save करें */
     const { count } = await supabaseAdmin
       .from('fee_payments')
       .select('id', { count: 'exact', head: true })
@@ -61,7 +60,6 @@ export async function POST(req) {
       }
     }
 
-    /* नई payment insert */
     const { error: e1 } = await supabaseAdmin.from('fee_payments').insert({
       student_id,
       performa_id,
@@ -71,7 +69,6 @@ export async function POST(req) {
     });
     if (e1) throw e1;
 
-    /* Total recompute और fee_performa_students.paid update */
     const { data: allPayments } = await supabaseAdmin
       .from('fee_payments')
       .select('amount')
