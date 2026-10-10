@@ -120,11 +120,14 @@ export default function AdminFeePerformaPage() {
     setFeeModalOpen(true);
   }
 
-  function handlePaidChange(studentId, newPaid) {
-    setRows((prev) =>
-      prev.map((s) => (s.id === studentId ? { ...s, paid: newPaid } : s))
-    );
-  }
+ function handleStudentChange(studentId, updatedStudent) {
+  setRows((prev) =>
+    prev.map((s) => (s.id === studentId ? { ...s, ...updatedStudent } : s))
+  );
+  setSelectedStudent((prev) =>
+    prev && prev.id === studentId ? { ...prev, ...updatedStudent } : prev
+  );
+}
 
   async function save() {
     if (!activeId) return;
