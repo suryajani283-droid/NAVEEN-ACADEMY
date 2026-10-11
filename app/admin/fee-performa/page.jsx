@@ -6,21 +6,10 @@ import FeeImportModal from '@/components/FeeImportModal';
 import FeeDepositModal from '@/components/FeeDepositModal';
 
 const blankRow = (sno) => ({
-  sno,
-  name: '',
-  mobile: '',
-  route: '',
-  previous_due: 0,
-  admission_fee: 0,
-  tuition_fee: 0,
-  vehicle_fee: 0,
-  paid: 0,
-  phone_date: '',
-  father_name: '',
-  mother_name: '',
-  class_section: '',
-  sr_no: '',
-  dob: '',
+  sno, name: '', mobile: '', route: '',
+  previous_due: 0, admission_fee: 0, tuition_fee: 0, vehicle_fee: 0,
+  paid: 0, phone_date: '',
+  father_name: '', mother_name: '', class_section: '', sr_no: '', dob: '',
 });
 
 export default function AdminFeePerformaPage() {
@@ -36,7 +25,6 @@ export default function AdminFeePerformaPage() {
   const [feeModalOpen, setFeeModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  /* Load list of class sheets on mount */
   useEffect(() => {
     (async () => {
       const res = await fetch('/api/admin/fee-performa');
@@ -98,18 +86,15 @@ export default function AdminFeePerformaPage() {
     );
   }
 
-  /* --- Excel import handler --- */
   function handleImported(imported, mode) {
     setRows((prev) => {
       const base = mode === 'replace' ? [] : prev;
-      const merged = [...base, ...imported];
-      return merged.map((r, i) => ({ ...r, sno: i + 1 }));
+      return [...base, ...imported].map((r, i) => ({ ...r, sno: i + 1 }));
     });
     setToast(`✓ ${imported.length} छात्र जोड़े गए — सेव करें`);
     setTimeout(() => setToast(''), 3000);
   }
 
-  /* --- Fee deposit modal --- */
   function openFeeModal(row) {
     if (!row.id) {
       setToast('⚠️ पहले डेटा सेव करें, फिर फीस जमा करें');
@@ -120,14 +105,12 @@ export default function AdminFeePerformaPage() {
     setFeeModalOpen(true);
   }
 
-  /* Payment add/delete होने पर paid field update करें */
   function handlePaidChange(studentId, newPaid) {
     setRows((prev) =>
       prev.map((s) => (s.id === studentId ? { ...s, paid: newPaid } : s))
     );
   }
 
-  /* Modal में student details (father, mother, sr_no, dob) save होने पर */
   function handleStudentChange(studentId, updatedStudent) {
     setRows((prev) =>
       prev.map((s) => (s.id === studentId ? { ...s, ...updatedStudent } : s))
@@ -148,7 +131,6 @@ export default function AdminFeePerformaPage() {
     setSaving(false);
     if (res.ok) {
       setToast('✓ सुरक्षित हो गया!');
-      /* Reload to get stable IDs for new rows */
       const fresh = await fetch(`/api/admin/fee-performa/${activeId}`);
       const data = await fresh.json();
       if (data.students) setRows(data.students);
@@ -161,28 +143,62 @@ export default function AdminFeePerformaPage() {
   return (
     <div className="min-h-screen bg-slate-100 p-4 md:p-6">
       <style jsx global>{`
-        .fee-table { width: 100%; border-collapse: collapse; font-size: 12px; color: #000; table-layout: fixed; }
-        .fee-table th, .fee-table td {
-          border: 1px solid #000; padding: 4px 6px; text-align: center; vertical-align: middle;
-          word-break: break-word; overflow-wrap: break-word;
+        .fee-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 12px;
+          color: #000;
+          table-layout: fixed;
+        }
+        .fee-table th,
+        .fee-table td {
+          border: 1px solid #000;
+          padding: 4px 6px;
+          text-align: center;
+          vertical-align: middle;
+          word-break: break-word;
+          overflow-wrap: break-word;
         }
         .fee-table th { background: #f8f9fa; font-weight: 700; }
         .fee-table input {
-          width: 100%; border: none; outline: none; background: transparent;
-          font-size: 12px; text-align: center; padding: 0;
+          width: 100%;
+          border: none;
+          outline: none;
+          background: transparent;
+          font-size: 12px;
+          text-align: center;
+          padding: 0;
         }
         .fee-table input.text-left { text-align: left; }
         .fee-table input:focus { background: #e8f0fe; }
         .bg-total { background: #f1f3f5; font-weight: bold; }
         .bg-due { background: #fff0f0; color: #b00000; font-weight: bold; }
 
+        .print-header { display: none; }
+
         @media print {
-          @page { size: A4 landscape; margin: 6mm; }
+          @page { size: A4 landscape; margin: 8mm 6mm; }
 
           html, body {
             background: #fff !important;
             margin: 0 !important;
             padding: 0 !important;
+          }
+
+          nav, header, footer, aside,
+          [class*="Navbar"], [class*="navbar"],
+          [class*="Footer"], [class*="footer"],
+          [class*="Marquee"], [class*="marquee"],
+          [class*="Admission"], [class*="admission"],
+          [class*="WhatsApp"], [class*="whatsapp"],
+          [class*="MobileBottomNav"], [class*="mobile-bottom"],
+          [class*="PushSubscribe"], [class*="ScrollToTop"],
+          [class*="sidebar"], [class*="Sidebar"],
+          [class*="admin-"], [class*="Admin-"] {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            overflow: hidden !important;
           }
 
           .no-print { display: none !important; }
@@ -198,20 +214,57 @@ export default function AdminFeePerformaPage() {
 
           .print-area .overflow-x-auto { overflow: visible !important; }
 
+          .print-header {
+            display: flex !important;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+          }
+          .print-header .ph-logo {
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
+            object-fit: contain;
+          }
+          .print-header .ph-text {
+            flex: 1;
+            text-align: center;
+            color: #000;
+          }
+          .print-header .ph-text h1 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 2px;
+            line-height: 1.15;
+          }
+          .print-header .ph-text p {
+            font-size: 10px;
+            margin: 1px 0 0;
+          }
+          .print-header .ph-text .ph-exam {
+            font-size: 12px;
+            font-weight: 700;
+            color: #b00000;
+            margin-top: 4px;
+          }
+
+          .print-area .screen-title { display: none !important; }
+
           .fee-table {
             width: 100% !important;
             table-layout: fixed !important;
             font-size: 9px !important;
           }
-
-          .fee-table th, .fee-table td {
-            padding: 1.5px 2px !important;
+          .fee-table th,
+          .fee-table td {
+            padding: 2px 3px !important;
             border: 1px solid #000 !important;
             font-size: 9px !important;
             line-height: 1.15 !important;
             word-break: break-word;
           }
-
           .fee-table input {
             border: none !important;
             background: transparent !important;
@@ -221,21 +274,21 @@ export default function AdminFeePerformaPage() {
             width: 100% !important;
           }
 
-          .print-area h1 { font-size: 14px !important; margin: 0 0 2px 0 !important; }
-          .print-area h2 { font-size: 10.5px !important; margin: 0 0 5px 0 !important; }
-
-          .fee-table tr { page-break-inside: avoid !important; }
+          .fee-table tr {
+            page-break-inside: avoid !important;
+            page-break-after: auto !important;
+          }
           .fee-table thead { display: table-header-group !important; }
+
+          img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
       `}</style>
 
-      {/* ============ ACTION BAR ============ */}
+      {/* ACTION BAR */}
       <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-300 bg-slate-200 px-4 py-3">
         <div className="flex items-center gap-3">
           <strong className="text-slate-800">फीस अपडेशन प्रपत्र</strong>
-          {toast && (
-            <span className="text-sm font-semibold text-green-700">{toast}</span>
-          )}
+          {toast && <span className="text-sm font-semibold text-green-700">{toast}</span>}
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -267,7 +320,7 @@ export default function AdminFeePerformaPage() {
         </div>
       </div>
 
-      {/* ============ CLASS SELECTOR ============ */}
+      {/* CLASS SELECTOR */}
       <div className="no-print mb-5 rounded-lg border border-slate-300 bg-white p-4">
         <div className="mb-3 flex flex-wrap items-center gap-3">
           <label className="text-sm font-semibold">कक्षा चुनें:</label>
@@ -283,14 +336,12 @@ export default function AdminFeePerformaPage() {
               </option>
             ))}
           </select>
-
           <button
             onClick={createSheet}
             className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             ➕ नई कक्षा जोड़ें
           </button>
-
           {activeId && (
             <button
               onClick={() => deleteSheet(activeId)}
@@ -300,7 +351,6 @@ export default function AdminFeePerformaPage() {
             </button>
           )}
         </div>
-
         <div className="flex flex-wrap gap-4 text-sm">
           <div>
             <label className="mr-2 font-semibold">कक्षा:</label>
@@ -321,7 +371,7 @@ export default function AdminFeePerformaPage() {
         </div>
       </div>
 
-      {/* ============ SHEET ============ */}
+      {/* SHEET */}
       {loading ? (
         <div className="py-20 text-center text-slate-500">लोड हो रहा है...</div>
       ) : !activeId ? (
@@ -330,12 +380,30 @@ export default function AdminFeePerformaPage() {
         </div>
       ) : (
         <div className="print-area rounded-lg bg-white p-6 shadow">
-          <div className="mb-4 text-center">
+          {/* Print-only header */}
+          <div className="print-header">
+            <img
+              src="/images/logo.png"
+              alt="School Logo"
+              className="ph-logo"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+            <div className="ph-text">
+              <h1>नवीन एकेडेमी उच्च माध्यमिक विद्यालय, चौहटन</h1>
+              <p>चौहटन, बाड़मेर (राजस्थान) • RBSE Affiliation No: 1730XXX</p>
+              <div className="ph-exam">
+                फीस अपडेट प्रपत्र — कक्षा: {className || '________'} • सत्र: {session}
+              </div>
+            </div>
+          </div>
+
+          {/* Screen-only title */}
+          <div className="screen-title mb-4 text-center">
             <h1 className="text-xl font-bold md:text-2xl">
               नवीन एकेडेमी उच्च माध्यमिक विद्यालय, चौहटन
             </h1>
             <h2 className="mt-1 flex flex-wrap items-center justify-center gap-2 text-base font-semibold md:text-lg">
-              <span>फीस अपडेशन प्रपत्र</span>
+              <span>फीस अपडेट प्रपत्र</span>
               <span>कक्षा- <b>{className || '________'}</b></span>
               <span className="text-sm text-slate-600">सत्र: {session}</span>
             </h2>
@@ -372,73 +440,36 @@ export default function AdminFeePerformaPage() {
                   return (
                     <tr key={idx}>
                       <td>
-                        <input
-                          value={r.sno}
-                          onChange={(e) => updateCell(idx, 'sno', e.target.value)}
-                        />
+                        <input value={r.sno} onChange={(e) => updateCell(idx, 'sno', e.target.value)} />
                       </td>
                       <td>
-                        <input
-                          className="text-left"
-                          value={r.name}
-                          onChange={(e) => updateCell(idx, 'name', e.target.value)}
-                        />
+                        <input className="text-left" value={r.name} onChange={(e) => updateCell(idx, 'name', e.target.value)} />
                       </td>
                       <td>
-                        <input
-                          value={r.mobile}
-                          onChange={(e) => updateCell(idx, 'mobile', e.target.value)}
-                        />
+                        <input value={r.mobile} onChange={(e) => updateCell(idx, 'mobile', e.target.value)} />
                       </td>
                       <td>
-                        <input
-                          value={r.route}
-                          onChange={(e) => updateCell(idx, 'route', e.target.value)}
-                        />
+                        <input value={r.route} onChange={(e) => updateCell(idx, 'route', e.target.value)} />
                       </td>
                       <td>
-                        <input
-                          type="number"
-                          value={r.previous_due}
-                          onChange={(e) => updateCell(idx, 'previous_due', e.target.value)}
-                        />
+                        <input type="number" value={r.previous_due} onChange={(e) => updateCell(idx, 'previous_due', e.target.value)} />
                       </td>
                       <td>
-                        <input
-                          type="number"
-                          value={r.admission_fee}
-                          onChange={(e) => updateCell(idx, 'admission_fee', e.target.value)}
-                        />
+                        <input type="number" value={r.admission_fee} onChange={(e) => updateCell(idx, 'admission_fee', e.target.value)} />
                       </td>
                       <td>
-                        <input
-                          type="number"
-                          value={r.tuition_fee}
-                          onChange={(e) => updateCell(idx, 'tuition_fee', e.target.value)}
-                        />
+                        <input type="number" value={r.tuition_fee} onChange={(e) => updateCell(idx, 'tuition_fee', e.target.value)} />
                       </td>
                       <td>
-                        <input
-                          type="number"
-                          value={r.vehicle_fee}
-                          onChange={(e) => updateCell(idx, 'vehicle_fee', e.target.value)}
-                        />
+                        <input type="number" value={r.vehicle_fee} onChange={(e) => updateCell(idx, 'vehicle_fee', e.target.value)} />
                       </td>
                       <td className="bg-total">{total}</td>
                       <td>
-                        <input
-                          type="number"
-                          value={r.paid}
-                          onChange={(e) => updateCell(idx, 'paid', e.target.value)}
-                        />
+                        <input type="number" value={r.paid} onChange={(e) => updateCell(idx, 'paid', e.target.value)} />
                       </td>
                       <td className="bg-due">{due}</td>
                       <td>
-                        <input
-                          value={r.phone_date}
-                          placeholder="DD/MM/YYYY"
-                          onChange={(e) => updateCell(idx, 'phone_date', e.target.value)}
-                        />
+                        <input value={r.phone_date} placeholder="DD/MM/YYYY" onChange={(e) => updateCell(idx, 'phone_date', e.target.value)} />
                       </td>
                       <td className="no-print">
                         <div className="flex items-center justify-center gap-1">
@@ -467,14 +498,12 @@ export default function AdminFeePerformaPage() {
         </div>
       )}
 
-      {/* ============ EXCEL IMPORT MODAL ============ */}
       <FeeImportModal
         open={importOpen}
         onClose={() => setImportOpen(false)}
         onImport={handleImported}
       />
 
-      {/* ============ FEE DEPOSIT MODAL ============ */}
       <FeeDepositModal
         open={feeModalOpen}
         onClose={() => {
