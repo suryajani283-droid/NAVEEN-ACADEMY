@@ -47,15 +47,30 @@ export default function FeeDepositModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, student?.id]);
 
+  /* Safe JSON parse helper */
+  async function safeJson(res) {
+    const text = await res.text();
+    if (!text) return { _empty: true, status: res.status };
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { _parseError: true, status: res.status, raw: text.slice(0, 200) };
+    }
+  }
+
   async function loadPayments() {
     if (!student) return;
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/admin/fee-performa/payments?student_id=${student.id}`
+        `/api/admin/fee-payments?student_id=${student.id}`
       );
-      const data = await res.json();
-      setPayments(Array.isArray(data) ? data : []);
+      const data = await safeJson(res);
+      if (data._empty || data._parseError) {
+        setPayments([]);
+      } else {
+        setPayments(Array.isArray(data) ? data : []);
+      }
     } catch {
       setPayments([]);
     }
@@ -80,13 +95,17 @@ export default function FeeDepositModal({
           body: JSON.stringify(details),
         }
       );
-      const data = await res.json();
+      const data = await safeJson(res);
+      if (data._empty || data._parseError) {
+        throw new Error(
+          `Server से गलत response (status ${res.status})`
+        );
+      }
       if (!res.ok) throw new Error(data.error || 'Save fail');
 
       setDetailsToast('✓ जानकारी सेव हो गई');
       setTimeout(() => setDetailsToast(''), 2500);
 
-      /* Update parent state so table shows new values */
       if (onStudentChange && data.student) {
         onStudentChange(student.id, data.student);
       }
@@ -113,7 +132,7 @@ export default function FeeDepositModal({
     setSaving(true);
     setError('');
     try {
-      const res = await fetch('/api/admin/fee-performa/payments', {
+      const res = await fetch('/api/admin/fee-payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -124,8 +143,16 @@ export default function FeeDepositModal({
           note: form.note,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Save fail');
+      const data = await safeJson(res);
+      if (data._empty) {
+        throw new Error(`Server से खाली response (status ${res.status})`);
+      }
+      if (data._parseError) {
+        throw new Error(
+          `Server से गलत response (status ${res.status}) — Route file check करें`
+        );
+      }
+      if (!res.ok) throw new Error(data.error || `Save fail (${res.status})`);
 
       setForm({ amount: '', date: todayISO(), note: '' });
       await loadPayments();
@@ -142,10 +169,13 @@ export default function FeeDepositModal({
   async function handleDelete(paymentId) {
     if (!confirm('यह payment हटाएँ?')) return;
     try {
-      const res = await fetch(`/api/admin/fee-performa/payments/${paymentId}`, {
+      const res = await fetch(`/api/admin/fee-payments/${paymentId}`, {
         method: 'DELETE',
       });
-      const data = await res.json();
+      const data = await safeJson(res);
+      if (data._empty || data._parseError) {
+        throw new Error(`Server error (${res.status})`);
+      }
       if (!res.ok) throw new Error(data.error || 'Delete fail');
       await loadPayments();
       if (onPaidChange) onPaidChange(student.id, Number(data.paid || 0));
@@ -358,7 +388,11 @@ export default function FeeDepositModal({
               />
             </div>
           </div>
-          {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
+          {error && (
+            <p className="mt-2 rounded bg-red-50 px-2 py-1 text-xs text-red-700">
+              {error}
+            </p>
+          )}
           <div className="mt-2 flex items-center gap-2">
             <button
               onClick={handleAdd}
