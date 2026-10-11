@@ -143,6 +143,7 @@ export default function AdminFeePerformaPage() {
   return (
     <div className="min-h-screen bg-slate-100 p-4 md:p-6">
       <style jsx global>{`
+        /* ============ SCREEN STYLES ============ */
         .fee-table {
           width: 100%;
           border-collapse: collapse;
@@ -174,27 +175,50 @@ export default function AdminFeePerformaPage() {
         .bg-total { background: #f1f3f5; font-weight: bold; }
         .bg-due { background: #fff0f0; color: #b00000; font-weight: bold; }
 
+        /* Print header — screen पर hidden */
         .print-header { display: none; }
+        .print-footer { display: none; }
 
+        /* ============ PROFESSIONAL PRINT STYLES ============ */
         @media print {
-          @page { size: A4 landscape; margin: 8mm 6mm; }
+          @page {
+            size: A4 landscape;
+            margin: 8mm 8mm 12mm 8mm;
+          }
 
           html, body {
             background: #fff !important;
             margin: 0 !important;
             padding: 0 !important;
+            font-family: 'Noto Sans Devanagari', 'Mangal', Arial, sans-serif !important;
+            font-size: 10px !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
 
-          nav, header, footer, aside,
-          [class*="Navbar"], [class*="navbar"],
-          [class*="Footer"], [class*="footer"],
-          [class*="Marquee"], [class*="marquee"],
-          [class*="Admission"], [class*="admission"],
-          [class*="WhatsApp"], [class*="whatsapp"],
-          [class*="MobileBottomNav"], [class*="mobile-bottom"],
-          [class*="PushSubscribe"], [class*="ScrollToTop"],
-          [class*="sidebar"], [class*="Sidebar"],
-          [class*="admin-"], [class*="Admin-"] {
+          /* ---------- सारे site chrome छुपाएँ ---------- */
+          nav,
+          header:not(.print-header),
+          footer,
+          aside,
+          [class*="Navbar"],
+          [class*="navbar"],
+          [class*="Footer"],
+          [class*="footer"],
+          [class*="Marquee"],
+          [class*="marquee"],
+          [class*="Admission"],
+          [class*="admission"],
+          [class*="WhatsApp"],
+          [class*="whatsapp"],
+          [class*="MobileBottomNav"],
+          [class*="mobile-bottom"],
+          [class*="PushSubscribe"],
+          [class*="ScrollToTop"],
+          [class*="sidebar"],
+          [class*="Sidebar"],
+          [class*="admin-nav"],
+          [class*="AdminNav"] {
             display: none !important;
             visibility: hidden !important;
             height: 0 !important;
@@ -203,6 +227,13 @@ export default function AdminFeePerformaPage() {
 
           .no-print { display: none !important; }
 
+          /* ---------- Main wrapper ---------- */
+          .min-h-screen {
+            min-height: auto !important;
+            padding: 0 !important;
+            background: #fff !important;
+          }
+
           .print-area {
             box-shadow: none !important;
             padding: 0 !important;
@@ -210,21 +241,30 @@ export default function AdminFeePerformaPage() {
             border-radius: 0 !important;
             width: 100% !important;
             max-width: 100% !important;
+            background: #fff !important;
           }
 
-          .print-area .overflow-x-auto { overflow: visible !important; }
+          .print-area .overflow-x-auto {
+            overflow: visible !important;
+          }
 
+          /* ---------- Screen title छुपाएँ ---------- */
+          .print-area .screen-title { display: none !important; }
+
+          /* ---------- PROFESSIONAL PRINT HEADER ---------- */
           .print-header {
             display: flex !important;
             align-items: center;
-            gap: 12px;
-            border-bottom: 2px solid #000;
-            padding-bottom: 6px;
-            margin-bottom: 8px;
+            gap: 10px;
+            border: 2px solid #000;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            page-break-inside: avoid;
+            page-break-after: avoid;
           }
           .print-header .ph-logo {
-            width: 60px;
-            height: 60px;
+            width: 55px;
+            height: 55px;
             flex-shrink: 0;
             object-fit: contain;
           }
@@ -232,38 +272,47 @@ export default function AdminFeePerformaPage() {
             flex: 1;
             text-align: center;
             color: #000;
+            line-height: 1.2;
           }
           .print-header .ph-text h1 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             margin: 0 0 2px;
-            line-height: 1.15;
+            letter-spacing: 0.3px;
           }
-          .print-header .ph-text p {
-            font-size: 10px;
-            margin: 1px 0 0;
+          .print-header .ph-text .ph-sub {
+            font-size: 9.5px;
+            margin: 0;
           }
           .print-header .ph-text .ph-exam {
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 700;
             color: #b00000;
-            margin-top: 4px;
+            margin-top: 3px;
+            padding-top: 3px;
+            border-top: 1px dashed #666;
           }
 
-          .print-area .screen-title { display: none !important; }
-
+          /* ---------- PRINT TABLE ---------- */
           .fee-table {
             width: 100% !important;
             table-layout: fixed !important;
+            border-collapse: collapse !important;
             font-size: 9px !important;
           }
           .fee-table th,
           .fee-table td {
-            padding: 2px 3px !important;
             border: 1px solid #000 !important;
+            padding: 2px 3px !important;
             font-size: 9px !important;
             line-height: 1.15 !important;
             word-break: break-word;
+            overflow-wrap: break-word;
+          }
+          .fee-table th {
+            background: #e9ecef !important;
+            font-weight: 700 !important;
+            color: #000 !important;
           }
           .fee-table input {
             border: none !important;
@@ -272,15 +321,59 @@ export default function AdminFeePerformaPage() {
             font-size: 9px !important;
             padding: 0 !important;
             width: 100% !important;
+            text-align: center;
+          }
+          .fee-table input.text-left { text-align: left !important; }
+
+          /* ---------- रंग बरकरार रखें ---------- */
+          .bg-total {
+            background: #f1f3f5 !important;
+            font-weight: bold !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .bg-due {
+            background: #fff0f0 !important;
+            color: #b00000 !important;
+            font-weight: bold !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
 
+          /* ---------- हर row पूरी ---------- */
           .fee-table tr {
             page-break-inside: avoid !important;
             page-break-after: auto !important;
           }
-          .fee-table thead { display: table-header-group !important; }
 
-          img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          /* ---------- हर page पर table header repeat ---------- */
+          .fee-table thead {
+            display: table-header-group !important;
+          }
+
+          /* ---------- Footer (हर page पर) ---------- */
+          .print-footer {
+            display: flex !important;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            padding-top: 4px;
+            border-top: 1px solid #000;
+            font-size: 9px;
+            color: #333;
+            page-break-inside: avoid;
+          }
+          .print-footer .pf-left {
+            font-style: italic;
+          }
+          .print-footer .pf-right {
+            font-weight: 600;
+          }
+
+          img {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
         }
       `}</style>
 
@@ -380,7 +473,7 @@ export default function AdminFeePerformaPage() {
         </div>
       ) : (
         <div className="print-area rounded-lg bg-white p-6 shadow">
-          {/* Print-only header */}
+          {/* ============ PROFESSIONAL PRINT HEADER ============ */}
           <div className="print-header">
             <img
               src="/images/logo.png"
@@ -390,7 +483,7 @@ export default function AdminFeePerformaPage() {
             />
             <div className="ph-text">
               <h1>नवीन एकेडेमी उच्च माध्यमिक विद्यालय, चौहटन</h1>
-              <p>चौहटन, बाड़मेर (राजस्थान) • RBSE Affiliation No: 1730XXX</p>
+              <p className="ph-sub">चौहटन, बाड़मेर (राजस्थान) • RBSE Affiliation No: 1730XXX</p>
               <div className="ph-exam">
                 फीस अपडेट प्रपत्र — कक्षा: {className || '________'} • सत्र: {session}
               </div>
@@ -422,7 +515,7 @@ export default function AdminFeePerformaPage() {
                   <th rowSpan={2} style={{ width: '7%' }}>शिक्षण शुल्क</th>
                   <th rowSpan={2} style={{ width: '7%' }}>वाहन शुल्क</th>
                   <th rowSpan={2} style={{ width: '7%' }}>योग</th>
-                  <th colSpan={2} style={{ fontSize: 10, fontStyle: 'italic', fontWeight: 'normal' }}>
+                  <th colSpan={2} style={{ fontSize: 9, fontStyle: 'italic', fontWeight: 'normal' }}>
                     पेंसिल से भरें
                   </th>
                   <th rowSpan={2} style={{ width: '9%' }}>दूरभाष दिनांक</th>
@@ -465,57 +558,4 @@ export default function AdminFeePerformaPage() {
                       </td>
                       <td className="bg-total">{total}</td>
                       <td>
-                        <input type="number" value={r.paid} onChange={(e) => updateCell(idx, 'paid', e.target.value)} />
-                      </td>
-                      <td className="bg-due">{due}</td>
-                      <td>
-                        <input value={r.phone_date} placeholder="DD/MM/YYYY" onChange={(e) => updateCell(idx, 'phone_date', e.target.value)} />
-                      </td>
-                      <td className="no-print">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => openFeeModal(r)}
-                            className="rounded bg-indigo-600 px-1.5 py-0.5 text-xs font-bold text-white hover:bg-indigo-700"
-                            title="फीस जमा करें"
-                          >
-                            💰
-                          </button>
-                          <button
-                            onClick={() => deleteRow(idx)}
-                            className="font-bold text-red-600 hover:text-red-800"
-                            title="हटाएं"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      <FeeImportModal
-        open={importOpen}
-        onClose={() => setImportOpen(false)}
-        onImport={handleImported}
-      />
-
-      <FeeDepositModal
-        open={feeModalOpen}
-        onClose={() => {
-          setFeeModalOpen(false);
-          setSelectedStudent(null);
-        }}
-        student={selectedStudent}
-        className={className}
-        session={session}
-        onPaidChange={handlePaidChange}
-        onStudentChange={handleStudentChange}
-      />
-    </div>
-  );
-}
+                        <input type="number" value={r.paid
