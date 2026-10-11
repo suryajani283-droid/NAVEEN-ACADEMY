@@ -86,24 +86,61 @@ body {
   animation: slide-up 0.5s ease-out;
 }
 
-/* =====================================================
-   PRINT FIX — सिर्फ fee performa / print pages पर लागू
-   ===================================================== */
+/* ============================================================
+   ================ PRINT STYLES ===========
+   ============================================================ */
 @media print {
-  /* Navbar, Footer, Marquee, WhatsApp, BottomNav सब छुपाएँ */
-  nav, header, footer, aside,
-  [class*="Navbar"], [class*="navbar"],
-  [class*="Footer"], [class*="footer"],
-  [class*="Marquee"], [class*="marquee"],
-  [class*="WhatsApp"], [class*="whatsapp"],
-  [class*="MobileBottomNav"], [class*="mobile-bottom"],
-  [class*="PushSubscribe"] {
-    display: none !important;
-    visibility: hidden !important;
+  @page {
+    size: A4 landscape;
+    margin: 8mm 6mm;
   }
 
-  /* हर बार नया page header repeat हो */
+  html, body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ---------- Site chrome — सब छुपाएँ ---------- */
+  nav,
+  header.site-header,
+  aside,
+  footer,
+  [class*="Navbar"],
+  [class*="navbar"],
+  [class*="Footer"]:not(.print-header),
+  [class*="footer"]:not(.print-header),
+  [class*="Marquee"],
+  [class*="marquee"],
+  [class*="Admission"],
+  [class*="admission"],
+  [class*="WhatsApp"],
+  [class*="whatsapp"],
+  [class*="MobileBottomNav"],
+  [class*="mobile-bottom"],
+  [class*="PushSubscribe"],
+  [class*="ScrollToTop"],
+  [class*="admin-"],
+  [class*="sidebar"],
+  [class*="Sidebar"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Admin specific — जो भी .no-print है वो छुपे */
+  .no-print { display: none !important; }
+
+  /* Rows बीच में न कटें */
+  table { page-break-inside: auto; }
+  tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+  }
   thead { display: table-header-group; }
   tfoot { display: table-footer-group; }
-  tr    { page-break-inside: avoid; }
+
+  /* Images print हों */
+  img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
