@@ -558,4 +558,67 @@ export default function AdminFeePerformaPage() {
                       </td>
                       <td className="bg-total">{total}</td>
                       <td>
-                        <input type="number" value={r.paid
+                        <input type="number" value={r.paid} onChange={(e) => updateCell(idx, 'paid', e.target.value)} />
+                      </td>
+                      <td className="bg-due">{due}</td>
+                      <td>
+                        <input value={r.phone_date} placeholder="DD/MM/YYYY" onChange={(e) => updateCell(idx, 'phone_date', e.target.value)} />
+                      </td>
+                      <td className="no-print">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => openFeeModal(r)}
+                            className="rounded bg-indigo-600 px-1.5 py-0.5 text-xs font-bold text-white hover:bg-indigo-700"
+                            title="फीस जमा करें"
+                          >
+                            💰
+                          </button>
+                          <button
+                            onClick={() => deleteRow(idx)}
+                            className="font-bold text-red-600 hover:text-red-800"
+                            title="हटाएं"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ============ PRINT FOOTER ============ */}
+          <div className="print-footer">
+            <div className="pf-left">
+              कुल छात्र: {rows.length} • दिनांक: {new Date().toLocaleDateString('en-IN')}
+            </div>
+            <div className="pf-right">
+              कक्षाध्यापक / प्राचार्य हस्ताक्षर: ____________________
+            </div>
+          </div>
+        </div>
+      )}
+
+      <FeeImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImport={handleImported}
+      />
+
+      <FeeDepositModal
+        open={feeModalOpen}
+        onClose={() => {
+          setFeeModalOpen(false);
+          setSelectedStudent(null);
+        }}
+        student={selectedStudent}
+        className={className}
+        session={session}
+        onPaidChange={handlePaidChange}
+        onStudentChange={handleStudentChange}
+      />
+    </div>
+  );
+}
