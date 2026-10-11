@@ -29,8 +29,8 @@ const sidebarSections = [
     links: [
       { href: '/admin/homework', label: 'Homework', icon: BookOpenIcon },
       { href: '/admin/notes', label: 'Notes', icon: DocumentTextIcon },
-{ href: '/admin/fee-performa', label: 'फीस प्रपत्र', icon: '💰' },
-      { href: '/admin/fee-messages', label: 'फीस मैसेज', icon: '📱' },
+{ href: '/admin/fee-performa', label: 'Fee update', icon: 'Money' },
+      { href: '/admin/fee-messages', label: 'fee message', icon: '📱' },
       { href: '/admin/attendance', label: 'Attendance', icon: ClipboardDocumentListIcon },
       { href: '/admin/downloads', label: 'Downloads', icon: ArrowDownTrayIcon },
       { href: '/admin/results', label: 'Results', icon: TrophyIcon },
@@ -38,7 +38,7 @@ const sidebarSections = [
       { href: '/admin/video-lectures', label: 'Video Lectures', icon: PlayCircleIcon },
       { href: '/admin/attendance/report', label: 'Attendance Report', icon: DocumentTextIcon },
       { href: '/admin/attendance/monthly', label: 'Monthly Report', icon: DocumentTextIcon },
-      { href: '/admin/exams', label: 'परीक्षा / Admit Card', icon: '📝' },
+      { href: '/admin/exams', label: 'Admit Card', icon: '📝' },
     ],
   },
   {
